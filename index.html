@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>KetofolDoc | Anesthesia Summaries and Exam Prep</title>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+        <span class="font-bold text-base sm:text-lg text-slate-100 tracking-tight">Ketofol<span class="text-blue-400">Doc</span></span>
+      </div>
+      <div class="flex items-center space-x-2 text-xs font-semibold text-slate-400">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          2 Platforms Live
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-16 flex flex-col justify-center">
+    
+    <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 bg-blue-950/60 border border-blue-800/60 rounded-full text-blue-300 text-xs font-semibold mb-4">
+        <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
+        <span>Postgraduate Anesthesiology Review</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight sm:leading-tight mb-4">
+        Clinical Anesthesia <br class="hidden sm:inline" />
+        <span class="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+          Active Recall Platforms
+        </span>
+      </h1>
+      <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
+        Interactive question banks, verified clinical textbook citations, and cross-device cloud progress synchronization for anesthesia specialty examination preparation.
+      </p>
+    </div>
+
+    <!-- Question Bank Projects Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+
+      <!-- Card 1: Saudi Board QB -->
+      <div class="bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 transition duration-300 rounded-2xl p-6 sm:p-8 flex flex-col justify-between group hover:shadow-xl hover:shadow-blue-950/30">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-950/70 border border-blue-800/60 text-blue-400 flex items-center justify-center group-hover:scale-105 transition">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 border border-blue-800/60 px-2.5 py-1 rounded-md">
+              Saudi Board
+            </span>
+          </div>
+
+          <h2 class="text-xl font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition">
+            Saudi Anesthesia Board QB Practice
+          </h2>
+          
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+            Curated subspecialty modules covering Core Anesthesia, Regional, Airway, Hemodynamics, Obstetric, Pediatric, and Pharmacology with verified citations from Miller, Barash, and ASRA.
+          </p>
+
+          <div class="space-y-2 mb-6 text-xs text-slate-300">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>9 Subspecialty-focused banks</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Verified textbook rationales & citations</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Cloud sync across your devices</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://ahmed.ketofoldoc.com" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-blue-600/20">
+          <span>Launch Platform</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Card 2: 1000 Anesthesia Questions -->
+      <div class="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition duration-300 rounded-2xl p-6 sm:p-8 flex flex-col justify-between group hover:shadow-xl hover:shadow-emerald-950/30">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 flex items-center justify-center group-hover:scale-105 transition">
+              <i data-lucide="book-open" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-md">
+              1,002 Questions
+            </span>
+          </div>
+
+          <h2 class="text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-300 transition">
+            1000 Anesthesia Questions
+          </h2>
+          
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+            Comprehensive chapter-by-chapter review parsed from Lippincott's Anesthesia Review across all 21 chapters, complete with integrated clinical diagrams, flow loops, and figures.
+          </p>
+
+          <div class="space-y-2 mb-6 text-xs text-slate-300">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>21 Complete high-yield chapters</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Integrated clinical figures & diagram loops</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Randomized shuffle & bookmarking tools</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://1000qs.ketofoldoc.com" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold rounded-xl text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/20">
+          <span>Launch Platform</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <a href="https://ahmed.ketofoldoc.com/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
+        <span>•</span>
+        <a href="https://ahmed.ketofoldoc.com/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
+      </div>
+      <p>© 2026 KetofolDoc. Non-commercial medical educational portal</p>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
