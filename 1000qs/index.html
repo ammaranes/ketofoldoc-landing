@@ -190,7 +190,6 @@
   <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
       
-      <!-- Search Input Header -->
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
         <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
         <input 
@@ -209,14 +208,12 @@
         </button>
       </div>
 
-      <!-- Search Results List -->
       <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40">
         <div class="text-xs text-slate-500 text-center py-8">
           Type at least 2 characters to search across all chapters...
         </div>
       </div>
       
-      <!-- Footer Shortcut Hint -->
       <div class="px-4 py-2 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
         <span id="search-count-badge">0 results found</span>
         <span>Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">ESC</kbd> to close</span>
@@ -229,7 +226,6 @@
   <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       
-      <!-- Modal Header -->
       <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
         <div class="flex items-center space-x-2">
           <i data-lucide="compass" class="w-5 h-5 text-emerald-400"></i>
@@ -243,7 +239,6 @@
         </button>
       </div>
 
-      <!-- Scrollable Content Area -->
       <div class="overflow-y-auto p-4 space-y-4 flex-1">
         
         <!-- Ecosystem Switcher Section -->
@@ -372,7 +367,7 @@
         .replace(/\n/g, '<br/>');
     }
 
-    // 🧩 Options Normalization Helper (Supports Object, Array of Strings, Array of Objects)
+    // 🧩 Options Normalization Helper
     function getNormalizedOptions(q) {
       if (!q || !q.options) return [];
       if (Array.isArray(q.options)) {
@@ -401,7 +396,7 @@
       return [];
     }
 
-    // 🧠 Spaced Repetition (SM-2 Inspired) Calculator
+    // 🧠 Spaced Repetition (SM-2) Engine
     function calculateNextSRS(currentSRS, rating) {
       let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
       const now = new Date();
@@ -532,6 +527,23 @@
         questions: combinedQuestions,
         isMulti: keys.length > 1
       };
+    }
+
+    // Calculate Active Due Question Indices
+    function getDueIndices(activeDeck) {
+      if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+      const now = new Date();
+      const dueIndices = [];
+      activeDeck.questions.forEach((q, idx) => {
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+        const parentProgress = state.userProgress[parentDeckId] || {};
+        const srs = (parentProgress.srs || {})[parentIdx];
+        if (!srs || !srs.dueDate || new Date(srs.dueDate) <= now) {
+          dueIndices.push(idx);
+        }
+      });
+      return dueIndices;
     }
 
     // Compile Card States for Ecosystem Aggregation
@@ -827,7 +839,6 @@
       if (e.key === 'Escape' && !searchModal.classList.contains('hidden')) {
         closeSearchModal();
       }
-      // Keyboard navigation for questions (when not typing in search)
       if (document.activeElement?.tagName !== 'INPUT' && searchModal.classList.contains('hidden')) {
         if (e.key === 'ArrowRight') {
           e.preventDefault();
@@ -878,21 +889,13 @@
       state.sessionState.isShuffled = false;
 
       if (state.sessionState.isSRSMode) {
-        const now = new Date();
-        const dueIndices = [];
-
-        activeDeck.questions.forEach((q, idx) => {
-          const parentProgress = state.userProgress[q._parentDeckId] || {};
-          const srs = (parentProgress.srs || {})[q._parentIndex];
-          if (!srs || !srs.dueDate || new Date(srs.dueDate) <= now) {
-            dueIndices.push(idx);
-          }
-        });
+        const dueIndices = getDueIndices(activeDeck);
 
         if (dueIndices.length === 0) {
           alert('🎉 Excellent! No questions are due for review across the selected chapters today.');
           state.sessionState.isSRSMode = false;
           state.sessionState.order = [];
+          state.sessionState.currentIndex = 0;
         } else {
           state.sessionState.order = dueIndices;
           state.sessionState.currentIndex = 0;
@@ -903,6 +906,51 @@
       }
 
       saveState();
+    }
+
+    // Advance Navigation Handler (Works seamlessly in Normal, Shuffled, and SRS modes)
+    function handleNextNavigation() {
+      const activeDeck = getActiveCompositeDeck();
+      if (!activeDeck || !activeDeck.questions.length) return;
+
+      const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+      const maxLen = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
+
+      if (state.sessionState.currentIndex < maxLen - 1) {
+        state.sessionState.currentIndex++;
+        saveState();
+      } else {
+        // At the end of the active queue
+        if (state.sessionState.isSRSMode) {
+          const stillDue = getDueIndices(activeDeck);
+          if (stillDue.length > 0 && !arraysEqual(stillDue, state.sessionState.order)) {
+            state.sessionState.order = stillDue;
+            state.sessionState.currentIndex = 0;
+            saveState();
+          } else {
+            alert("🎉 Outstanding! You have reviewed all SRS due cards for this session.");
+            state.sessionState.isSRSMode = false;
+            state.sessionState.order = [];
+            state.sessionState.currentIndex = 0;
+            saveState();
+          }
+        } else {
+          // Standard / Shuffled Mode Loop
+          if (confirm("You've reached the end of the selected questions. Restart from Question 1?")) {
+            state.sessionState.currentIndex = 0;
+            saveState();
+          }
+        }
+      }
+    }
+
+    function arraysEqual(a, b) {
+      if (a === b) return true;
+      if (a == null || b == null || a.length !== b.length) return false;
+      for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
     }
 
     // --- Main UI Rendering ---
@@ -1009,7 +1057,7 @@
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Render Options (Normalized for Array/Object compatibility)
+      // Render Options
       const optionsContainer = document.getElementById('options-container');
       optionsContainer.innerHTML = '';
       const selectedAnswer = (parentProgress.answers || {})[parentIdx];
@@ -1087,7 +1135,9 @@
       }
       if (nextBtn) {
         const isLast = qPointer >= activeTotal - 1;
-        nextBtn.innerHTML = isLast ? `Finished <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
+        nextBtn.innerHTML = isLast 
+          ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
+          : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
       }
 
       lucide.createIcons();
@@ -1102,7 +1152,7 @@
       saveState();
     }
 
-    // Handle SRS Recall Ratings with parent chapter write-back
+    // Handle SRS Recall Ratings with Auto-Progression
     window.rateRecall = (rating) => {
       const activeDeck = getActiveCompositeDeck();
       if (!activeDeck || !activeDeck.questions.length) return;
@@ -1120,6 +1170,11 @@
       state.userProgress[parentDeckId].srs[parentIdx] = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
       
       saveState();
+
+      // If practicing in SRS mode, smoothly advance to the next due card
+      if (state.sessionState.isSRSMode) {
+        handleNextNavigation();
+      }
     };
 
     // Render the Multi-Select Chapter List with Checkboxes
@@ -1214,16 +1269,7 @@
     // Navigation Events
     document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
     document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
-
-    document.getElementById('btn-next').onclick = () => {
-      const activeDeck = getActiveCompositeDeck();
-      if (!activeDeck || !activeDeck.questions.length) return;
-      const maxLen = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order.length : activeDeck.questions.length;
-      if (state.sessionState.currentIndex < maxLen - 1) { 
-        state.sessionState.currentIndex++; 
-        saveState(); 
-      }
-    };
+    document.getElementById('btn-next').onclick = handleNextNavigation;
 
     document.getElementById('btn-prev').onclick = () => {
       if (state.sessionState.currentIndex > 0) { 
