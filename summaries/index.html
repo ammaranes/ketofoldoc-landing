@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>KetofolDoc | Anesthesia Chapter Summaries</title>
+  
+  <!-- Favicon & Touch Icon -->
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="apple-touch-icon" href="logo.svg" />
+  
+  <!-- Tailwind CSS, Marked.js & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    html { scroll-behavior: smooth; }
+
+    /* Continuous High-Comfort Reading Typography */
+    .prose-reading {
+      color: #cbd5e1;
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+    .prose-reading p {
+      margin-top: 1.25rem;
+      margin-bottom: 1.25rem;
+      color: #cbd5e1;
+    }
+    .prose-reading strong, .prose-reading b {
+      color: #f8fafc;
+      font-weight: 700;
+    }
+    .prose-reading em, .prose-reading i {
+      color: #e2e8f0;
+    }
+    .prose-reading h1, .prose-reading h2, .prose-reading h3, .prose-reading h4 {
+      color: #f8fafc;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .prose-reading h3 {
+      font-size: 1.35rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.85rem;
+      color: #e9d5ff;
+    }
+    .prose-reading h4 {
+      font-size: 1.15rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.65rem;
+      color: #c084fc;
+    }
+
+    /* Spacious Lists */
+    .prose-reading ul {
+      list-style-type: disc;
+      margin-top: 1rem;
+      margin-bottom: 1.25rem;
+      padding-left: 1.75rem;
+    }
+    .prose-reading ol {
+      list-style-type: decimal;
+      margin-top: 1rem;
+      margin-bottom: 1.25rem;
+      padding-left: 1.75rem;
+    }
+    .prose-reading li {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.75;
+      color: #cbd5e1;
+    }
+
+    /* Spacious Responsive Tables */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin: 2rem 0;
+      border-radius: 1rem;
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .prose-reading table {
+      width: 100%;
+      min-width: 650px;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .prose-reading th {
+      background-color: rgba(30, 41, 59, 0.95);
+      color: #c084fc;
+      font-weight: 700;
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+      border-right: 1px solid rgba(51, 65, 85, 0.4);
+    }
+    .prose-reading td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+      border-right: 1px solid rgba(51, 65, 85, 0.3);
+      color: #e2e8f0;
+      vertical-align: top;
+    }
+    .prose-reading tr:last-child td {
+      border-bottom: none;
+    }
+    .prose-reading tr:hover td {
+      background-color: rgba(51, 65, 85, 0.2);
+    }
+
+    /* Blockquotes & Clinical Highlights */
+    .prose-reading blockquote {
+      border-left: 4px solid #a855f7;
+      background: rgba(168, 85, 247, 0.08);
+      padding: 1rem 1.5rem;
+      border-radius: 0 0.85rem 0.85rem 0;
+      margin: 1.75rem 0;
+      color: #e9d5ff;
+      font-size: 0.975rem;
+      line-height: 1.75;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
+      
+      <!-- Left: Navigation Controls & Brand -->
+      <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+        
+        <!-- Back to Library Button -->
+        <button id="btn-back-to-library" class="hidden px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shrink-0 border border-slate-700/60">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">All Chapters</span>
+        </button>
+
+        <!-- Menu Drawer Button -->
+        <button id="btn-menu" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0" title="Chapters & Navigation">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </button>
+        
+        <a href="https://ketofoldoc.com" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
+          <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
+        </a>
+
+        <!-- Title Block -->
+        <div class="min-w-0 flex-1 flex flex-col justify-center">
+          <span id="header-book-title" class="text-[10px] font-bold uppercase tracking-wider text-purple-400 truncate leading-tight">
+            Miller's Anesthesia Summaries
+          </span>
+          <div class="flex items-center space-x-2 truncate">
+            <h1 id="header-chapter-title" class="font-bold text-xs sm:text-sm text-slate-100 truncate leading-snug">
+              Chapter Library
+            </h1>
+            <span id="header-separator" class="hidden text-slate-600 text-xs">•</span>
+            <p id="header-read-time" class="hidden text-[11px] font-medium text-emerald-400 truncate leading-snug">
+              0 min read
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Search, Actions & Auth Profile -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+        
+        <!-- Search Trigger -->
+        <button id="btn-search" class="p-2 text-slate-400 hover:text-purple-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Search Summaries (Ctrl + K)">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Table of Contents Toggle (Reader Mode) -->
+        <button id="btn-toc-toggle" class="hidden p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Table of Contents">
+          <i data-lucide="list" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Google Auth Profile Button -->
+        <button id="btn-auth" class="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-purple-500/50 rounded-xl text-xs font-semibold text-slate-200 flex items-center space-x-2 transition shrink-0">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span id="auth-label">Sign In</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Reading Progress Bar -->
+    <div id="reading-progress-bar" class="hidden w-full bg-slate-800 h-1">
+      <div id="reading-progress-fill" class="bg-purple-500 h-1 w-0 transition-all duration-150"></div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 📚 VIEW 1: CHAPTERS DIRECTORY / LANDING    -->
+  <!-- ========================================== -->
+  <section id="view-directory" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-10 pb-36">
+    
+    <!-- Hero Banner -->
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-800/60 text-purple-300 text-xs font-semibold mb-4">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+        <span id="directory-badge-count">Miller's 9th Edition Summaries</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4">
+        Textbook Chapter Summaries
+      </h1>
+      <p class="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto mb-6">
+        High-yield structured summaries with cross-platform Spaced Repetition sync connected directly to your question banks.
+      </p>
+
+      <!-- Overall Reading Progress Dashboard -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 max-w-md mx-auto shadow-sm">
+        <div class="flex items-center justify-between text-xs font-semibold mb-2">
+          <span class="text-slate-400 flex items-center">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1.5 text-emerald-400"></i> Overall Reading Progress
+          </span>
+          <span id="overall-progress-text" class="text-purple-300 font-bold">0 / 0 Completed</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div id="overall-progress-bar" class="bg-gradient-to-r from-purple-500 to-emerald-400 h-2 w-0 transition-all duration-300 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Quick Filter Bar (Sanitized to prevent browser password prompts) -->
+      <div class="mt-6 max-w-md mx-auto relative">
+        <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input 
+          type="search" 
+          id="directory-filter-input" 
+          name="chapter-filter-search"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Filter chapters by title, number, or keyword..." 
+          class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition shadow-inner [&::-webkit-search-cancel-button]:hidden"
+        />
+      </div>
+    </div>
+
+    <!-- Chapter Cards Grid -->
+    <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+  </section>
+
+  <!-- ========================================== -->
+  <!-- 📖 VIEW 2: CONTINUOUS CHAPTER READER       -->
+  <!-- ========================================== -->
+  <main id="view-reader" class="hidden flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8 pb-36">
+
+    <!-- Chapter Header Banner & Mark as Read Button -->
+    <div id="chapter-banner" class="mb-10 pb-8 border-b border-slate-800/80">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+        <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-purple-400">
+          <span id="banner-book-badge" class="px-3 py-0.5 rounded-full bg-purple-950/70 border border-purple-800/60">Miller's Anesthesia</span>
+          <span class="text-slate-600">•</span>
+          <span id="banner-chapter-number" class="text-slate-400">Chapter 1</span>
+        </div>
+
+        <!-- Top "Mark as Read" Toggle Button -->
+        <button id="btn-toggle-read-top" class="self-start sm:self-auto px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center space-x-2 shadow-sm">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span id="btn-toggle-read-text-top">Mark as Read</span>
+        </button>
+      </div>
+
+      <h1 id="chapter-headline" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4"></h1>
+      
+      <div class="flex items-center space-x-5 text-xs sm:text-sm text-slate-400">
+        <span class="inline-flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-1.5 text-emerald-400"></i> <span id="chapter-read-time-val">10 min read</span></span>
+        <span class="inline-flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-1.5 text-purple-400"></i> <span id="chapter-sections-count-val">5 Sections</span></span>
+      </div>
+    </div>
+
+    <!-- Continuous Document Surface -->
+    <article id="single-document-surface" class="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-12 lg:p-16 shadow-2xl backdrop-blur-sm prose-reading">
+      <div id="sections-container" class="space-y-12"></div>
+    </article>
+
+    <!-- 🎯 Interactive Practice Questions Section (Dual Question Bank SRS Engine) -->
+    <section id="chapter-quiz-section" class="mt-16 pt-12 border-t-2 border-slate-800">
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-purple-950/70 border border-purple-800/60 text-purple-400 flex items-center justify-center">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-2xl font-bold text-slate-100">Chapter Recall Practice</h2>
+            <p class="text-xs sm:text-sm text-slate-400">Spaced repetition reviews synced live with Saudi Board QB & 1000 Questions</p>
+          </div>
+        </div>
+        <span id="quiz-count-badge" class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-purple-400">
+          0 Questions
+        </span>
+      </div>
+
+      <!-- Live Question Cards Container -->
+      <div id="quiz-cards-container" class="grid grid-cols-1 gap-6"></div>
+    </section>
+
+    <!-- Bottom Chapter Navigation & Mark as Read -->
+    <div class="mt-16 pt-8 border-t border-slate-800/80 flex flex-col gap-4">
+      
+      <!-- Center Complete Button -->
+      <div class="flex justify-center">
+        <button id="btn-toggle-read-bottom" class="w-full sm:w-auto px-6 py-3 rounded-2xl border text-sm font-bold transition flex items-center justify-center space-x-2 shadow-lg">
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          <span id="btn-toggle-read-text-bottom">Mark Chapter as Completed</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
+        <button id="btn-prev-chapter" class="w-full sm:w-auto flex-1 py-3.5 px-5 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 border border-slate-800 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center text-slate-300 transition">
+          <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i> Previous Chapter
+        </button>
+
+        <button id="btn-bottom-library" class="w-full sm:w-auto py-3.5 px-6 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-2xl font-semibold text-xs sm:text-sm text-purple-300 hover:text-white flex items-center justify-center transition">
+          <i data-lucide="grid" class="w-4 h-4 mr-2"></i> Back to All Chapters
+        </button>
+
+        <button id="btn-next-chapter" class="w-full sm:w-auto flex-1 py-3.5 px-5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
+          Next Chapter <i data-lucide="chevron-right" class="w-4 h-4 ml-2"></i>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Global Full-Text Search Modal -->
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
+        <input 
+          type="search" 
+          id="search-input" 
+          name="global-summary-search"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Search keywords, clinical trials, pharmacology, or concepts..." 
+          class="w-full bg-transparent text-slate-100 placeholder-slate-500 text-sm focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        />
+        <button id="btn-close-search" class="p-1 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40">
+        <div class="text-xs text-slate-500 text-center py-8">
+          Type at least 2 characters to search across all summary chapters...
+        </div>
+      </div>
+      
+      <div class="px-4 py-2 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+        <span id="search-count-badge">0 results found</span>
+        <span>Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">ESC</kbd> to close</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Book & Chapter Drawer + 3-Platform Ecosystem Hub Modal -->
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="compass" class="w-5 h-5 text-purple-400"></i>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm sm:text-base">Navigation & Books</h3>
+            <p class="text-[11px] text-slate-400">Switch platforms or select chapter summaries</p>
+          </div>
+        </div>
+        <button id="btn-close-decks" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto p-4 space-y-4 flex-1">
+        
+        <!-- 3-Platform Ecosystem Switcher -->
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+            KetofolDoc Platforms
+          </span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            
+            <a href="https://ahmed.ketofoldoc.com" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-blue-300 truncate">Saudi Board</span>
+              </div>
+            </a>
+
+            <a href="https://1000qs.ketofoldoc.com" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-emerald-300 truncate">1000 Qs</span>
+              </div>
+            </a>
+
+            <div class="p-2.5 rounded-xl bg-purple-600/15 border border-purple-500/50 flex items-center justify-between">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i>
+                <span class="text-xs font-bold text-purple-200 truncate">Summaries</span>
+              </div>
+              <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300 border border-purple-400/40">Active</span>
+            </div>
+
+          </div>
+
+          <a href="https://ketofoldoc.com" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Return to KetofolDoc Home Portal</span>
+          </a>
+        </div>
+
+        <div class="border-t border-slate-800/80"></div>
+
+        <!-- Book Library Tabs -->
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+            Textbook Library
+          </span>
+          <div id="book-tabs" class="flex space-x-2 overflow-x-auto pb-1"></div>
+        </div>
+
+        <!-- Chapter Selection List -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Chapters
+            </span>
+            <span id="chapters-available-count" class="text-[10px] text-slate-500"></span>
+          </div>
+          <div id="drawer-chapter-list" class="space-y-1.5"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Chapter Table of Contents Drawer Modal -->
+  <div id="modal-toc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="list" class="w-5 h-5 text-purple-400"></i>
+          <h3 class="font-bold text-slate-100 text-sm">Table of Contents</h3>
+        </div>
+        <button id="btn-close-toc" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="toc-list" class="p-4 overflow-y-auto space-y-2 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- ES6 Application Logic + Cross-Platform SM-2 SRS Sync Engine -->
+  <script type="module">
+    import { allBooks } from './books/index.js';
+
+    // Firebase Modular SDK
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    // Unified KetofolDoc Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
+      authDomain: "qb-sync-e6294.firebaseapp.com",
+      projectId: "qb-sync-e6294",
+      storageBucket: "qb-sync-e6294.firebasestorage.app",
+      messagingSenderId: "94979024020",
+      appId: "1:94979024020:web:687bd4c064b87ff1180081"
+    };
+
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    } catch (e) {
+      console.warn("Firebase Init:", e);
+    }
+
+    // Dynamic Multi-Bank Loader (Saudi Board QB & 1000 Questions)
+    let questionChapters = [];
+    try {
+      const imported = await import('./decks/index.js');
+      if (imported.allQuestionDecks) {
+        questionChapters = imported.allQuestionDecks;
+      } else {
+        const saudi = (imported.allDecks || []).map(d => ({ ...d, sourceName: 'Saudi Board QB', sourceKey: 'saudi_board_progress', sourceBadgeColor: 'blue' }));
+        const thousand = (imported.allChapters || []).map(d => ({ ...d, sourceName: '1000 Questions', sourceKey: 'thousand_qs_progress', sourceBadgeColor: 'emerald' }));
+        questionChapters = [...saudi, ...thousand];
+      }
+    } catch (e) {
+      console.info("Question decks not found or optional; running in summary mode.");
+    }
+
+    // Spaced Repetition (SM-2) Engine
+    function calculateSM2(cardState, quality) {
+      let { reps = 0, interval = 1, easeFactor = 2.5 } = cardState || {};
+      
+      if (quality < 3) {
+        reps = 0;
+        interval = 1;
+      } else {
+        if (reps === 0) {
+          interval = 1;
+        } else if (reps === 1) {
+          interval = 6;
+        } else {
+          interval = Math.round(interval * easeFactor);
+        }
+        reps += 1;
+      }
+
+      easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+      
+      const now = Date.now();
+      const dueDate = now + (interval * 86400000);
+
+      return {
+        reps,
+        interval,
+        easeFactor: Number(easeFactor.toFixed(2)),
+        dueDate,
+        lastReviewed: now,
+        lastQuality: quality
+      };
+    }
+
+    // Storage Management
+    const LOCAL_SUMMARIES_KEY = 'ketofoldoc_summaries_progress';
+    const LOCAL_SAUDI_KEY = 'saudi_board_progress';
+    const LOCAL_1000_KEY = 'thousand_qs_progress';
+
+    let summariesState = { readChapters: {}, quizAnswers: {} };
+    let saudiBoardCardStates = {};
+    let thousandQsCardStates = {};
+
+    function loadLocalProgress() {
+      try {
+        const sumSaved = localStorage.getItem(LOCAL_SUMMARIES_KEY);
+        if (sumSaved) summariesState = JSON.parse(sumSaved);
+
+        const saudiSaved = localStorage.getItem(LOCAL_SAUDI_KEY);
+        if (saudiSaved) saudiBoardCardStates = JSON.parse(saudiSaved).card_states || {};
+
+        const thSaved = localStorage.getItem(LOCAL_1000_KEY);
+        if (thSaved) thousandQsCardStates = JSON.parse(thSaved).card_states || {};
+      } catch (e) {}
+    }
+    loadLocalProgress();
+
+    // Cross-Platform Firestore & LocalStorage Sync
+    async function syncCardSRS(question, quality) {
+      const qId = question.id || question._generatedId;
+      const isSaudi = question._sourceName === 'Saudi Board QB';
+      const targetStates = isSaudi ? saudiBoardCardStates : thousandQsCardStates;
+      const targetStorageKey = isSaudi ? LOCAL_SAUDI_KEY : LOCAL_1000_KEY;
+      const targetFirestoreField = isSaudi ? 'saudi_board_progress' : 'thousand_qs_progress';
+
+      const existingState = targetStates[qId] || {};
+      const newCardState = calculateSM2(existingState, quality);
+
+      targetStates[qId] = newCardState;
+
+      try {
+        localStorage.setItem(targetStorageKey, JSON.stringify({ card_states: targetStates }));
+        localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
+      } catch (e) {}
+
+      if (currentUser && db) {
+        try {
+          const userDocRef = doc(db, 'users', currentUser.uid);
+          await setDoc(userDocRef, {
+            [targetFirestoreField]: { card_states: { [qId]: newCardState } },
+            summaries_progress: summariesState
+          }, { merge: true });
+        } catch (e) {
+          console.error("Firestore SRS sync error:", e);
+        }
+      }
+    }
+
+    // Auth State Observer
+    if (auth) {
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        const authBtnLabel = document.getElementById('auth-label');
+        
+        if (user) {
+          authBtnLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+          
+          if (db) {
+            try {
+              const snap = await getDoc(doc(db, 'users', user.uid));
+              if (snap.exists()) {
+                const data = snap.data();
+                if (data.summaries_progress) {
+                  summariesState.readChapters = { ...summariesState.readChapters, ...(data.summaries_progress.readChapters || {}) };
+                  summariesState.quizAnswers = { ...summariesState.quizAnswers, ...(data.summaries_progress.quizAnswers || {}) };
+                }
+                if (data.saudi_board_progress?.card_states) {
+                  saudiBoardCardStates = { ...saudiBoardCardStates, ...data.saudi_board_progress.card_states };
+                }
+                if (data.thousand_qs_progress?.card_states) {
+                  thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
+                }
+              }
+            } catch (e) {
+              console.error("Error fetching cloud progress:", e);
+            }
+          }
+        } else {
+          authBtnLabel.textContent = 'Sign In';
+        }
+
+        if (activeChapterId) {
+          renderReader();
+        } else {
+          renderDirectory();
+        }
+      });
+    }
+
+    document.getElementById('btn-auth').onclick = async () => {
+      if (!auth) return;
+      if (currentUser) {
+        if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
+          await signOut(auth);
+        }
+      } else {
+        const provider = new GoogleAuthProvider();
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (err) {
+          console.error("Google sign-in error:", err);
+        }
+      }
+    };
+
+    // Topic & Keyword Mapping Table for Miller Chapters
+    const CHAPTER_TOPIC_MAP = {
+      10: { topic: "neuro", keywords: ["cerebral", "cbf", "icp", "brain", "autoregulation", "cpp", "jugular", "isoflurane", "burst suppression"] },
+      11: { topic: "pharmacology", keywords: ["neuromuscular", "acetylcholine", "nmj", "receptor", "depolarizing", "myasthenia"] },
+      12: { topic: "respiratory", keywords: ["respiratory", "hypoxia", "shunt", "dead space", "ventilation", "compliance", "frc", "hypoxemia"] },
+      13: { topic: "cardiac", keywords: ["cardiac", "myocardial", "preload", "afterload", "coronary", "contractility", "stroke volume"] },
+      14: { topic: "general", keywords: ["hepatic", "liver", "gastrointestinal", "stomach", "aspiration", "cirrhosis", "jaundice"] },
+      15: { topic: "renal", keywords: ["renal", "gfr", "kidney", "nephron", "creatinine", "clearance", "tubular"] },
+      16: { topic: "pharmacology", keywords: ["pharmacokinetics", "pharmacodynamics", "half-life", "clearance", "volume of distribution", "context-sensitive"] },
+      17: { topic: "pharmacology", keywords: ["inhaled", "mac", "minimum alveolar", "volatile", "sevoflurane", "isoflurane", "desflurane"] },
+      18: { topic: "pharmacology", keywords: ["uptake", "distribution", "blood-gas", "solubility", "second gas", "concentration effect"] },
+      19: { topic: "pharmacology", keywords: ["pulmonary pharmacology", "bronchodilation", "hpv", "hypoxic pulmonary", "airway resistance"] },
+      20: { topic: "equipment", keywords: ["vaporizer", "machine", "circle system", "scavenging", "pipeline", "oxygen flush", "fail-safe"] },
+      21: { topic: "pharmacology", keywords: ["propofol", "etomidate", "ketamine", "barbiturate", "intravenous induction", "methohexital"] },
+      22: { topic: "pharmacology", keywords: ["opioid", "fentanyl", "morphine", "remifentanil", "sufentanil", "mu receptor", "naloxone"] },
+      23: { topic: "equipment", keywords: ["infusion", "tiva", "target controlled", "syringe pump", "ke0"] },
+      24: { topic: "pharmacology", keywords: ["succinylcholine", "rocuronium", "vecuronium", "sugammadex", "neostigmine", "paralytic", "cisatracurium"] },
+      25: { topic: "regional", keywords: ["bupivacaine", "lidocaine", "ropivacaine", "local anesthetic", "last", "toxicity", "lipid emulsion"] },
+      27: { topic: "safety", keywords: ["risk", "mortality", "safety", "morbidity", "closed claims", "aspiration"] },
+      28: { topic: "preop", keywords: ["preoperative", "evaluation", "assessment", "mallampati", "asa class", "functional capacity", "mets"] },
+      29: { topic: "general", keywords: ["concurrent", "diabetes", "hypertension", "thyroid", "pacemaker", "rheumatoid"] },
+      30: { topic: "safety", keywords: ["positioning", "nerve injury", "prone", "lithotomy", "brachial plexus", "ulnar nerve", "peroneal"] },
+      31: { topic: "neuro", keywords: ["malignant hyperthermia", "muscular dystrophy", "myasthenia", "genetic", "dantrolene", "ryanodine"] },
+      32: { topic: "monitoring", keywords: ["arterial line", "central venous", "cardiac output", "pulmonary artery catheter", "wedge pressure"] },
+      33: { topic: "cardiac", keywords: ["echo", "echocardiography", "pocus", "ultrasound", "tee", "tte", "fractional shortening"] },
+      34: { topic: "cardiac", keywords: ["pacemaker", "icd", "defibrillator", "cied", "magnet", "electrocautery"] },
+      35: { topic: "monitoring", keywords: ["eeg", "evoked potentials", "ssep", "mep", "bis", "monitoring", "brainstem"] },
+      36: { topic: "monitoring", keywords: ["depth of anesthesia", "bis", "entropy", "awareness", "recall", "sedline"] },
+      37: { topic: "monitoring", keywords: ["capnography", "etco2", "pulse oximeter", "oxygenation", "spirometry", "curare cleft"] },
+      38: { topic: "renal", keywords: ["acute kidney injury", "aki", "ischemia", "nephrotoxic", "dialysis", "contrast"] },
+      39: { topic: "monitoring", keywords: ["train of four", "tof", "neuromuscular monitoring", "twitch", "tetanic", "post-tetanic"] },
+      40: { topic: "airway", keywords: ["difficult airway", "intubation", "laryngoscopy", "cricothyrotomy", "lma", "videolaryngoscope", "bougie"] },
+      41: { topic: "regional", keywords: ["spinal", "epidural", "caudal", "subarachnoid", "dural puncture", "pdph", "neuraxial", "blood patch"] },
+      42: { topic: "regional", keywords: ["peripheral nerve block", "ultrasound guided", "brachial plexus", "femoral", "sciatic", "interscalene", "adductor"] },
+      43: { topic: "fluids", keywords: ["fluid therapy", "colloid", "crystalloid", "electrolyte", "hyponatremia", "hyperkalemia", "osmolality"] },
+      44: { topic: "fluids", keywords: ["acid-base", "acidosis", "alkalosis", "base excess", "anion gap", "abg", "bicarbonate"] },
+      45: { topic: "hematology", keywords: ["transfusion", "prbc", "ffp", "platelets", "cryoprecipitate", "massive transfusion", "trali", "taco"] },
+      46: { topic: "hematology", keywords: ["coagulation", "teg", "rotem", "platelet", "anticoagulant", "heparin", "thrombosis", "fibrinogen"] },
+      47: { topic: "pain", keywords: ["chronic pain", "neuropathic", "crps", "epidural steroid", "opioid tolerance", "allodynia"] },
+      49: { topic: "thoracic", keywords: ["thoracic", "one-lung ventilation", "double lumen", "bronchial blocker", "thoracotomy", "hypoxic pulmonary"] },
+      50: { topic: "cardiac", keywords: ["cardiac surgery", "cardiopulmonary bypass", "cpb", "coronary artery bypass", "valve replacement", "cardioplegia"] },
+      51: { topic: "cardiac", keywords: ["arrhythmia", "atrial fibrillation", "ventricular tachycardia", "heart block", "antiarrhythmic", "amiodarone"] },
+      52: { topic: "vascular", keywords: ["aortic aneurysm", "cross-clamp", "carotid endarterectomy", "cea", "vascular", "ischemia-reperfusion"] },
+      53: { topic: "neuro", keywords: ["craniotomy", "aneurysm", "intracranial", "sitting position", "venous air embolism", "subarachnoid"] },
+      54: { topic: "general", keywords: ["bariatric", "obesity", "bmi", "osa", "gastric bypass", "ideal body weight"] },
+      55: { topic: "renal", keywords: ["urology", "turp", "kidney transplant", "cystoscopy", "lithotripsy", "turp syndrome", "glycine"] },
+      58: { topic: "obstetrics", keywords: ["obstetric", "preeclampsia", "cesarean", "labor", "uterine", "placenta", "epidural", "fetal", "magnesium", "ergot", "oxytocin", "uterotonic"] },
+      59: { topic: "obstetrics", keywords: ["fetal surgery", "fetoscopic", "exit procedure", "myelomeningocele", "twin-to-twin"] },
+      60: { topic: "orthopedic", keywords: ["orthopedic", "arthroplasty", "fat embolism", "bone cement", "tourniquet", "hip fracture", "bcis"] },
+      62: { topic: "trauma", keywords: ["trauma", "hemorrhagic shock", "resuscitation", "burns", "cervical spine", "damage control"] },
+      72: { topic: "pediatrics", keywords: ["pediatric", "neonatal", "infant", "child", "laryngospasm", "croup", "epiglottitis", "mac"] },
+      73: { topic: "pediatrics", keywords: ["pediatric cardiac", "congenital heart", "tetralogy", "vsd", "asd", "shunt", "ductus"] },
+      74: { topic: "pediatrics", keywords: ["pediatric regional", "caudal", "ilioinguinal", "penile block", "sacral hiatus"] },
+      75: { topic: "pediatrics", keywords: ["pediatric icu", "neonatal resuscitation", "apgar", "pals", "surfactant", "persistent fetal"] },
+      80: { topic: "neuro", keywords: ["neurocritical", "traumatic brain injury", "tbi", "stroke", "brain death", "subarachnoid hemorrhage", "vasospasm"] }
+    };
+
+    function formatMarkdown(text) {
+      if (!text) return '';
+      const rawHtml = marked.parse(text);
+      return rawHtml.replace(/<table/g, '<div class="table-wrapper"><table').replace(/<\/table>/g, '</table></div>');
+    }
+
+    let activeBookId = allBooks[0]?.id || 'miller';
+    let activeChapterId = null;
+
+    function getActiveBook() {
+      return allBooks.find(b => b.id === activeBookId) || allBooks[0];
+    }
+
+    function getActiveChapter() {
+      const book = getActiveBook();
+      if (!book || !activeChapterId) return null;
+      return book.chapters.find(c => c.id === activeChapterId) || null;
+    }
+
+    // Scroll Progress Tracker
+    window.addEventListener('scroll', () => {
+      if (!activeChapterId) return;
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      document.getElementById('reading-progress-fill').style.width = `${scrolled}%`;
+    });
+
+    // Navigation & Views
+    function showDirectory() {
+      activeChapterId = null;
+      window.location.hash = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      document.getElementById('view-directory').classList.remove('hidden');
+      document.getElementById('view-reader').classList.add('hidden');
+      
+      document.getElementById('btn-back-to-library').classList.add('hidden');
+      document.getElementById('btn-toc-toggle').classList.add('hidden');
+      document.getElementById('reading-progress-bar').classList.add('hidden');
+      document.getElementById('header-chapter-title').textContent = 'Chapter Library';
+      document.getElementById('header-separator').classList.add('hidden');
+      document.getElementById('header-read-time').classList.add('hidden');
+
+      renderDirectory();
+      lucide.createIcons();
+    }
+
+    function openChapter(chapterId) {
+      activeChapterId = chapterId;
+      window.location.hash = chapterId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      document.getElementById('view-directory').classList.add('hidden');
+      document.getElementById('view-reader').classList.remove('hidden');
+
+      document.getElementById('btn-back-to-library').classList.remove('hidden');
+      document.getElementById('btn-toc-toggle').classList.remove('hidden');
+      document.getElementById('reading-progress-bar').classList.remove('hidden');
+      document.getElementById('header-separator').classList.remove('hidden');
+      document.getElementById('header-read-time').classList.remove('hidden');
+
+      renderReader();
+      lucide.createIcons();
+    }
+
+    // Toggle Chapter Read Status
+    async function toggleChapterRead(chapterId) {
+      if (summariesState.readChapters[chapterId]) {
+        delete summariesState.readChapters[chapterId];
+      } else {
+        summariesState.readChapters[chapterId] = true;
+      }
+      
+      try {
+        localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
+      } catch (e) {}
+
+      if (currentUser && db) {
+        try {
+          await setDoc(doc(db, 'users', currentUser.uid), { summaries_progress: summariesState }, { merge: true });
+        } catch (e) {}
+      }
+
+      renderReader();
+      renderDirectory();
+    }
+
+    // Render Directory Landing Grid
+    function renderDirectory(filterQuery = '') {
+      const book = getActiveBook();
+      const grid = document.getElementById('directory-grid');
+      const badge = document.getElementById('directory-badge-count');
+      grid.innerHTML = '';
+
+      if (!book) return;
+
+      badge.textContent = `${book.chapters.length} Chapters Available`;
+
+      const totalChapters = book.chapters.length;
+      const readCount = book.chapters.filter(ch => Boolean(summariesState.readChapters[ch.id])).length;
+      const percent = totalChapters > 0 ? Math.round((readCount / totalChapters) * 100) : 0;
+
+      document.getElementById('overall-progress-text').textContent = `${readCount} / ${totalChapters} Chapters Read (${percent}%)`;
+      document.getElementById('overall-progress-bar').style.width = `${percent}%`;
+
+      const cleanQuery = filterQuery.trim().toLowerCase();
+      const filtered = book.chapters.filter(ch => {
+        if (!cleanQuery) return true;
+        const numMatch = String(ch.chapterNumber).includes(cleanQuery);
+        const titleMatch = ch.title.toLowerCase().includes(cleanQuery);
+        return numMatch || titleMatch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-500 text-sm">
+            No chapters match your search query "<b>${filterQuery}</b>".
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(ch => {
+        const isRead = Boolean(summariesState.readChapters[ch.id]);
+        const card = document.createElement('div');
+        
+        card.className = isRead
+          ? 'bg-slate-900/90 border border-emerald-500/40 hover:border-emerald-400/70 rounded-2xl p-6 flex flex-col justify-between group hover:shadow-xl hover:shadow-emerald-950/20 transition cursor-pointer'
+          : 'bg-slate-900/80 border border-slate-800 hover:border-purple-500/60 rounded-2xl p-6 flex flex-col justify-between group hover:shadow-xl hover:shadow-purple-950/20 transition cursor-pointer';
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-0.5 rounded-lg bg-purple-950/80 border border-purple-800/60 text-purple-300 text-[11px] font-bold">
+                  Chapter ${ch.chapterNumber}
+                </span>
+                ${isRead ? `<span class="px-2 py-0.5 rounded-lg bg-emerald-950/80 border border-emerald-800/60 text-emerald-300 text-[10px] font-bold flex items-center"><i data-lucide="check" class="w-3 h-3 mr-1"></i> Read</span>` : ''}
+              </div>
+              <span class="text-xs text-slate-500 flex items-center">
+                <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i> ${ch.readTimeMinutes || 8} min
+              </span>
+            </div>
+            
+            <h3 class="text-base sm:text-lg font-bold text-slate-100 group-hover:text-purple-300 transition line-clamp-2 leading-snug mb-3">
+              ${ch.title}
+            </h3>
+
+            <p class="text-xs text-slate-400 mb-6 flex items-center space-x-2">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>${(ch.sections || []).length} High-Yield Sections</span>
+            </p>
+          </div>
+
+          <div class="w-full py-2.5 ${isRead ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white' : 'bg-slate-800 group-hover:bg-purple-600 text-slate-300 group-hover:text-white'} active:scale-[0.99] font-semibold text-xs rounded-xl flex items-center justify-center transition shadow-md">
+            <span>${isRead ? 'Read Again' : 'Read Summary'}</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1.5 transition-transform group-hover:translate-x-1"></i>
+          </div>
+        `;
+
+        card.onclick = () => openChapter(ch.id);
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    document.getElementById('directory-filter-input').addEventListener('input', (e) => {
+      renderDirectory(e.target.value);
+    });
+
+    document.getElementById('btn-back-to-library').onclick = showDirectory;
+    document.getElementById('btn-bottom-library').onclick = showDirectory;
+
+    // Search Engine
+    function searchAllSummaries(query) {
+      const clean = query.trim().toLowerCase();
+      if (clean.length < 2) return [];
+
+      const results = [];
+      allBooks.forEach(book => {
+        book.chapters.forEach(ch => {
+          (ch.sections || []).forEach((sec, idx) => {
+            let score = 0;
+            let matchText = '';
+
+            if (sec.title && sec.title.toLowerCase().includes(clean)) {
+              score += 10;
+              matchText = sec.title;
+            } else if (sec.content && sec.content.toLowerCase().includes(clean)) {
+              score += 5;
+              matchText = sec.content;
+            }
+
+            if (score > 0) {
+              results.push({
+                bookId: book.id,
+                bookTitle: book.title,
+                chapterId: ch.id,
+                chapterTitle: ch.title,
+                sectionTitle: sec.title,
+                sectionIndex: idx,
+                snippet: matchText,
+                score
+              });
+            }
+          });
+        });
+      });
+
+      return results.sort((a, b) => b.score - a.score);
+    }
+
+    function highlightKeyword(text, query) {
+      if (!query || !text) return text || '';
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      return text.replace(regex, '<span class="bg-purple-500/30 text-purple-200 font-semibold px-0.5 rounded">$1</span>');
+    }
+
+    function renderSearchResults(query) {
+      const list = document.getElementById('search-results-list');
+      const badge = document.getElementById('search-count-badge');
+      const results = searchAllSummaries(query);
+      list.innerHTML = '';
+
+      if (query.trim().length < 2) {
+        list.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">Type at least 2 characters to search across all summary chapters...</div>`;
+        badge.textContent = '0 results found';
+        return;
+      }
+
+      if (results.length === 0) {
+        list.innerHTML = `<div class="text-xs text-amber-400/80 text-center py-8">No matching summaries found for "<b>${query}</b>".</div>`;
+        badge.textContent = '0 results found';
+        return;
+      }
+
+      badge.textContent = `${results.length} result${results.length > 1 ? 's' : ''} found`;
+
+      results.forEach(res => {
+        const item = document.createElement('div');
+        item.className = 'pt-2.5 pb-2.5 px-3 rounded-xl hover:bg-slate-800/60 cursor-pointer transition flex flex-col space-y-1';
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-purple-400 truncate">${res.chapterTitle}</span>
+            <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/60 shrink-0">${res.bookTitle}</span>
+          </div>
+          <div class="text-xs font-semibold text-slate-300 truncate">${res.sectionTitle}</div>
+          <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+            ${highlightKeyword(res.snippet, query)}
+          </p>
+        `;
+
+        item.onclick = () => {
+          activeBookId = res.bookId;
+          openChapter(res.chapterId);
+          document.getElementById('modal-search').classList.add('hidden');
+          
+          setTimeout(() => {
+            const secEl = document.getElementById(`section-${res.sectionIndex}`);
+            if (secEl) secEl.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
+        };
+
+        list.appendChild(item);
+      });
+    }
+
+    // Search Handlers
+    const searchModal = document.getElementById('modal-search');
+    const searchInput = document.getElementById('search-input');
+    document.getElementById('btn-search').onclick = () => {
+      searchModal.classList.remove('hidden');
+      searchInput.value = '';
+      searchInput.focus();
+      renderSearchResults('');
+      lucide.createIcons();
+    };
+    document.getElementById('btn-close-search').onclick = () => searchModal.classList.add('hidden');
+    searchInput.addEventListener('input', (e) => renderSearchResults(e.target.value));
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchModal.classList.remove('hidden');
+        searchInput.focus();
+      }
+      if (e.key === 'Escape' && !searchModal.classList.contains('hidden')) {
+        searchModal.classList.add('hidden');
+      }
+    });
+
+    // Dual-Bank Question Matching Engine with Cross-Platform SM-2
+    function renderInteractiveQuestions(chapterNumber) {
+      const container = document.getElementById('quiz-cards-container');
+      const badge = document.getElementById('quiz-count-badge');
+      const section = document.getElementById('chapter-quiz-section');
+      container.innerHTML = '';
+
+      const mapping = CHAPTER_TOPIC_MAP[chapterNumber] || { topic: "general", keywords: [] };
+      const allAvailableQuestions = [];
+
+      questionChapters.forEach(deck => {
+        (deck.questions || []).forEach((q, qIndex) => {
+          const generatedId = q.id || `${deck.id}_${qIndex}`;
+          allAvailableQuestions.push({
+            ...q,
+            _generatedId: generatedId,
+            _deckTitle: deck.title || "Question Bank",
+            _sourceName: deck.sourceName || "Question Bank",
+            _sourceBadgeColor: deck.sourceBadgeColor || "purple"
+          });
+        });
+      });
+
+      if (allAvailableQuestions.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      const scored = allAvailableQuestions.map(q => {
+        let score = 0;
+        const fullContent = `${q.stem || ''} ${q.explanation || ''} ${Object.values(q.options || {}).join(' ')}`.toLowerCase();
+        
+        mapping.keywords.forEach(kw => {
+          if (fullContent.includes(kw.toLowerCase())) {
+            score += 5;
+          }
+        });
+
+        return { ...q, _relevanceScore: score };
+      });
+
+      const saudiScored = scored.filter(q => q._sourceName === 'Saudi Board QB' && q._relevanceScore > 0)
+                                .sort((a, b) => b._relevanceScore - a._relevanceScore);
+      const thousandScored = scored.filter(q => q._sourceName === '1000 Questions' && q._relevanceScore > 0)
+                                   .sort((a, b) => b._relevanceScore - a._relevanceScore);
+
+      const MAX_PER_SOURCE = 4;
+      const TARGET_TOTAL = 8;
+
+      let selectedQuestions = [
+        ...saudiScored.slice(0, MAX_PER_SOURCE),
+        ...thousandScored.slice(0, MAX_PER_SOURCE)
+      ];
+
+      if (selectedQuestions.length < 5) {
+        const chosenSet = new Set(selectedQuestions);
+        const remaining = scored.filter(q => q._relevanceScore > 0 && !chosenSet.has(q))
+                                .sort((a, b) => b._relevanceScore - a._relevanceScore);
+        for (const q of remaining) {
+          if (selectedQuestions.length >= TARGET_TOTAL) break;
+          selectedQuestions.push(q);
+        }
+      }
+
+      if (selectedQuestions.length === 0) {
+        const matchingDeck = questionChapters.find(d => (d.title || '').toLowerCase().includes(mapping.topic));
+        if (matchingDeck && matchingDeck.questions) {
+          selectedQuestions = matchingDeck.questions.slice(0, TARGET_TOTAL).map((q, qIndex) => ({
+            ...q,
+            _generatedId: q.id || `${matchingDeck.id}_${qIndex}`,
+            _deckTitle: matchingDeck.title,
+            _sourceName: matchingDeck.sourceName || 'Question Bank',
+            _sourceBadgeColor: matchingDeck.sourceBadgeColor || 'purple'
+          }));
+        }
+      }
+
+      if (selectedQuestions.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      section.classList.remove('hidden');
+      badge.textContent = `${selectedQuestions.length} High-Yield Questions`;
+
+      selectedQuestions.forEach((q, qIndex) => {
+        const qId = q.id || q._generatedId;
+        const selectedAns = summariesState.quizAnswers[qId];
+        const isRevealed = Boolean(selectedAns);
+
+        const isSaudi = q._sourceName === 'Saudi Board QB';
+        const badgeStyle = isSaudi 
+          ? 'bg-blue-950/80 text-blue-300 border-blue-800/60' 
+          : 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60';
+
+        const cardStates = isSaudi ? saudiBoardCardStates : thousandQsCardStates;
+        const existingSRS = cardStates[qId];
+
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-lg';
+
+        let srsBadgeHtml = '';
+        if (existingSRS && existingSRS.interval) {
+          srsBadgeHtml = `
+            <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-semibold text-slate-400 border border-slate-700/60 flex items-center">
+              <i data-lucide="repeat" class="w-3 h-3 mr-1 text-purple-400"></i> ${existingSRS.interval}d interval
+            </span>
+          `;
+        }
+
+        let cardHtml = `
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded bg-slate-800 text-purple-300 border border-slate-700/60 font-bold">Question ${qIndex + 1}</span>
+              <span class="px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${badgeStyle}">${q._sourceName}</span>
+              ${srsBadgeHtml}
+            </div>
+            <span class="text-[11px] text-slate-400 truncate max-w-[200px]">${q._deckTitle}</span>
+          </div>
+          <p class="text-sm sm:text-base font-medium text-slate-100 leading-relaxed mb-4">${q.stem}</p>
+        `;
+
+        if (q.image) {
+          const cleanPath = q.image.startsWith('/') ? q.image.slice(1) : q.image;
+          cardHtml += `<img src="${cleanPath}" class="max-h-64 mx-auto rounded-xl border border-slate-700 bg-white/5 p-1 mb-4" />`;
+        }
+
+        cardHtml += `<div class="space-y-3 options-wrapper">`;
+        Object.entries(q.options || {}).forEach(([letter, text]) => {
+          let btnClass = 'w-full text-left p-4 rounded-xl border text-sm font-medium transition flex items-start space-x-3.5 ';
+          if (isRevealed) {
+            if (letter === q.correctAnswer) btnClass += 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200';
+            else if (letter === selectedAns) btnClass += 'bg-rose-950/40 border-rose-500/80 text-rose-200';
+            else btnClass += 'bg-slate-950/40 border-slate-800/40 text-slate-500';
+          } else {
+            btnClass += 'bg-slate-950/80 border-slate-800 hover:border-purple-500/50 text-slate-200 active:bg-slate-800';
+          }
+
+          cardHtml += `
+            <button type="button" data-letter="${letter}" class="${btnClass}">
+              <span class="font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 shrink-0">${letter}</span>
+              <span class="leading-relaxed">${text}</span>
+            </button>
+          `;
+        });
+        cardHtml += `</div>`;
+
+        if (isRevealed) {
+          cardHtml += `
+            <div class="mt-5 pt-4 border-t border-slate-800 text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-4 sm:p-5 rounded-xl">
+              <div class="font-bold text-emerald-400 mb-1.5 flex items-center">
+                <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Correct Answer: Option ${q.correctAnswer}
+              </div>
+              <div class="text-slate-300 prose-reading mb-5">${formatMarkdown(q.explanation) || 'No rationale provided.'}</div>
+              
+              <div class="pt-4 border-t border-slate-800/80">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                  Update Spaced Repetition Memory State
+                </span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button type="button" data-quality="1" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-rose-950/50 border border-slate-800 hover:border-rose-500/60 rounded-xl text-xs font-semibold text-rose-300 transition flex flex-col items-center">
+                    <span>Again</span>
+                    <span class="text-[10px] text-slate-500">1 day</span>
+                  </button>
+                  <button type="button" data-quality="2" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-amber-950/50 border border-slate-800 hover:border-amber-500/60 rounded-xl text-xs font-semibold text-amber-300 transition flex flex-col items-center">
+                    <span>Hard</span>
+                    <span class="text-[10px] text-slate-500">3 days</span>
+                  </button>
+                  <button type="button" data-quality="3" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-blue-950/50 border border-slate-800 hover:border-blue-500/60 rounded-xl text-xs font-semibold text-blue-300 transition flex flex-col items-center">
+                    <span>Good</span>
+                    <span class="text-[10px] text-slate-500">6 days</span>
+                  </button>
+                  <button type="button" data-quality="4" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-emerald-950/50 border border-slate-800 hover:border-emerald-500/60 rounded-xl text-xs font-semibold text-emerald-300 transition flex flex-col items-center">
+                    <span>Easy</span>
+                    <span class="text-[10px] text-slate-500">12 days</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          `;
+        }
+
+        card.innerHTML = cardHtml;
+
+        card.querySelectorAll('.options-wrapper button').forEach(btn => {
+          btn.onclick = async () => {
+            const letter = btn.getAttribute('data-letter');
+            summariesState.quizAnswers[qId] = letter;
+
+            const initialQuality = (letter === q.correctAnswer) ? 3 : 1;
+            await syncCardSRS(q, initialQuality);
+
+            renderInteractiveQuestions(chapterNumber);
+          };
+        });
+
+        card.querySelectorAll('.srs-btn').forEach(srsBtn => {
+          srsBtn.onclick = async () => {
+            const quality = parseInt(srsBtn.getAttribute('data-quality'), 10);
+            await syncCardSRS(q, quality);
+            renderInteractiveQuestions(chapterNumber);
+          };
+        });
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Reader Renderer
+    function renderReader() {
+      lucide.createIcons();
+      const book = getActiveBook();
+      const ch = getActiveChapter();
+
+      if (!book || !ch) {
+        showDirectory();
+        return;
+      }
+
+      document.getElementById('header-book-title').textContent = `${book.title} Summaries`;
+      document.getElementById('header-chapter-title').textContent = ch.title;
+      document.getElementById('header-read-time').textContent = `${ch.readTimeMinutes || 8} min read`;
+
+      document.getElementById('banner-book-badge').textContent = book.title;
+      document.getElementById('banner-chapter-number').textContent = `Chapter ${ch.chapterNumber || ''}`;
+      document.getElementById('chapter-headline').textContent = ch.title;
+      document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
+      document.getElementById('chapter-sections-count-val').textContent = `${(ch.sections || []).length} Sections`;
+
+      const isRead = Boolean(summariesState.readChapters[ch.id]);
+      const topBtn = document.getElementById('btn-toggle-read-top');
+      const topText = document.getElementById('btn-toggle-read-text-top');
+      const bottomBtn = document.getElementById('btn-toggle-read-bottom');
+      const bottomText = document.getElementById('btn-toggle-read-text-bottom');
+
+      if (isRead) {
+        topBtn.className = 'self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs font-semibold flex items-center space-x-1.5 hover:bg-rose-950/40 hover:border-rose-500/60 hover:text-rose-300 transition';
+        topText.textContent = 'Completed (Mark Unread)';
+
+        bottomBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-sm font-bold flex items-center justify-center space-x-2 hover:bg-rose-950/40 hover:border-rose-500/60 hover:text-rose-300 transition';
+        bottomText.textContent = '✓ Chapter Completed (Click to Unmark)';
+      } else {
+        topBtn.className = 'self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700 hover:border-emerald-500/60 text-slate-300 hover:text-emerald-300 text-xs font-semibold flex items-center space-x-1.5 transition';
+        topText.textContent = 'Mark as Read';
+
+        bottomBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-900 border border-slate-700 hover:border-emerald-500/60 text-slate-200 hover:text-emerald-300 text-sm font-bold flex items-center justify-center space-x-2 transition shadow-md';
+        bottomText.textContent = 'Mark Chapter as Completed';
+      }
+
+      topBtn.onclick = () => toggleChapterRead(ch.id);
+      bottomBtn.onclick = () => toggleChapterRead(ch.id);
+
+      const container = document.getElementById('sections-container');
+      container.innerHTML = '';
+
+      (ch.sections || []).forEach((sec, idx) => {
+        const secDiv = document.createElement('section');
+        secDiv.id = `section-${idx}`;
+        secDiv.className = 'scroll-mt-24';
+
+        let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10"></div>` : '';
+
+        secDiv.innerHTML = `
+          ${dividerHtml}
+          <div class="mb-5">
+            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-3 tracking-tight">${sec.title}</h2>
+          </div>
+          <div>
+            ${formatMarkdown(sec.content)}
+          </div>
+        `;
+        container.appendChild(secDiv);
+      });
+
+      renderInteractiveQuestions(ch.chapterNumber || 1);
+
+      const chIndex = book.chapters.findIndex(c => c.id === ch.id);
+      const prevBtn = document.getElementById('btn-prev-chapter');
+      const nextBtn = document.getElementById('btn-next-chapter');
+
+      prevBtn.disabled = chIndex <= 0;
+      prevBtn.className = chIndex <= 0 
+        ? 'w-full sm:w-auto flex-1 py-3.5 px-5 bg-slate-900/40 border border-slate-800/40 rounded-2xl font-semibold text-xs sm:text-sm text-slate-600 cursor-not-allowed flex items-center justify-center'
+        : 'w-full sm:w-auto flex-1 py-3.5 px-5 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 border border-slate-800 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center text-slate-300 transition';
+
+      nextBtn.disabled = chIndex >= book.chapters.length - 1;
+      nextBtn.className = chIndex >= book.chapters.length - 1
+        ? 'w-full sm:w-auto flex-1 py-3.5 px-5 bg-slate-900/40 border border-slate-800/40 rounded-2xl font-semibold text-xs sm:text-sm text-slate-600 cursor-not-allowed flex items-center justify-center'
+        : 'w-full sm:w-auto flex-1 py-3.5 px-5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center transition shadow-lg shadow-purple-600/20';
+
+      prevBtn.onclick = () => {
+        if (chIndex > 0) openChapter(book.chapters[chIndex - 1].id);
+      };
+
+      nextBtn.onclick = () => {
+        if (chIndex < book.chapters.length - 1) openChapter(book.chapters[chIndex + 1].id);
+      };
+
+      lucide.createIcons();
+    }
+
+    // In-Chapter Table of Contents Drawer
+    function renderTOC() {
+      const ch = getActiveChapter();
+      const list = document.getElementById('toc-list');
+      list.innerHTML = '';
+      if (!ch) return;
+
+      (ch.sections || []).forEach((sec, idx) => {
+        const item = document.createElement('button');
+        item.className = 'w-full text-left p-3.5 rounded-xl hover:bg-slate-800/80 border border-transparent hover:border-slate-700/60 transition flex items-center justify-between text-xs sm:text-sm text-slate-300';
+        item.innerHTML = `
+          <div class="flex items-center space-x-3 min-w-0 pr-2">
+            <span class="font-bold text-slate-400 text-xs bg-slate-800 px-2 py-0.5 rounded">#${idx + 1}</span>
+            <span class="truncate font-medium">${sec.title}</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 shrink-0"></i>
+        `;
+
+        item.onclick = () => {
+          document.getElementById('modal-toc').classList.add('hidden');
+          const secEl = document.getElementById(`section-${idx}`);
+          if (secEl) secEl.scrollIntoView({ behavior: 'smooth' });
+        };
+        list.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    document.getElementById('btn-toc-toggle').onclick = () => {
+      renderTOC();
+      document.getElementById('modal-toc').classList.remove('hidden');
+    };
+    document.getElementById('btn-close-toc').onclick = () => document.getElementById('modal-toc').classList.add('hidden');
+
+    // Books & Chapter Drawer Navigation Modal
+    function renderDrawer() {
+      const book = getActiveBook();
+      const tabs = document.getElementById('book-tabs');
+      const list = document.getElementById('drawer-chapter-list');
+      
+      tabs.innerHTML = '';
+      list.innerHTML = '';
+
+      allBooks.forEach(b => {
+        const tabBtn = document.createElement('button');
+        const isActive = b.id === activeBookId;
+        tabBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+          isActive ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+        }`;
+        tabBtn.textContent = b.title;
+        tabBtn.onclick = () => {
+          activeBookId = b.id;
+          renderDrawer();
+          if (activeChapterId) {
+            openChapter(b.chapters[0]?.id || null);
+          } else {
+            renderDirectory();
+          }
+        };
+        tabs.appendChild(tabBtn);
+      });
+
+      document.getElementById('chapters-available-count').textContent = `${book.chapters.length} Chapters`;
+
+      book.chapters.forEach(ch => {
+        const isCurrent = ch.id === activeChapterId;
+        const isRead = Boolean(summariesState.readChapters[ch.id]);
+
+        const item = document.createElement('div');
+        item.className = `p-3.5 rounded-xl border flex items-center justify-between transition cursor-pointer select-none ${
+          isCurrent ? 'bg-purple-600/15 border-purple-500/60 text-purple-200' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
+        }`;
+
+        item.innerHTML = `
+          <div class="min-w-0 flex-1 pr-2">
+            <div class="font-bold text-xs sm:text-sm truncate text-slate-100 flex items-center">
+              ${isRead ? `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 mr-1.5 shrink-0"></i>` : ''}
+              <span class="truncate">${ch.title}</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-0.5 flex items-center space-x-2">
+              <span>Chapter ${ch.chapterNumber}</span>
+              <span>•</span>
+              <span>${ch.readTimeMinutes || 8} min</span>
+            </div>
+          </div>
+          <div class="shrink-0">
+            ${isCurrent ? `<span class="px-2 py-0.5 text-[10px] font-bold uppercase bg-purple-500/20 border border-purple-400/40 text-purple-300 rounded-md">Reading</span>` : `<i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>`}
+          </div>
+        `;
+
+        item.onclick = () => {
+          openChapter(ch.id);
+          document.getElementById('modal-decks').classList.add('hidden');
+        };
+
+        list.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    document.getElementById('btn-menu').onclick = () => {
+      renderDrawer();
+      document.getElementById('modal-decks').classList.remove('hidden');
+    };
+    document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
+
+    // Handle Hash Routing
+    const initialHash = window.location.hash.replace('#', '').trim();
+    const book = getActiveBook();
+    const initialChapter = book?.chapters.find(c => c.id === initialHash);
+
+    if (initialChapter) {
+      openChapter(initialChapter.id);
+    } else {
+      showDirectory();
+    }
+  </script>
+</body>
+</html>
