@@ -37,12 +37,12 @@
         </button>
 
         <!-- Clickable Logo returning to Main Portal -->
-       <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
+        <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
           <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
         </a>
 
         <div class="min-w-0 flex-1 flex flex-col justify-center">
-          <a href="https://ketofoldoc.com" class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 truncate leading-tight transition">
+          <a href="/" class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 truncate leading-tight transition">
             1000 Anesthesia Questions
           </a>
           <div class="flex items-center space-x-2 truncate">
@@ -178,9 +178,9 @@
         </div>
 
         <div class="flex items-center justify-center space-x-3 text-[11px] text-slate-500">
-          <a href="https://ketofoldoc.com/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
+          <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
           <span>•</span>
-          <a href="https://ketofoldoc.com/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
+          <a href="/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
         </div>
       </div>
     </footer>
@@ -252,26 +252,35 @@
             KetofolDoc Platforms
           </span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            
-            <!-- Saudi Board Link -->
-<a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">Saudi Board</span>
-</a>
+            <a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="award" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-blue-300 transition truncate">Saudi Board</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 transition shrink-0"></i>
+            </a>
 
-<!-- Current Active Tab -->
-<div class="p-2.5 rounded-xl bg-emerald-600/15 border border-emerald-500/50 ...">
-  <span class="text-xs font-bold text-emerald-200">1000 Qs</span>
-</div>
+            <div class="p-2.5 rounded-xl bg-emerald-600/15 border border-emerald-500/50 flex items-center justify-between">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="book-open" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-bold text-emerald-200 truncate">1000 Qs</span>
+              </div>
+              <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 shrink-0">Active</span>
+            </div>
 
-<!-- Summaries Link -->
-<a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">Summaries</span>
-</a>
+            <a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="file-text" class="w-4 h-4 text-purple-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-purple-300 transition truncate">Summaries</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-400 transition shrink-0"></i>
+            </a>
+          </div>
 
-<!-- Return Home Link -->
-<a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 ...">
-  <span>Return to KetofolDoc Home Portal</span>
-</a>
+          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Return to KetofolDoc Home Portal</span>
+          </a>
         </div>
 
         <div class="border-t border-slate-800/80"></div>
@@ -534,6 +543,24 @@
       });
     }
 
+    // Deep merge progress objects to avoid overwriting separate chapters
+    function mergeUserProgress(localProg, remoteProg) {
+      if (!remoteProg) return localProg;
+      const merged = { ...localProg };
+      Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
+        if (!merged[deckId]) {
+          merged[deckId] = remoteDeck;
+        } else {
+          merged[deckId] = {
+            answers: { ...(merged[deckId].answers || {}), ...(remoteDeck.answers || {}) },
+            flags: Array.from(new Set([...(merged[deckId].flags || []), ...(remoteDeck.flags || [])])),
+            srs: { ...(merged[deckId].srs || {}), ...(remoteDeck.srs || {}) }
+          };
+        }
+      });
+      return merged;
+    }
+
     // --- Cloud Authentication & Sync ---
     if (auth) {
       auth.onAuthStateChanged((user) => {
@@ -568,46 +595,45 @@
       lucide.createIcons();
     }
 
-    function initUserCloudSync(userId) {
-      async function initUserCloudSync(userId) {
-  if (!db) return;
-  document.getElementById('sync-dot').classList.remove('hidden');
-  if (syncUnsubscribe) syncUnsubscribe();
+    async function initUserCloudSync(userId) {
+      if (!db) return;
+      document.getElementById('sync-dot').classList.remove('hidden');
+      if (syncUnsubscribe) syncUnsubscribe();
 
-  const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
+      const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
 
-  // 1. Check legacy collection 'users_1000q' if not migrated yet
-  try {
-    const legacySnap = await db.collection('users_1000q').doc(userId).get();
-    if (legacySnap.exists && legacySnap.data().userProgress) {
-      const legacyProgress = legacySnap.data().userProgress;
-      state.userProgress = { ...legacyProgress, ...state.userProgress };
-      pushStateToCloud(); // Migrate to shared doc
-    }
-  } catch (e) {
-    console.warn("Legacy check:", e);
-  }
-
-  // 2. Listen to shared doc
-  syncUnsubscribe = userDocRef.onSnapshot((doc) => {
-    if (doc.exists) {
-      const cloudData = doc.data();
-      const thousandData = cloudData.thousand_qs_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
-      if (thousandData) {
-        if (thousandData.userProgress) {
-          state.userProgress = { ...state.userProgress, ...thousandData.userProgress };
+      // 1. Check legacy collection 'users_1000q' if not migrated yet
+      try {
+        const legacySnap = await db.collection('users_1000q').doc(userId).get();
+        if (legacySnap.exists && legacySnap.data().userProgress) {
+          const legacyProgress = legacySnap.data().userProgress;
+          state.userProgress = mergeUserProgress(state.userProgress, legacyProgress);
+          pushStateToCloud(); // Migrate to shared doc
         }
-        if (thousandData.card_states) {
-          applyCloudCardStates(thousandData.card_states);
-        }
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
-        render();
+      } catch (e) {
+        console.warn("Legacy check:", e);
       }
-    } else {
-      pushStateToCloud();
+
+      // 2. Listen to shared doc
+      syncUnsubscribe = userDocRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          const cloudData = doc.data();
+          const thousandData = cloudData.thousand_qs_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
+          if (thousandData) {
+            if (thousandData.userProgress) {
+              state.userProgress = mergeUserProgress(state.userProgress, thousandData.userProgress);
+            }
+            if (thousandData.card_states) {
+              applyCloudCardStates(thousandData.card_states);
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
+            render();
+          }
+        } else {
+          pushStateToCloud();
+        }
+      });
     }
-  });
-}
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
@@ -1112,7 +1138,7 @@
     document.getElementById('btn-next').onclick = () => {
       const activeDeck = getActiveCompositeDeck();
       if (!activeDeck) return;
-      const maxLen = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order.length : activeDeck.questions.length;
+      const maxLen = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order[state.sessionState.currentIndex] : activeDeck.questions.length;
       if (state.sessionState.currentIndex < maxLen - 1) { 
         state.sessionState.currentIndex++; 
         saveState(); 
