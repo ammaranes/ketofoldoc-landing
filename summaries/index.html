@@ -235,7 +235,7 @@
         </div>
       </div>
 
-      <!-- Quick Filter Bar (Sanitized to prevent browser password prompts) -->
+      <!-- Quick Filter Bar -->
       <div class="mt-6 max-w-md mx-auto relative">
         <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
         <input 
@@ -402,25 +402,36 @@
           </span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             
-            <!-- Saudi Board Link -->
-<a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">Saudi Board</span>
-</a>
+            <a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="award" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-blue-300 truncate">Saudi Board</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 transition shrink-0"></i>
+            </a>
 
-<!-- 1000 Qs Link -->
-<a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">1000 Qs</span>
-</a>
+            <a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="book-open" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-emerald-300 truncate">1000 Qs</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition shrink-0"></i>
+            </a>
 
-<!-- Current Active Tab -->
-<div class="p-2.5 rounded-xl bg-purple-600/15 border border-purple-500/50 ...">
-  <span class="text-xs font-bold text-purple-200">Summaries</span>
-</div>
+            <div class="p-2.5 rounded-xl bg-purple-600/15 border border-purple-500/50 flex items-center justify-between">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="file-text" class="w-4 h-4 text-purple-400 shrink-0"></i>
+                <span class="text-xs font-bold text-purple-200 truncate">Summaries</span>
+              </div>
+              <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-300 border border-purple-400/40">Active</span>
+            </div>
 
-<!-- Return Home Link -->
-<a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 ...">
-  <span>Return to KetofolDoc Home Portal</span>
-</a>
+          </div>
+
+          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Return to KetofolDoc Home Portal</span>
+          </a>
         </div>
 
         <div class="border-t border-slate-800/80"></div>
@@ -588,7 +599,7 @@
         try {
           const userDocRef = doc(db, 'users', currentUser.uid);
           await setDoc(userDocRef, {
-            [targetFirestoreField]: { card_states: { [qId]: newCardState } },
+            [targetFirestoreField]: { card_states: targetStates, lastUpdated: new Date().toISOString() },
             summaries_progress: summariesState
           }, { merge: true });
         } catch (e) {
@@ -614,12 +625,15 @@
                 if (data.summaries_progress) {
                   summariesState.readChapters = { ...summariesState.readChapters, ...(data.summaries_progress.readChapters || {}) };
                   summariesState.quizAnswers = { ...summariesState.quizAnswers, ...(data.summaries_progress.quizAnswers || {}) };
+                  localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
                 }
                 if (data.saudi_board_progress?.card_states) {
                   saudiBoardCardStates = { ...saudiBoardCardStates, ...data.saudi_board_progress.card_states };
+                  localStorage.setItem(LOCAL_SAUDI_KEY, JSON.stringify({ card_states: saudiBoardCardStates }));
                 }
                 if (data.thousand_qs_progress?.card_states) {
                   thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
+                  localStorage.setItem(LOCAL_1000_KEY, JSON.stringify({ card_states: thousandQsCardStates }));
                 }
               }
             } catch (e) {
