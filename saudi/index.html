@@ -43,7 +43,7 @@
         </a>
 
         <div class="min-w-0 flex-1 flex flex-col justify-center">
-          <a href="https://ketofoldoc.com" class="text-[10px] font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300 truncate leading-tight transition">
+          <a href="/" class="text-[10px] font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300 truncate leading-tight transition">
             Saudi Anesthesia Board QB Practice
           </a>
           <div class="flex items-center space-x-2 truncate">
@@ -179,9 +179,9 @@
         </div>
 
         <div class="flex items-center justify-center space-x-3 text-[11px] text-slate-500">
-          <a href="https://ketofoldoc.com/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
+          <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
           <span>•</span>
-          <a href="https://ketofoldoc.com/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
+          <a href="/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
         </div>
       </div>
     </footer>
@@ -245,29 +245,37 @@
       <div class="overflow-y-auto p-4 space-y-4 flex-1">
         
         <!-- Ecosystem Switcher Section -->
-        <!-- Current Active Tab -->
-<div class="p-2.5 rounded-xl bg-blue-600/15 border border-blue-500/50 ...">
-  <span class="text-xs font-bold text-blue-200">Saudi Board</span>
-</div>
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+            KetofolDoc Platforms
+          </span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="p-2.5 rounded-xl bg-blue-600/15 border border-blue-500/50 flex items-center justify-between">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="award" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                <span class="text-xs font-bold text-blue-200 truncate">Saudi Board</span>
+              </div>
+              <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300 border border-blue-400/40 shrink-0">Active</span>
+            </div>
 
-<!-- 1000 Questions Link -->
-<a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">1000 Qs</span>
-</a>
+            <a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="book-open" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-emerald-300 transition truncate">1000 Qs</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition shrink-0"></i>
+            </a>
 
-<!-- Summaries Link -->
-<a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 ...">
-  <span class="text-xs font-medium text-slate-200">Summaries</span>
-</a>
-
-<!-- Return Home Link -->
-<a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 ...">
-  <span>Return to KetofolDoc Home Portal</span>
-</a>
-
+            <a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 flex items-center justify-between transition group">
+              <div class="flex items-center space-x-2 min-w-0">
+                <i data-lucide="file-text" class="w-4 h-4 text-purple-400 shrink-0"></i>
+                <span class="text-xs font-medium text-slate-200 group-hover:text-purple-300 transition truncate">Summaries</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-400 transition shrink-0"></i>
+            </a>
           </div>
 
-          <a href="https://ketofoldoc.com" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center space-x-2 transition">
+          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center space-x-2 transition">
             <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
             <span>Return to KetofolDoc Home Portal</span>
           </a>
@@ -528,6 +536,24 @@
       });
     }
 
+    // Deep merge progress objects to avoid overwriting separate modules
+    function mergeUserProgress(localProg, remoteProg) {
+      if (!remoteProg) return localProg;
+      const merged = { ...localProg };
+      Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
+        if (!merged[deckId]) {
+          merged[deckId] = remoteDeck;
+        } else {
+          merged[deckId] = {
+            answers: { ...(merged[deckId].answers || {}), ...(remoteDeck.answers || {}) },
+            flags: Array.from(new Set([...(merged[deckId].flags || []), ...(remoteDeck.flags || [])])),
+            srs: { ...(merged[deckId].srs || {}), ...(remoteDeck.srs || {}) }
+          };
+        }
+      });
+      return merged;
+    }
+
     // --- Cloud Authentication & Sync ---
     if (auth) {
       auth.onAuthStateChanged((user) => {
@@ -575,7 +601,7 @@
           const saudiData = cloudData.saudi_board_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
           if (saudiData) {
             if (saudiData.userProgress) {
-              state.userProgress = { ...state.userProgress, ...saudiData.userProgress };
+              state.userProgress = mergeUserProgress(state.userProgress, saudiData.userProgress);
             }
             if (saudiData.card_states) {
               applyCloudCardStates(saudiData.card_states);
