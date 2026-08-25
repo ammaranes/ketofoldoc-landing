@@ -29,7 +29,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 min-h-[3.75rem] flex items-center justify-between gap-3">
       
       <!-- Brand Logo & Title -->
-      <a href="https://ketofoldoc.com" class="flex items-center space-x-3 group">
+      <a href="/" class="flex items-center space-x-3 group">
         <img src="logo.svg" alt="KetofolDoc Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain group-hover:border-slate-500 transition" />
         <div>
           <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight block leading-tight group-hover:text-blue-400 transition">
@@ -293,9 +293,9 @@
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
       <p>© 2026 KetofolDoc. Designed for anesthesia education and clinical board review.</p>
       <div class="flex items-center space-x-4">
-        <a href="https://ketofoldoc.com/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
+        <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
         <span>•</span>
-        <a href="https://ketofoldoc.com/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
+        <a href="/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
       </div>
     </div>
   </footer>
@@ -310,7 +310,7 @@
       signOut, 
       onAuthStateChanged 
     } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
     // 🔑 KetofolDoc Unified Firebase Configuration
     const firebaseConfig = {
@@ -325,6 +325,7 @@
     let auth = null;
     let db = null;
     let currentUser = null;
+    let unsubDashboardSnapshot = null;
 
     try {
       const app = initializeApp(firebaseConfig);
@@ -358,6 +359,32 @@
     document.getElementById('btn-auth-header').onclick = handleGoogleAuth;
     document.getElementById('btn-dashboard-signin').onclick = handleGoogleAuth;
 
+    // Extract Cards from Schema (Supports both compiled card_states and raw userProgress)
+    function extractCardList(source) {
+      if (!source) return [];
+      if (source.card_states && typeof source.card_states === 'object') {
+        return Object.values(source.card_states);
+      }
+      
+      // Fallback: parse raw userProgress structure
+      const prog = source.userProgress || source;
+      const extracted = [];
+      Object.values(prog).forEach(deck => {
+        if (deck && deck.srs) {
+          Object.values(deck.srs).forEach(srsItem => {
+            if (srsItem) {
+              extracted.push({
+                reps: srsItem.repetitions || srsItem.reps || 0,
+                interval: srsItem.interval || 0,
+                easeFactor: srsItem.easeFactor || 2.5
+              });
+            }
+          });
+        }
+      });
+      return extracted;
+    }
+
     // Render Dashboard Analytics for Authenticated Users
     function renderDashboard(userData) {
       document.getElementById('dashboard-logged-out').classList.add('hidden');
@@ -366,14 +393,11 @@
       const name = currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Resident';
       document.getElementById('dash-greeting').textContent = `Welcome Back, Dr. ${name}`;
 
-      const saudiCards = userData?.saudi_board_progress?.card_states || {};
-      const thousandCards = userData?.thousand_qs_progress?.card_states || {};
+      const saudiCards = extractCardList(userData?.saudi_board_progress || (userData?.userProgress ? { userProgress: userData.userProgress } : null));
+      const thousandCards = extractCardList(userData?.thousand_qs_progress);
       const readChapters = userData?.summaries_progress?.readChapters || {};
 
-      const allCards = [
-        ...Object.values(saudiCards),
-        ...Object.values(thousandCards)
-      ];
+      const allCards = [...saudiCards, ...thousandCards];
 
       const totalReviewed = allCards.filter(c => (c.reps || 0) > 0).length;
       const masteredCards = allCards.filter(c => (c.interval || 0) >= 21).length;
@@ -401,8 +425,8 @@
       document.getElementById('stat-summaries-read').textContent = summariesCount.toLocaleString();
       document.getElementById('stat-retention-rate').textContent = totalReviewed > 0 ? `${retentionPercent}%` : '0%';
 
-      const saudiCount = Object.values(saudiCards).filter(c => (c.reps || 0) > 0).length;
-      const thousandCount = Object.values(thousandCards).filter(c => (c.reps || 0) > 0).length;
+      const saudiCount = saudiCards.filter(c => (c.reps || 0) > 0).length;
+      const thousandCount = thousandCards.filter(c => (c.reps || 0) > 0).length;
 
       document.getElementById('card-stat-saudi').textContent = `${saudiCount} Active Cards`;
       document.getElementById('card-stat-1000').textContent = `${thousandCount} Active Cards`;
@@ -423,26 +447,31 @@
       lucide.createIcons();
     }
 
-    // Auth State Observer
+    // Real-Time Auth & Firestore Observer
     if (auth) {
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(auth, (user) => {
         currentUser = user;
+        if (unsubDashboardSnapshot) {
+          unsubDashboardSnapshot();
+          unsubDashboardSnapshot = null;
+        }
+
         if (user) {
           const displayLabel = user.displayName ? user.displayName.split(' ')[0] : 'Account';
           document.getElementById('auth-label-header').textContent = displayLabel;
           
           if (db) {
-            try {
-              const snap = await getDoc(doc(db, 'users', user.uid));
+            // Attach real-time snapshot listener
+            unsubDashboardSnapshot = onSnapshot(doc(db, 'users', user.uid), (snap) => {
               if (snap.exists()) {
                 renderDashboard(snap.data());
               } else {
                 renderDashboard({});
               }
-            } catch (err) {
-              console.error("Error fetching analytics:", err);
+            }, (err) => {
+              console.error("Dashboard sync error:", err);
               renderDashboard({});
-            }
+            });
           }
         } else {
           renderLoggedOut();
