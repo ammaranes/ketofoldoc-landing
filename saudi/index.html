@@ -173,7 +173,7 @@
           <button id="btn-reveal" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl font-semibold text-sm text-slate-200 transition">
             Reveal
           </button>
-          <button id="btn-next" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-xl font-semibold text-sm text-white flex items-center justify-center transition">
+          <button id="btn-next" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-xl font-semibold text-sm text-white flex items-center justify-center transition shadow-lg shadow-blue-600/20">
             Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
           </button>
         </div>
@@ -364,13 +364,13 @@
     // 🛠️ Formatting Helper
     function formatMarkdown(text) {
       if (!text) return '';
-      return text
+      return String(text)
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-100">$1</strong>')
         .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
         .replace(/\n/g, '<br/>');
     }
 
-    // 🧠 Spaced Repetition (SM-2 Inspired) Calculator
+    // 🧠 Spaced Repetition (SM-2) Calculator
     function calculateNextSRS(currentSRS, rating) {
       let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
       const now = new Date();
@@ -412,7 +412,7 @@
 
     // Build Decks Map from allDecks
     const DECKS = {};
-    allDecks.forEach(d => {
+    (allDecks || []).forEach(d => {
       DECKS[d.id] = d;
     });
 
@@ -438,15 +438,18 @@
     const LOCAL_STORAGE_KEY = 'anesthesia_user_progress';
     const FIRESTORE_COLLECTION = 'users';
 
+    const firstDeckKey = Object.keys(DECKS)[0] || 'core_anesthesia';
+
     let state = {
       decks: DECKS,
-      selectedDeckKeys: new Set([Object.keys(DECKS)[0] || 'core_anesthesia']),
+      selectedDeckKeys: new Set([firstDeckKey]),
       userProgress: {},
       sessionState: {
         currentIndex: 0,
         order: [],
         isShuffled: false,
-        isSRSMode: false
+        isSRSMode: false,
+        srsSessionAnswers: {}
       }
     };
 
@@ -463,7 +466,7 @@
       const combinedQuestions = [];
       keys.forEach(key => {
         const deck = state.decks[key];
-        if (deck && deck.questions) {
+        if (deck && Array.isArray(deck.questions)) {
           deck.questions.forEach((q, idx) => {
             combinedQuestions.push({
               ...q,
@@ -473,6 +476,8 @@
           });
         }
       });
+
+      if (combinedQuestions.length === 0) return null;
 
       let title = "Custom Practice";
       if (keys.length === 1) {
@@ -491,13 +496,32 @@
       };
     }
 
+    // Calculate Active Due Question Indices
+    function getDueIndices(activeDeck) {
+      if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+      const now = new Date();
+      const dueIndices = [];
+      activeDeck.questions.forEach((q, idx) => {
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+        const parentProgress = state.userProgress[parentDeckId] || {};
+        const srs = (parentProgress.srs || {})[parentIdx];
+        if (!srs || !srs.dueDate || new Date(srs.dueDate) <= now) {
+          dueIndices.push(idx);
+        }
+      });
+      return dueIndices;
+    }
+
     // Compile Card States for Ecosystem Aggregation
     function compileCardStates() {
       const cardStates = {};
-      Object.entries(state.userProgress).forEach(([deckId, deckProg]) => {
+      Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
+        if (!deckProg) return;
         const srsMap = deckProg.srs || {};
         const deck = state.decks[deckId];
         Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
+          if (!srsObj || typeof srsObj !== 'object') return;
           const idx = parseInt(idxStr, 10);
           const q = deck?.questions?.[idx];
           const qId = q?.id || `${deckId}_${idx}`;
@@ -505,8 +529,8 @@
             reps: srsObj.repetitions || srsObj.reps || 0,
             interval: srsObj.interval || 0,
             easeFactor: srsObj.easeFactor || 2.5,
-            dueDate: typeof srsObj.dueDate === 'string' ? new Date(srsObj.dueDate).getTime() : srsObj.dueDate,
-            lastReviewed: typeof srsObj.lastReviewed === 'string' ? new Date(srsObj.lastReviewed).getTime() : srsObj.lastReviewed
+            dueDate: typeof srsObj.dueDate === 'string' ? new Date(srsObj.dueDate).getTime() : (srsObj.dueDate || 0),
+            lastReviewed: typeof srsObj.lastReviewed === 'string' ? new Date(srsObj.lastReviewed).getTime() : (srsObj.lastReviewed || 0)
           };
         });
       });
@@ -515,7 +539,7 @@
 
     // Apply Cross-Platform SRS Updates from Cloud
     function applyCloudCardStates(cloudCardStates) {
-      if (!cloudCardStates) return;
+      if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
       Object.entries(state.decks).forEach(([deckId, deck]) => {
         if (!deck.questions) return;
         deck.questions.forEach((q, idx) => {
@@ -538,9 +562,10 @@
 
     // Deep merge progress objects to avoid overwriting separate modules
     function mergeUserProgress(localProg, remoteProg) {
-      if (!remoteProg) return localProg;
-      const merged = { ...localProg };
+      if (!remoteProg) return localProg || {};
+      const merged = { ...(localProg || {}) };
       Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
+        if (!remoteDeck) return;
         if (!merged[deckId]) {
           merged[deckId] = remoteDeck;
         } else {
@@ -656,7 +681,7 @@
       if (!query || !text) return text || '';
       const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`(${escaped})`, 'gi');
-      return text.replace(regex, '<span class="bg-blue-500/30 text-blue-200 font-semibold px-0.5 rounded">$1</span>');
+      return String(text).replace(regex, '<span class="bg-blue-500/30 text-blue-200 font-semibold px-0.5 rounded">$1</span>');
     }
 
     function searchAllQuestions(query) {
@@ -672,18 +697,19 @@
           let matchScore = 0;
           let matchSource = '';
 
-          if (q.stem && q.stem.toLowerCase().includes(cleanQuery)) {
+          const stemText = q.stem || q.question || q.text || '';
+          const expText = q.explanation || q.rationale || '';
+          const optionValues = Object.values(q.options || {}).join(' ');
+
+          if (stemText.toLowerCase().includes(cleanQuery)) {
             matchScore += 10;
-            matchSource = q.stem;
-          } else if (q.explanation && q.explanation.toLowerCase().includes(cleanQuery)) {
+            matchSource = stemText;
+          } else if (expText.toLowerCase().includes(cleanQuery)) {
             matchScore += 5;
-            matchSource = q.explanation;
-          } else {
-            const optionValues = Object.values(q.options || {}).join(' ');
-            if (optionValues.toLowerCase().includes(cleanQuery)) {
-              matchScore += 3;
-              matchSource = optionValues;
-            }
+            matchSource = expText;
+          } else if (optionValues.toLowerCase().includes(cleanQuery)) {
+            matchScore += 3;
+            matchSource = optionValues;
           }
 
           if (matchScore > 0) {
@@ -692,7 +718,7 @@
               deckTitle: deck.title,
               questionIndex: idx,
               questionNumber: idx + 1,
-              stem: q.stem,
+              stem: stemText,
               previewSnippet: matchSource,
               score: matchScore
             });
@@ -741,6 +767,7 @@
           state.sessionState.order = [];
           state.sessionState.isShuffled = false;
           state.sessionState.isSRSMode = false;
+          state.sessionState.srsSessionAnswers = {};
 
           saveState();
           closeSearchModal();
@@ -766,6 +793,18 @@
       if (e.key === 'Escape' && !searchModal.classList.contains('hidden')) {
         closeSearchModal();
       }
+      if (document.activeElement?.tagName !== 'INPUT' && searchModal.classList.contains('hidden')) {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          document.getElementById('btn-next').click();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          document.getElementById('btn-prev').click();
+        } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
+          e.preventDefault();
+          document.getElementById('btn-reveal').click();
+        }
+      }
     });
 
     // --- Shuffle & SRS Modes across Active Pool ---
@@ -784,6 +823,7 @@
       
       state.sessionState.isSRSMode = false;
       state.sessionState.isShuffled = !state.sessionState.isShuffled;
+      state.sessionState.srsSessionAnswers = {};
 
       if (state.sessionState.isShuffled) {
         state.sessionState.order = generateShuffledIndices(activeDeck.questions.length);
@@ -802,23 +842,16 @@
 
       state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
       state.sessionState.isShuffled = false;
+      state.sessionState.srsSessionAnswers = {}; // Fresh active recall state
 
       if (state.sessionState.isSRSMode) {
-        const now = new Date();
-        const dueIndices = [];
-
-        activeDeck.questions.forEach((q, idx) => {
-          const parentProgress = state.userProgress[q._parentDeckId] || {};
-          const srs = (parentProgress.srs || {})[q._parentIndex];
-          if (!srs || !srs.dueDate || new Date(srs.dueDate) <= now) {
-            dueIndices.push(idx);
-          }
-        });
+        const dueIndices = getDueIndices(activeDeck);
 
         if (dueIndices.length === 0) {
           alert('🎉 Excellent! No questions are due for review across the selected modules today.');
           state.sessionState.isSRSMode = false;
           state.sessionState.order = [];
+          state.sessionState.currentIndex = 0;
         } else {
           state.sessionState.order = dueIndices;
           state.sessionState.currentIndex = 0;
@@ -829,6 +862,50 @@
       }
 
       saveState();
+    }
+
+    // Advance Navigation Handler
+    function handleNextNavigation() {
+      const activeDeck = getActiveCompositeDeck();
+      if (!activeDeck || !activeDeck.questions.length) return;
+
+      const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+      const maxLen = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
+
+      if (state.sessionState.currentIndex < maxLen - 1) {
+        state.sessionState.currentIndex++;
+        saveState();
+      } else {
+        if (state.sessionState.isSRSMode) {
+          const stillDue = getDueIndices(activeDeck);
+          if (stillDue.length > 0 && !arraysEqual(stillDue, state.sessionState.order)) {
+            state.sessionState.order = stillDue;
+            state.sessionState.currentIndex = 0;
+            saveState();
+          } else {
+            alert("🎉 Outstanding! You have reviewed all SRS due cards for this session.");
+            state.sessionState.isSRSMode = false;
+            state.sessionState.order = [];
+            state.sessionState.currentIndex = 0;
+            state.sessionState.srsSessionAnswers = {};
+            saveState();
+          }
+        } else {
+          if (confirm("You've reached the end of the selected questions. Restart from Question 1?")) {
+            state.sessionState.currentIndex = 0;
+            saveState();
+          }
+        }
+      }
+    }
+
+    function arraysEqual(a, b) {
+      if (a === b) return true;
+      if (a == null || b == null || a.length !== b.length) return false;
+      for (let i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
     }
 
     // --- Main UI Rendering ---
@@ -851,15 +928,20 @@
       document.getElementById('quiz-footer').classList.remove('hidden');
 
       const totalQ = activeDeck.questions.length;
-      const qPointer = state.sessionState.currentIndex || 0;
-
       const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
-      const actualIndex = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
       const activeTotal = hasCustomOrder ? state.sessionState.order.length : totalQ;
 
+      if (state.sessionState.currentIndex >= activeTotal) {
+        state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
+      }
+      const qPointer = state.sessionState.currentIndex || 0;
+      const actualIndex = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+
       const q = activeDeck.questions[actualIndex] || activeDeck.questions[0];
-      const parentDeckId = q._parentDeckId;
-      const parentIdx = q._parentIndex;
+      if (!q) return;
+
+      const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+      const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
       // Update Header
       document.getElementById('deck-title').textContent = activeDeck.title;
@@ -909,11 +991,12 @@
       }
 
       // Stem Text & Optional Stem Image
-      document.getElementById('question-stem').textContent = q.stem;
+      document.getElementById('question-stem').textContent = q.stem || q.question || q.text || '';
       const stemImgContainer = document.getElementById('stem-image-container');
       const stemImg = document.getElementById('stem-image');
-      if (q.image) {
-        const cleanPath = q.image.startsWith('/') ? q.image.slice(1) : q.image;
+      const rawImg = q.image || q.figure || q.stemImage;
+      if (rawImg) {
+        const cleanPath = String(rawImg).startsWith('/') ? String(rawImg).slice(1) : rawImg;
         stemImg.src = cleanPath;
         stemImgContainer.classList.remove('hidden');
       } else {
@@ -928,10 +1011,14 @@
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Render Options (Key-Value Schema)
+      // Determine Selected Answer: Clean slate during SRS Mode until user selects/reveals
+      const selectedAnswer = state.sessionState.isSRSMode 
+        ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
+        : ((parentProgress.answers || {})[parentIdx]);
+
+      // Render Options
       const optionsContainer = document.getElementById('options-container');
       optionsContainer.innerHTML = '';
-      const selectedAnswer = (parentProgress.answers || {})[parentIdx];
 
       Object.entries(q.options || {}).forEach(([letter, text]) => {
         const btn = document.createElement('button');
@@ -943,7 +1030,7 @@
         } else {
           btn.className += 'bg-slate-900 border-slate-800 hover:border-slate-700 active:bg-slate-800 text-slate-200';
         }
-        btn.innerHTML = `<span class="font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300">${letter}</span><span>${text}</span>`;
+        btn.innerHTML = `<span class="font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 shrink-0">${letter}</span><span>${text}</span>`;
         btn.onclick = () => handleSelectOption(q, letter);
         optionsContainer.appendChild(btn);
       });
@@ -951,12 +1038,13 @@
       // Explanation & Reference Box
       const expBox = document.getElementById('explanation-box');
       const expImgContainer = document.getElementById('explanation-images-container');
+      const expText = q.explanation || q.rationale || '';
 
-      if (selectedAnswer && (q.explanation || q.correctAnswer)) {
+      if (selectedAnswer && (expText || q.correctAnswer)) {
         expBox.classList.remove('hidden');
         document.getElementById('explanation-content').innerHTML = `
-          <div><b>Correct Answer:</b> Option ${q.correctAnswer}</div>
-          <div class="mt-1 text-slate-300">${formatMarkdown(q.explanation) || 'No rationale provided.'}</div>
+          <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
+          <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
         `;
 
         // Update SRS Status Tag
@@ -974,14 +1062,17 @@
         }
 
         // Render explanation figures if present
-        if (q.explanationImages && q.explanationImages.length > 0) {
+        const expImages = q.explanationImages || q.explanation_images || [];
+        if (Array.isArray(expImages) && expImages.length > 0) {
           expImgContainer.innerHTML = '';
-          q.explanationImages.forEach(src => {
-            const cleanSrc = src.startsWith('/') ? src.slice(1) : src;
-            const img = document.createElement('img');
-            img.src = cleanSrc;
-            img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
-            expImgContainer.appendChild(img);
+          expImages.forEach(src => {
+            if (src) {
+              const cleanSrc = String(src).startsWith('/') ? String(src).slice(1) : src;
+              const img = document.createElement('img');
+              img.src = cleanSrc;
+              img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
+              expImgContainer.appendChild(img);
+            }
           });
           expImgContainer.classList.remove('hidden');
         } else if (expImgContainer) {
@@ -990,33 +1081,62 @@
       } else {
         expBox.classList.add('hidden');
       }
+
+      // Update Navigation Buttons (Next / Prev States)
+      const prevBtn = document.getElementById('btn-prev');
+      const nextBtn = document.getElementById('btn-next');
+      if (prevBtn) {
+        prevBtn.disabled = qPointer <= 0;
+        prevBtn.classList.toggle('opacity-50', qPointer <= 0);
+        prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
+      }
+      if (nextBtn) {
+        const isLast = qPointer >= activeTotal - 1;
+        nextBtn.innerHTML = isLast 
+          ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
+          : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
+      }
+
       lucide.createIcons();
     }
 
     function handleSelectOption(q, letter) {
-      const parentDeckId = q._parentDeckId;
-      const parentIdx = q._parentIndex;
+      if (!q) return;
+      const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+      const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
+      
+      if (state.sessionState.isSRSMode) {
+        state.sessionState.srsSessionAnswers = state.sessionState.srsSessionAnswers || {};
+        state.sessionState.srsSessionAnswers[`${parentDeckId}_${parentIdx}`] = letter;
+      }
+
       state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
       state.userProgress[parentDeckId].answers[parentIdx] = letter;
       saveState();
     }
 
-    // Handle SRS Recall Ratings with parent deck write-back
+    // Handle SRS Recall Ratings with Auto-Progression
     window.rateRecall = (rating) => {
       const activeDeck = getActiveCompositeDeck();
-      if (!activeDeck) return;
+      if (!activeDeck || !activeDeck.questions.length) return;
       const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
-      const idx = hasCustomOrder ? state.sessionState.order[state.sessionState.currentIndex] : state.sessionState.currentIndex;
+      const qPointer = state.sessionState.currentIndex || 0;
+      const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
       const q = activeDeck.questions[idx];
+      if (!q) return;
 
-      const parentDeckId = q._parentDeckId;
-      const parentIdx = q._parentIndex;
+      const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+      const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
       state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
       state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId].srs || {};
       state.userProgress[parentDeckId].srs[parentIdx] = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
       
       saveState();
+
+      if (state.sessionState.isSRSMode) {
+        handleNextNavigation();
+      }
     };
 
     // Render the Multi-Select Module List with Checkboxes
@@ -1104,6 +1224,7 @@
       state.sessionState.order = [];
       state.sessionState.isShuffled = false;
       state.sessionState.isSRSMode = false;
+      state.sessionState.srsSessionAnswers = {};
       saveState();
       document.getElementById('modal-decks').classList.add('hidden');
     };
@@ -1111,16 +1232,7 @@
     // Navigation Events
     document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
     document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
-
-    document.getElementById('btn-next').onclick = () => {
-      const activeDeck = getActiveCompositeDeck();
-      if (!activeDeck) return;
-      const maxLen = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order.length : activeDeck.questions.length;
-      if (state.sessionState.currentIndex < maxLen - 1) { 
-        state.sessionState.currentIndex++; 
-        saveState(); 
-      }
-    };
+    document.getElementById('btn-next').onclick = handleNextNavigation;
 
     document.getElementById('btn-prev').onclick = () => {
       if (state.sessionState.currentIndex > 0) { 
@@ -1131,21 +1243,27 @@
 
     document.getElementById('btn-reveal').onclick = () => {
       const activeDeck = getActiveCompositeDeck();
-      if (activeDeck) {
-        const idx = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order[state.sessionState.currentIndex] : state.sessionState.currentIndex;
-        const q = activeDeck.questions[idx];
+      if (!activeDeck || !activeDeck.questions.length) return;
+      const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+      const qPointer = state.sessionState.currentIndex || 0;
+      const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+      const q = activeDeck.questions[idx];
+      if (q) {
         handleSelectOption(q, q.correctAnswer || 'A');
       }
     };
 
     document.getElementById('btn-flag').onclick = () => {
       const activeDeck = getActiveCompositeDeck();
-      if (!activeDeck) return;
-      const idx = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order[state.sessionState.currentIndex] : state.sessionState.currentIndex;
+      if (!activeDeck || !activeDeck.questions.length) return;
+      const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+      const qPointer = state.sessionState.currentIndex || 0;
+      const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
       const q = activeDeck.questions[idx];
+      if (!q) return;
 
-      const parentDeckId = q._parentDeckId;
-      const parentIdx = q._parentIndex;
+      const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+      const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
       state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
       state.userProgress[parentDeckId].flags = state.userProgress[parentDeckId].flags || [];
