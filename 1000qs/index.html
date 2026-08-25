@@ -569,31 +569,45 @@
     }
 
     function initUserCloudSync(userId) {
-      if (!db) return;
-      document.getElementById('sync-dot').classList.remove('hidden');
-      if (syncUnsubscribe) syncUnsubscribe();
+      async function initUserCloudSync(userId) {
+  if (!db) return;
+  document.getElementById('sync-dot').classList.remove('hidden');
+  if (syncUnsubscribe) syncUnsubscribe();
 
-      const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
+  const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
 
-      syncUnsubscribe = userDocRef.onSnapshot((doc) => {
-        if (doc.exists) {
-          const cloudData = doc.data();
-          const thousandData = cloudData.thousand_qs_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
-          if (thousandData) {
-            if (thousandData.userProgress) {
-              state.userProgress = { ...state.userProgress, ...thousandData.userProgress };
-            }
-            if (thousandData.card_states) {
-              applyCloudCardStates(thousandData.card_states);
-            }
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
-            render();
-          }
-        } else {
-          pushStateToCloud();
-        }
-      });
+  // 1. Check legacy collection 'users_1000q' if not migrated yet
+  try {
+    const legacySnap = await db.collection('users_1000q').doc(userId).get();
+    if (legacySnap.exists && legacySnap.data().userProgress) {
+      const legacyProgress = legacySnap.data().userProgress;
+      state.userProgress = { ...legacyProgress, ...state.userProgress };
+      pushStateToCloud(); // Migrate to shared doc
     }
+  } catch (e) {
+    console.warn("Legacy check:", e);
+  }
+
+  // 2. Listen to shared doc
+  syncUnsubscribe = userDocRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      const cloudData = doc.data();
+      const thousandData = cloudData.thousand_qs_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
+      if (thousandData) {
+        if (thousandData.userProgress) {
+          state.userProgress = { ...state.userProgress, ...thousandData.userProgress };
+        }
+        if (thousandData.card_states) {
+          applyCloudCardStates(thousandData.card_states);
+        }
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
+        render();
+      }
+    } else {
+      pushStateToCloud();
+    }
+  });
+}
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
