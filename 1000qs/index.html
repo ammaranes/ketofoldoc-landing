@@ -36,7 +36,6 @@
           <i data-lucide="layers" class="w-5 h-5"></i>
         </button>
 
-        <!-- Clickable Logo returning to Main Portal -->
         <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
           <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
         </a>
@@ -162,7 +161,7 @@
       </div>
     </div>
 
-    <!-- Navigation Footer (Fixed at bottom across all screens) -->
+    <!-- Navigation Footer -->
     <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl">
       <div class="max-w-3xl mx-auto px-4">
         <div class="flex items-center justify-between space-x-3 mb-2">
@@ -240,8 +239,6 @@
       </div>
 
       <div class="overflow-y-auto p-4 space-y-4 flex-1">
-        
-        <!-- Ecosystem Switcher Section -->
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
             KetofolDoc Platforms
@@ -373,9 +370,7 @@
       if (Array.isArray(q.options)) {
         return q.options.map((opt, i) => {
           const defaultLetter = String.fromCharCode(65 + i);
-          if (typeof opt === 'string') {
-            return { key: defaultLetter, text: opt };
-          }
+          if (typeof opt === 'string') return { key: defaultLetter, text: opt };
           if (opt && typeof opt === 'object') {
             return {
               key: opt.label || opt.key || opt.letter || defaultLetter,
@@ -487,29 +482,29 @@
       }
     };
 
-    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedProgress) {
-      try { 
-        state.userProgress = JSON.parse(savedProgress);
-        sanitizeUserProgress(state.userProgress);
-      } catch (e) {}
-    }
-
-    // 🧹 Auto-Purge Sanitizer: Removes ghost/unattempted SRS entries caused by legacy ID collisions
-    function sanitizeUserProgress(prog) {
+    // 🧹 Strict Data Purge: Eliminates ghost copies where no answer was ever submitted
+    function purgeGhostProgress(prog) {
       if (!prog || typeof prog !== 'object') return;
       Object.entries(prog).forEach(([deckId, deckProg]) => {
         if (!deckProg || typeof deckProg !== 'object') return;
         const answers = deckProg.answers || {};
         const srs = deckProg.srs || {};
+        
         Object.keys(srs).forEach(idxStr => {
-          const srsObj = srs[idxStr];
-          // Strip entry if the question was never answered AND has no review repetitions
-          if (answers[idxStr] === undefined && (!srsObj || !srsObj.repetitions || srsObj.repetitions === 0)) {
+          // If the question is not recorded in your actual answers, it is a ghost copy and must be purged
+          if (answers[idxStr] === undefined) {
             delete srs[idxStr];
           }
         });
       });
+    }
+
+    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedProgress) {
+      try { 
+        state.userProgress = JSON.parse(savedProgress);
+        purgeGhostProgress(state.userProgress);
+      } catch (e) {}
     }
 
     // --- Virtual Composite Deck Generator ---
@@ -550,7 +545,7 @@
       };
     }
 
-    // Calculate Active Due Question Indices (Only questions that have been genuinely studied)
+    // Strict Due Indices: ONLY questions with real answer history and mature due date
     function getDueIndices(activeDeck) {
       if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
       const now = new Date();
@@ -563,21 +558,17 @@
         const answers = parentProgress.answers || {};
         const srs = (parentProgress.srs || {})[parentIdx];
 
-        // STRICT FILTER:
-        // 1. Must have an SRS record with a valid dueDate <= now
-        // 2. Must either have been answered in session OR have completed at least 1 SRS review repetition
-        if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
-          const isGenuinelyStudied = answers[parentIdx] !== undefined || (srs.repetitions && srs.repetitions > 0);
-          if (isGenuinelyStudied) {
-            dueIndices.push(idx);
-          }
+        // 1. Must be answered previously by the user
+        // 2. Must have valid SRS interval whose due date has arrived
+        if (answers[parentIdx] !== undefined && srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+          dueIndices.push(idx);
         }
       });
 
       return dueIndices;
     }
 
-    // Compile Card States with Namespace (ch_XX_idx) to guarantee zero collisions across chapters
+    // Compile Namespaced Card States (ch_XX_idx)
     function compileCardStates() {
       const cardStates = {};
       Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
@@ -588,8 +579,9 @@
         Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
           if (!srsObj || typeof srsObj !== 'object') return;
           const idx = parseInt(idxStr, 10);
-          // Only sync cards that were actually studied
-          if (answers[idx] === undefined && (!srsObj.repetitions || srsObj.repetitions === 0)) return;
+          
+          // Strict: only compile for genuinely answered cards
+          if (answers[idx] === undefined) return;
 
           const namespacedId = `${deckId}_${idx}`;
           cardStates[namespacedId] = {
@@ -604,7 +596,7 @@
       return cardStates;
     }
 
-    // Apply Namespaced SRS Updates from Cloud
+    // Apply Namespaced SRS Updates from Cloud (Ignores legacy generic IDs "1", "2")
     function applyCloudCardStates(cloudCardStates) {
       if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
       Object.entries(state.decks).forEach(([deckId, deck]) => {
@@ -628,7 +620,6 @@
       });
     }
 
-    // Deep merge progress objects
     function mergeUserProgress(localProg, remoteProg) {
       if (!remoteProg) return localProg || {};
       const merged = { ...(localProg || {}) };
@@ -644,7 +635,7 @@
           };
         }
       });
-      sanitizeUserProgress(merged);
+      purgeGhostProgress(merged);
       return merged;
     }
 
@@ -689,11 +680,10 @@
 
       const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
 
-      // Listen to shared doc
       syncUnsubscribe = userDocRef.onSnapshot((doc) => {
         if (doc.exists) {
           const cloudData = doc.data();
-          const thousandData = cloudData.thousand_qs_progress || (cloudData.userProgress ? { userProgress: cloudData.userProgress } : null);
+          const thousandData = cloudData.thousand_qs_progress;
           if (thousandData) {
             if (thousandData.userProgress) {
               state.userProgress = mergeUserProgress(state.userProgress, thousandData.userProgress);
@@ -701,7 +691,7 @@
             if (thousandData.card_states) {
               applyCloudCardStates(thousandData.card_states);
             }
-            sanitizeUserProgress(state.userProgress);
+            purgeGhostProgress(state.userProgress);
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
             render();
           }
@@ -713,7 +703,7 @@
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
-      sanitizeUserProgress(state.userProgress);
+      purgeGhostProgress(state.userProgress);
       db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
         thousand_qs_progress: {
           userProgress: state.userProgress,
@@ -724,14 +714,14 @@
     }
 
     function saveState() {
-      sanitizeUserProgress(state.userProgress);
+      purgeGhostProgress(state.userProgress);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
       render();
       pushStateToCloud();
     }
 
     // ==========================================
-    // 🔍 GLOBAL FULL-TEXT SEARCH ENGINE
+    // 🔍 GLOBAL SEARCH
     // ==========================================
     const searchModal = document.getElementById('modal-search');
     const searchInput = document.getElementById('search-input');
@@ -851,7 +841,6 @@
       });
     }
 
-    // Search Listeners
     document.getElementById('btn-search').onclick = openSearchModal;
     document.getElementById('btn-close-search').onclick = closeSearchModal;
 
@@ -881,7 +870,7 @@
       }
     });
 
-    // --- Shuffle & SRS Modes ---
+    // --- Modes ---
     function generateShuffledIndices(length) {
       const arr = Array.from({ length }, (_, i) => i);
       for (let i = arr.length - 1; i > 0; i--) {
@@ -922,7 +911,7 @@
         const dueIndices = getDueIndices(activeDeck);
 
         if (dueIndices.length === 0) {
-          alert('🎉 Excellent! No questions are due for review across the selected chapters today.');
+          alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
           state.sessionState.isSRSMode = false;
           state.sessionState.order = [];
           state.sessionState.currentIndex = 0;
@@ -938,7 +927,6 @@
       saveState();
     }
 
-    // Advance Navigation Handler
     function handleNextNavigation() {
       const activeDeck = getActiveCompositeDeck();
       if (!activeDeck || !activeDeck.questions.length) return;
@@ -1017,7 +1005,6 @@
       const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
       const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
-      // Update Header
       document.getElementById('deck-title').textContent = activeDeck.title;
       
       let answeredCount = 0;
@@ -1038,7 +1025,6 @@
       const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
       document.getElementById('score-badge').textContent = `Accuracy: ${acc}%`;
 
-      // Shuffle & SRS Buttons / Tags
       const shuffleBtn = document.getElementById('btn-shuffle');
       const shuffleTag = document.getElementById('shuffle-mode-tag');
       const srsBtn = document.getElementById('btn-srs-filter');
@@ -1064,7 +1050,6 @@
         document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${totalQ}`;
       }
 
-      // Stem Text & Stem Image
       document.getElementById('question-stem').textContent = q.stem || q.question || q.text || '';
       const stemImgContainer = document.getElementById('stem-image-container');
       const stemImg = document.getElementById('stem-image');
@@ -1077,7 +1062,6 @@
         stemImgContainer.classList.add('hidden');
       }
 
-      // Flag state
       const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
       const isFlagged = (parentProgress.flags || []).includes(parentIdx);
       const flagBtn = document.getElementById('btn-flag');
@@ -1085,12 +1069,10 @@
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Clean test slate during active SRS review sessions
       const selectedAnswer = state.sessionState.isSRSMode 
         ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
         : ((parentProgress.answers || {})[parentIdx]);
 
-      // Render Options
       const optionsContainer = document.getElementById('options-container');
       optionsContainer.innerHTML = '';
       const normalizedOpts = getNormalizedOptions(q);
@@ -1110,7 +1092,6 @@
         optionsContainer.appendChild(btn);
       });
 
-      // Explanation & Rationale Box
       const expBox = document.getElementById('explanation-box');
       const expImgContainer = document.getElementById('explanation-images-container');
       const expText = q.explanation || q.rationale || '';
@@ -1122,7 +1103,6 @@
           <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
         `;
 
-        // Update SRS Status Tag
         const srsData = (parentProgress.srs || {})[parentIdx];
         const srsTagStatus = document.getElementById('srs-status-tag');
         if (srsTagStatus) {
@@ -1136,7 +1116,6 @@
           }
         }
 
-        // Render explanation figures if present
         const expImages = q.explanationImages || q.explanation_images || [];
         if (Array.isArray(expImages) && expImages.length > 0) {
           expImgContainer.innerHTML = '';
@@ -1157,7 +1136,6 @@
         expBox.classList.add('hidden');
       }
 
-      // Update Navigation Buttons (Next / Prev States)
       const prevBtn = document.getElementById('btn-prev');
       const nextBtn = document.getElementById('btn-next');
       if (prevBtn) {
@@ -1190,7 +1168,6 @@
       saveState();
     }
 
-    // Handle SRS Recall Ratings with Auto-Progression
     window.rateRecall = (rating) => {
       const activeDeck = getActiveCompositeDeck();
       if (!activeDeck || !activeDeck.questions.length) return;
@@ -1214,7 +1191,6 @@
       }
     };
 
-    // Render the Multi-Select Chapter List with Checkboxes
     function renderDeckList() {
       const list = document.getElementById('deck-list');
       list.innerHTML = '';
@@ -1282,7 +1258,6 @@
       lucide.createIcons();
     }
 
-    // Multi-Select Button Handlers
     document.getElementById('btn-select-all').onclick = () => {
       Object.keys(state.decks).forEach(k => state.selectedDeckKeys.add(k));
       renderDeckList();
@@ -1304,7 +1279,6 @@
       document.getElementById('modal-decks').classList.add('hidden');
     };
 
-    // Navigation Events
     document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
     document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
     document.getElementById('btn-next').onclick = handleNextNavigation;
@@ -1348,13 +1322,11 @@
       saveState();
     };
 
-    // Modal Events
     document.getElementById('btn-menu').onclick = () => { renderDeckList(); document.getElementById('modal-decks').classList.remove('hidden'); };
     document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
     document.getElementById('btn-auth-modal').onclick = () => document.getElementById('modal-auth').classList.remove('hidden');
     document.getElementById('btn-close-auth-modal').onclick = () => document.getElementById('modal-auth').classList.add('hidden');
 
-    // Google Sign-In / Sign-Out Handlers
     document.getElementById('btn-google-login').onclick = () => {
       if (!auth) return;
       const provider = new firebase.auth.GoogleAuthProvider();
