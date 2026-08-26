@@ -446,7 +446,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     // Unified Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
@@ -1419,6 +1419,98 @@
         item.className = `p-3.5 rounded-xl border flex items-center justify-between transition cursor-pointer select-none ${
           isCurrent ? 'bg-purple-600/15 border-purple-500/60 text-purple-200' : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
         }`;
+        // --- 💬 Automatic Feedback Engine ---
+function captureSummaryContext() {
+  const book = getActiveBook();
+  const ch = getActiveChapter();
+
+  if (!ch) {
+    return {
+      pageType: "summaries_directory",
+      bookTitle: book?.title || "Miller's Anesthesia",
+      chapterNumber: null,
+      chapterTitle: "Chapter Directory View"
+    };
+  }
+
+  return {
+    pageType: "summaries_reader",
+    bookTitle: book.title,
+    chapterNumber: ch.chapterNumber,
+    chapterId: ch.id,
+    chapterTitle: ch.title,
+    sectionsCount: (ch.sections || []).length
+  };
+}
+
+const feedbackModal = document.getElementById('modal-feedback');
+const feedbackContextBadge = document.getElementById('feedback-context-badge');
+const feedbackContextSummary = document.getElementById('feedback-context-summary');
+const feedbackComment = document.getElementById('feedback-comment');
+const feedbackStatusMsg = document.getElementById('feedback-status-msg');
+
+document.getElementById('btn-feedback-trigger').onclick = () => {
+  const ctx = captureSummaryContext();
+  feedbackModal.classList.remove('hidden');
+  feedbackComment.value = '';
+  feedbackStatusMsg.classList.add('hidden');
+
+  if (ctx.chapterNumber) {
+    feedbackContextBadge.textContent = `Chapter ${ctx.chapterNumber}`;
+    feedbackContextSummary.textContent = `${ctx.bookTitle}: ${ctx.chapterTitle}`;
+  } else {
+    feedbackContextBadge.textContent = "All Chapters";
+    feedbackContextSummary.textContent = `${ctx.bookTitle} Summary Directory`;
+  }
+  lucide.createIcons();
+};
+
+document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
+document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
+
+document.getElementById('btn-submit-feedback').onclick = async () => {
+  const comment = feedbackComment.value.trim();
+  if (!comment) {
+    alert("Please write your comment before submitting.");
+    return;
+  }
+
+  const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "General";
+  const context = captureSummaryContext();
+  const submitBtn = document.getElementById('btn-submit-feedback');
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  try {
+    if (db) {
+      await addDoc(collection(db, 'feedback'), {
+        timestamp: new Date().toISOString(),
+        userId: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        userName: currentUser?.displayName || "Guest Doctor",
+        url: window.location.href,
+        category,
+        message: comment,
+        context
+      });
+    }
+    feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
+    feedbackStatusMsg.textContent = "✓ Thank you! Your suggestion for this chapter has been submitted.";
+    setTimeout(() => {
+      feedbackModal.classList.add('hidden');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
+      lucide.createIcons();
+    }, 1500);
+  } catch (err) {
+    console.error("Feedback submit error:", err);
+    feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
+    feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = `<span>Send Feedback</span>`;
+  }
+};
 
         item.innerHTML = `
           <div class="min-w-0 flex-1 pr-2">
