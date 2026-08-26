@@ -37,7 +37,6 @@
           <i data-lucide="layers" class="w-5 h-5"></i>
         </button>
         
-        <!-- Clickable Logo returning to Main Portal -->
         <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
           <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
         </a>
@@ -332,7 +331,7 @@
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#5.84" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
           <span>Continue with Google</span>
@@ -357,9 +356,97 @@
     </div>
   </div>
 
+  <!-- 💬 Floating Feedback Trigger Button -->
+  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
+    <i data-lucide="message-square-plus" class="w-4 h-4 text-blue-400"></i>
+    <span class="hidden sm:inline">Feedback</span>
+  </button>
+
+  <!-- 📝 Context-Aware Feedback Modal -->
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-100">Feedback & Suggestions</h3>
+            <p class="text-[11px] text-slate-400">Help improve accuracy and platform features</p>
+          </div>
+        </div>
+        <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="overflow-y-auto py-4 space-y-4 flex-1">
+        
+        <!-- Auto-Detected Context Card -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
+            <span class="flex items-center">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-blue-400"></i> Auto-Detected Context
+            </span>
+            <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Page Context</span>
+          </div>
+          <div id="feedback-context-summary" class="text-xs text-slate-200 line-clamp-2 leading-relaxed font-mono">
+            Detecting current location...
+          </div>
+        </div>
+
+        <!-- Feedback Type Selector -->
+        <div>
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Content Error / Typo</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Answer / Rationale</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Suggestion</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Bug Report</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- User Comment Input -->
+        <div>
+          <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
+          <textarea id="feedback-comment" rows="4" placeholder="Describe the error, suggested change, or thought..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+        </div>
+
+        <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
+        <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+          Cancel
+        </button>
+        <button id="btn-submit-feedback" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-blue-600/20">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Send Feedback</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ES6 Application Logic -->
   <script type="module">
-    import { allDecks } from './decks/index.js';
+    import { allDecks } from './decks/index.js';[cite: 1]
 
     // 🛠️ Formatting Helper
     function formatMarkdown(text) {
@@ -412,7 +499,7 @@
 
     // Build Decks Map from allDecks
     const DECKS = {};
-    (allDecks || []).forEach(d => {
+    (allDecks || []).forEach(d => {[cite: 1]
       DECKS[d.id] = d;
     });
 
@@ -453,28 +540,27 @@
       }
     };
 
-    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedProgress) {
-      try { 
-        state.userProgress = JSON.parse(savedProgress);
-        sanitizeUserProgress(state.userProgress);
-      } catch (e) {}
-    }
-
-    // 🧹 Auto-Purge Sanitizer: Removes ghost SRS entries
-    function sanitizeUserProgress(prog) {
+    // 🧹 Strict Data Purge: Eliminates ghost copies where no answer was ever submitted
+    function purgeGhostProgress(prog) {
       if (!prog || typeof prog !== 'object') return;
       Object.entries(prog).forEach(([deckId, deckProg]) => {
         if (!deckProg || typeof deckProg !== 'object') return;
         const answers = deckProg.answers || {};
         const srs = deckProg.srs || {};
         Object.keys(srs).forEach(idxStr => {
-          const srsObj = srs[idxStr];
-          if (answers[idxStr] === undefined && (!srsObj || !srsObj.repetitions || srsObj.repetitions === 0)) {
+          if (answers[idxStr] === undefined) {
             delete srs[idxStr];
           }
         });
       });
+    }
+
+    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedProgress) {
+      try { 
+        state.userProgress = JSON.parse(savedProgress);
+        purgeGhostProgress(state.userProgress);
+      } catch (e) {}
     }
 
     // --- Virtual Composite Deck Generator ---
@@ -515,7 +601,7 @@
       };
     }
 
-    // Calculate Active Due Question Indices (Only questions that have been genuinely studied)
+    // Calculate Active Due Question Indices (Strict: genuine attempts only)
     function getDueIndices(activeDeck) {
       if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
       const now = new Date();
@@ -528,11 +614,8 @@
         const answers = parentProgress.answers || {};
         const srs = (parentProgress.srs || {})[parentIdx];
 
-        if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
-          const isGenuinelyStudied = answers[parentIdx] !== undefined || (srs.repetitions && srs.repetitions > 0);
-          if (isGenuinelyStudied) {
-            dueIndices.push(idx);
-          }
+        if (answers[parentIdx] !== undefined && srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+          dueIndices.push(idx);
         }
       });
 
@@ -550,7 +633,7 @@
         Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
           if (!srsObj || typeof srsObj !== 'object') return;
           const idx = parseInt(idxStr, 10);
-          if (answers[idx] === undefined && (!srsObj.repetitions || srsObj.repetitions === 0)) return;
+          if (answers[idx] === undefined) return;
 
           const namespacedId = `${deckId}_${idx}`;
           cardStates[namespacedId] = {
@@ -605,7 +688,7 @@
           };
         }
       });
-      sanitizeUserProgress(merged);
+      purgeGhostProgress(merged);
       return merged;
     }
 
@@ -661,7 +744,7 @@
             if (saudiData.card_states) {
               applyCloudCardStates(saudiData.card_states);
             }
-            sanitizeUserProgress(state.userProgress);
+            purgeGhostProgress(state.userProgress);
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
             render();
           }
@@ -673,7 +756,7 @@
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
-      sanitizeUserProgress(state.userProgress);
+      purgeGhostProgress(state.userProgress);
       db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
         saudi_board_progress: {
           userProgress: state.userProgress,
@@ -684,7 +767,7 @@
     }
 
     function saveState() {
-      sanitizeUserProgress(state.userProgress);
+      purgeGhostProgress(state.userProgress);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
       render();
       pushStateToCloud();
@@ -823,10 +906,13 @@
         e.preventDefault();
         openSearchModal();
       }
-      if (e.key === 'Escape' && !searchModal.classList.contains('hidden')) {
-        closeSearchModal();
+      if (e.key === 'Escape') {
+        if (!searchModal.classList.contains('hidden')) closeSearchModal();
+        if (!document.getElementById('modal-feedback').classList.contains('hidden')) document.getElementById('modal-feedback').classList.add('hidden');
       }
-      if (document.activeElement?.tagName !== 'INPUT' && searchModal.classList.contains('hidden')) {
+      
+      const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+      if (!isTyping && searchModal.classList.contains('hidden') && document.getElementById('modal-feedback').classList.contains('hidden')) {
         if (e.key === 'ArrowRight') {
           e.preventDefault();
           document.getElementById('btn-next').click();
@@ -1201,102 +1287,6 @@
             ? 'bg-blue-600/15 border-blue-500/60 text-blue-200' 
             : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
         }`;
-        // --- 💬 Automatic Feedback Engine ---
-function captureCurrentContext() {
-  const activeDeck = getActiveCompositeDeck();
-  const qPointer = state.sessionState.currentIndex || 0;
-  const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
-  const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
-  const q = activeDeck?.questions?.[idx];
-
-  if (!q) {
-    return {
-      pageType: "saudi_qb",
-      deckTitle: activeDeck?.title || "Saudi Board QB",
-      questionNumber: null
-    };
-  }
-
-  return {
-    pageType: "saudi_qb",
-    deckTitle: activeDeck.title,
-    questionNumber: qPointer + 1,
-    questionId: q._parentDeckId ? `${q._parentDeckId}_${q._parentIndex}` : (q.id || null),
-    stem: q.stem || q.question || "",
-    options: q.options || {},
-    correctAnswer: q.correctAnswer || "A",
-    explanation: q.explanation || ""
-  };
-}
-
-const feedbackModal = document.getElementById('modal-feedback');
-const feedbackContextBadge = document.getElementById('feedback-context-badge');
-const feedbackContextSummary = document.getElementById('feedback-context-summary');
-const feedbackComment = document.getElementById('feedback-comment');
-const feedbackStatusMsg = document.getElementById('feedback-status-msg');
-
-document.getElementById('btn-feedback-trigger').onclick = () => {
-  const ctx = captureCurrentContext();
-  feedbackModal.classList.remove('hidden');
-  feedbackComment.value = '';
-  feedbackStatusMsg.classList.add('hidden');
-  
-  if (ctx.questionNumber) {
-    feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
-    feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
-  } else {
-    feedbackContextBadge.textContent = ctx.deckTitle;
-    feedbackContextSummary.textContent = "General module navigation / view";
-  }
-  lucide.createIcons();
-};
-
-document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
-document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
-
-document.getElementById('btn-submit-feedback').onclick = async () => {
-  const comment = feedbackComment.value.trim();
-  if (!comment) {
-    alert("Please write your comment or suggestion before submitting.");
-    return;
-  }
-
-  const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "General";
-  const context = captureCurrentContext();
-  const submitBtn = document.getElementById('btn-submit-feedback');
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
-
-  try {
-    if (db) {
-      await db.collection('feedback').add({
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: currentUser?.uid || "anonymous",
-        userEmail: currentUser?.email || "anonymous",
-        userName: currentUser?.displayName || "Guest Doctor",
-        url: window.location.href,
-        category,
-        message: comment,
-        context
-      });
-    }
-    feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
-    feedbackStatusMsg.textContent = "✓ Thank you! Your feedback and question details have been submitted.";
-    setTimeout(() => {
-      feedbackModal.classList.add('hidden');
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
-      lucide.createIcons();
-    }, 1500);
-  } catch (err) {
-    console.error("Feedback submit error:", err);
-    feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
-    feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = `<span>Send Feedback</span>`;
-  }
-};
         
         item.innerHTML = `
           <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
@@ -1426,95 +1416,105 @@ document.getElementById('btn-submit-feedback').onclick = async () => {
       auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
     };
 
+    // --- 💬 Automatic Feedback Engine ---
+    function captureCurrentContext() {
+      const activeDeck = getActiveCompositeDeck();
+      const qPointer = state.sessionState.currentIndex || 0;
+      const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+      const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+      const q = activeDeck?.questions?.[idx];
+
+      if (!q) {
+        return {
+          pageType: "saudi_qb",
+          deckTitle: activeDeck?.title || "Saudi Board QB",
+          questionNumber: null
+        };
+      }
+
+      return {
+        pageType: "saudi_qb",
+        deckTitle: activeDeck.title,
+        questionNumber: qPointer + 1,
+        questionId: q._parentDeckId ? `${q._parentDeckId}_${q._parentIndex}` : (q.id || null),
+        stem: q.stem || q.question || "",
+        options: q.options || {},
+        correctAnswer: q.correctAnswer || "A",
+        explanation: q.explanation || ""
+      };
+    }
+
+    const feedbackModal = document.getElementById('modal-feedback');
+    const feedbackContextBadge = document.getElementById('feedback-context-badge');
+    const feedbackContextSummary = document.getElementById('feedback-context-summary');
+    const feedbackComment = document.getElementById('feedback-comment');
+    const feedbackStatusMsg = document.getElementById('feedback-status-msg');
+
+    document.getElementById('btn-feedback-trigger').onclick = () => {
+      const ctx = captureCurrentContext();
+      feedbackModal.classList.remove('hidden');
+      feedbackComment.value = '';
+      feedbackStatusMsg.classList.add('hidden');
+      
+      if (ctx.questionNumber) {
+        feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
+        feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
+      } else {
+        feedbackContextBadge.textContent = ctx.deckTitle;
+        feedbackContextSummary.textContent = "General module navigation / view";
+      }
+      lucide.createIcons();
+    };
+
+    document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
+    document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
+
+    document.getElementById('btn-submit-feedback').onclick = async () => {
+      const comment = feedbackComment.value.trim();
+      if (!comment) {
+        alert("Please write your comment or suggestion before submitting.");
+        return;
+      }
+
+      const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "Content Error / Typo";
+      const context = captureCurrentContext();
+      const submitBtn = document.getElementById('btn-submit-feedback');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        if (db) {
+          await db.collection('feedback').add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            userId: currentUser?.uid || "anonymous",
+            userEmail: currentUser?.email || "anonymous",
+            userName: currentUser?.displayName || "Guest Doctor",
+            url: window.location.href,
+            category,
+            message: comment,
+            context
+          });
+        }
+        feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
+        feedbackStatusMsg.textContent = "✓ Thank you! Your feedback and question details have been submitted.";
+        setTimeout(() => {
+          feedbackModal.classList.add('hidden');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
+          lucide.createIcons();
+        }, 1500);
+      } catch (err) {
+        console.error("Feedback submit error:", err);
+        feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
+        feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Send Feedback</span>`;
+      }
+    };
+
     // Initialize UI
     render();
   </script>
-  <!-- 💬 Floating Feedback Button -->
-<button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
-  <i data-lucide="message-square-plus" class="w-4 h-4 text-blue-400"></i>
-  <span class="hidden sm:inline">Feedback</span>
-</button>
-
-<!-- 📝 Context-Aware Feedback Modal -->
-<div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
-    
-    <!-- Modal Header -->
-    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center">
-          <i data-lucide="message-square" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-slate-100">Feedback & Suggestions</h3>
-          <p class="text-[11px] text-slate-400">Help improve accuracy and platform features</p>
-        </div>
-      </div>
-      <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-    </div>
-
-    <!-- Scrollable Body -->
-    <div class="overflow-y-auto py-4 space-y-4 flex-1">
-      
-      <!-- Auto-Detected Context Card -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
-        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
-          <span class="flex items-center">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-blue-400"></i> Auto-Detected Context
-          </span>
-          <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Page Context</span>
-        </div>
-        <div id="feedback-context-summary" class="text-xs text-slate-200 line-clamp-2 leading-relaxed font-mono">
-          Detecting current location...
-        </div>
-      </div>
-
-      <!-- Feedback Type Selector -->
-      <div>
-        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
-        <div class="grid grid-cols-2 gap-2">
-          <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-            <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-            <span>Content Error / Typo</span>
-          </label>
-          <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-            <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-            <span>Answer / Rationale</span>
-          </label>
-          <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-            <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-            <span>Suggestion</span>
-          </label>
-          <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-            <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-            <span>Bug Report</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- User Comment Input -->
-      <div>
-        <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
-        <textarea id="feedback-comment" rows="4" placeholder="Describe the error, suggested change, or thought..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
-      </div>
-
-      <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
-      <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
-        Cancel
-      </button>
-      <button id="btn-submit-feedback" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-blue-600/20">
-        <i data-lucide="send" class="w-3.5 h-3.5"></i>
-        <span>Send Feedback</span>
-      </button>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
