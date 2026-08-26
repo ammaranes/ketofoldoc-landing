@@ -496,22 +496,25 @@
       };
     }
 
-    // Calculate Active Due Question Indices
-    function getDueIndices(activeDeck) {
-      if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
-      const now = new Date();
-      const dueIndices = [];
-      activeDeck.questions.forEach((q, idx) => {
-        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
-        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
-        const parentProgress = state.userProgress[parentDeckId] || {};
-        const srs = (parentProgress.srs || {})[parentIdx];
-        if (!srs || !srs.dueDate || new Date(srs.dueDate) <= now) {
-          dueIndices.push(idx);
-        }
-      });
-      return dueIndices;
+    // Calculate Active Due Question Indices (Only previously studied cards)
+function getDueIndices(activeDeck) {
+  if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+  const now = new Date();
+  const dueIndices = [];
+  activeDeck.questions.forEach((q, idx) => {
+    const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+    const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+    const parentProgress = state.userProgress[parentDeckId] || {};
+    const srs = (parentProgress.srs || {})[parentIdx];
+    
+    // STRICT: Only include questions that have an existing SRS record AND are due today
+    if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+      dueIndices.push(idx);
     }
+  });
+  return dueIndices;
+}
+
 
     // Compile Card States for Ecosystem Aggregation
     function compileCardStates() {
