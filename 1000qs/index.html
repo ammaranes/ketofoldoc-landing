@@ -483,13 +483,33 @@
         order: [],
         isShuffled: false,
         isSRSMode: false,
-        srsSessionAnswers: {} // Tracks fresh answers during active SRS review sessions
+        srsSessionAnswers: {}
       }
     };
 
     const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedProgress) {
-      try { state.userProgress = JSON.parse(savedProgress); } catch (e) {}
+      try { 
+        state.userProgress = JSON.parse(savedProgress);
+        sanitizeUserProgress(state.userProgress);
+      } catch (e) {}
+    }
+
+    // 🧹 Auto-Purge Sanitizer: Removes ghost/unattempted SRS entries caused by legacy ID collisions
+    function sanitizeUserProgress(prog) {
+      if (!prog || typeof prog !== 'object') return;
+      Object.entries(prog).forEach(([deckId, deckProg]) => {
+        if (!deckProg || typeof deckProg !== 'object') return;
+        const answers = deckProg.answers || {};
+        const srs = deckProg.srs || {};
+        Object.keys(srs).forEach(idxStr => {
+          const srsObj = srs[idxStr];
+          // Strip entry if the question was never answered AND has no review repetitions
+          if (answers[idxStr] === undefined && (!srsObj || !srsObj.repetitions || srsObj.repetitions === 0)) {
+            delete srs[idxStr];
+          }
+        });
+      });
     }
 
     // --- Virtual Composite Deck Generator ---
@@ -530,38 +550,49 @@
       };
     }
 
-    // Calculate Active Due Question Indices (Only previously studied cards)
-function getDueIndices(activeDeck) {
-  if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
-  const now = new Date();
-  const dueIndices = [];
-  activeDeck.questions.forEach((q, idx) => {
-    const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
-    const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
-    const parentProgress = state.userProgress[parentDeckId] || {};
-    const srs = (parentProgress.srs || {})[parentIdx];
-    
-    // STRICT: Only include questions that have an existing SRS record AND are due today
-    if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
-      dueIndices.push(idx);
-    }
-  });
-  return dueIndices;
-}
+    // Calculate Active Due Question Indices (Only questions that have been genuinely studied)
+    function getDueIndices(activeDeck) {
+      if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+      const now = new Date();
+      const dueIndices = [];
 
-    // Compile Card States for Ecosystem Aggregation
+      activeDeck.questions.forEach((q, idx) => {
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+        const parentProgress = state.userProgress[parentDeckId] || {};
+        const answers = parentProgress.answers || {};
+        const srs = (parentProgress.srs || {})[parentIdx];
+
+        // STRICT FILTER:
+        // 1. Must have an SRS record with a valid dueDate <= now
+        // 2. Must either have been answered in session OR have completed at least 1 SRS review repetition
+        if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+          const isGenuinelyStudied = answers[parentIdx] !== undefined || (srs.repetitions && srs.repetitions > 0);
+          if (isGenuinelyStudied) {
+            dueIndices.push(idx);
+          }
+        }
+      });
+
+      return dueIndices;
+    }
+
+    // Compile Card States with Namespace (ch_XX_idx) to guarantee zero collisions across chapters
     function compileCardStates() {
       const cardStates = {};
       Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
         if (!deckProg) return;
         const srsMap = deckProg.srs || {};
-        const deck = state.decks[deckId];
+        const answers = deckProg.answers || {};
+
         Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
           if (!srsObj || typeof srsObj !== 'object') return;
           const idx = parseInt(idxStr, 10);
-          const q = deck?.questions?.[idx];
-          const qId = q?.id || `${deckId}_${idx}`;
-          cardStates[qId] = {
+          // Only sync cards that were actually studied
+          if (answers[idx] === undefined && (!srsObj.repetitions || srsObj.repetitions === 0)) return;
+
+          const namespacedId = `${deckId}_${idx}`;
+          cardStates[namespacedId] = {
             reps: srsObj.repetitions || srsObj.reps || 0,
             interval: srsObj.interval || 0,
             easeFactor: srsObj.easeFactor || 2.5,
@@ -573,15 +604,16 @@ function getDueIndices(activeDeck) {
       return cardStates;
     }
 
-    // Apply Cross-Platform SRS Updates from Cloud
+    // Apply Namespaced SRS Updates from Cloud
     function applyCloudCardStates(cloudCardStates) {
       if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
       Object.entries(state.decks).forEach(([deckId, deck]) => {
         if (!deck.questions) return;
         deck.questions.forEach((q, idx) => {
-          const qId = q.id || `${deckId}_${idx}`;
-          if (cloudCardStates[qId]) {
-            const c = cloudCardStates[qId];
+          const namespacedId = `${deckId}_${idx}`;
+          const c = cloudCardStates[namespacedId];
+
+          if (c) {
             state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
             state.userProgress[deckId].srs = state.userProgress[deckId].srs || {};
             state.userProgress[deckId].srs[idx] = {
@@ -612,6 +644,7 @@ function getDueIndices(activeDeck) {
           };
         }
       });
+      sanitizeUserProgress(merged);
       return merged;
     }
 
@@ -656,19 +689,7 @@ function getDueIndices(activeDeck) {
 
       const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
 
-      // 1. Check legacy collection 'users_1000q' if not migrated yet
-      try {
-        const legacySnap = await db.collection('users_1000q').doc(userId).get();
-        if (legacySnap.exists && legacySnap.data().userProgress) {
-          const legacyProgress = legacySnap.data().userProgress;
-          state.userProgress = mergeUserProgress(state.userProgress, legacyProgress);
-          pushStateToCloud();
-        }
-      } catch (e) {
-        console.warn("Legacy check:", e);
-      }
-
-      // 2. Listen to shared doc
+      // Listen to shared doc
       syncUnsubscribe = userDocRef.onSnapshot((doc) => {
         if (doc.exists) {
           const cloudData = doc.data();
@@ -680,6 +701,7 @@ function getDueIndices(activeDeck) {
             if (thousandData.card_states) {
               applyCloudCardStates(thousandData.card_states);
             }
+            sanitizeUserProgress(state.userProgress);
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
             render();
           }
@@ -691,6 +713,7 @@ function getDueIndices(activeDeck) {
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
+      sanitizeUserProgress(state.userProgress);
       db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
         thousand_qs_progress: {
           userProgress: state.userProgress,
@@ -701,6 +724,7 @@ function getDueIndices(activeDeck) {
     }
 
     function saveState() {
+      sanitizeUserProgress(state.userProgress);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
       render();
       pushStateToCloud();
@@ -857,7 +881,7 @@ function getDueIndices(activeDeck) {
       }
     });
 
-    // --- Shuffle & SRS Modes across Active Pool ---
+    // --- Shuffle & SRS Modes ---
     function generateShuffledIndices(length) {
       const arr = Array.from({ length }, (_, i) => i);
       for (let i = arr.length - 1; i > 0; i--) {
@@ -892,7 +916,7 @@ function getDueIndices(activeDeck) {
 
       state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
       state.sessionState.isShuffled = false;
-      state.sessionState.srsSessionAnswers = {}; // Fresh active recall session
+      state.sessionState.srsSessionAnswers = {};
 
       if (state.sessionState.isSRSMode) {
         const dueIndices = getDueIndices(activeDeck);
@@ -926,7 +950,6 @@ function getDueIndices(activeDeck) {
         state.sessionState.currentIndex++;
         saveState();
       } else {
-        // At the end of the active queue
         if (state.sessionState.isSRSMode) {
           const stillDue = getDueIndices(activeDeck);
           if (stillDue.length > 0 && !arraysEqual(stillDue, state.sessionState.order)) {
@@ -982,7 +1005,6 @@ function getDueIndices(activeDeck) {
       const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
       const activeTotal = hasCustomOrder ? state.sessionState.order.length : totalQ;
 
-      // Safe index clamping
       if (state.sessionState.currentIndex >= activeTotal) {
         state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
       }
@@ -1063,7 +1085,7 @@ function getDueIndices(activeDeck) {
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Determine Selected Answer: Clean slate during SRS Mode until user selects/reveals
+      // Clean test slate during active SRS review sessions
       const selectedAnswer = state.sessionState.isSRSMode 
         ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
         : ((parentProgress.answers || {})[parentIdx]);
