@@ -70,7 +70,7 @@
     <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
       <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-medium mb-3">
         <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
-        <span>Unified Board Preparation & Analytics</span>
+        <span>Unified Anesthesia Board Ecosystem</span>
       </div>
       <h1 class="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight sm:leading-tight mb-3">
         Precision Anesthesia <br class="hidden sm:inline" />
@@ -79,7 +79,7 @@
         </span>
       </h1>
       <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl mx-auto">
-        Track spaced repetition mastery across question banks and textbook summaries in real-time.
+        Empowering clinical residents and candidates with structured active recall, SM-2 spaced repetition, and synced textbook analytics.
       </p>
     </div>
 
@@ -192,106 +192,244 @@
     </section>
 
     <!-- 🌐 3-PLATFORM INTERACTIVE CARDS GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+    <section class="mb-14">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-base sm:text-lg font-bold text-slate-100 flex items-center">
+          <i data-lucide="layout-grid" class="w-4 h-4 mr-2 text-blue-400"></i>
+          Active Study Platforms
+        </h2>
+        <span class="text-xs text-slate-500">Choose a platform to begin</span>
+      </div>
 
-      <!-- Platform 1: Saudi Board QB -->
-      <a href="/saudi/" class="bg-slate-900/80 border border-slate-800 hover:border-blue-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-blue-950/40 cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between mb-5">
-            <div class="w-12 h-12 rounded-2xl bg-blue-950/70 border border-blue-800/60 text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-              <i data-lucide="award" class="w-6 h-6"></i>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+
+        <!-- Platform 1: Saudi Board QB -->
+        <a href="/saudi/" class="bg-slate-900/80 border border-slate-800 hover:border-blue-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-blue-950/40 cursor-pointer">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-blue-950/70 border border-blue-800/60 text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
+                <i data-lucide="award" class="w-6 h-6"></i>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 border border-blue-800/60 px-2.5 py-1 rounded-lg">
+                Saudi Board
+              </span>
             </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 border border-blue-800/60 px-2.5 py-1 rounded-lg">
-              Saudi Board
-            </span>
-          </div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition">
-            Saudi Board QB
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-            9 subspecialty question banks with verified textbook citations, custom sessions, and SM-2 spaced repetition.
-          </p>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition">
+              Saudi Board QB
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+              9 subspecialty question banks with verified textbook citations, custom composite sessions, and SM-2 spaced repetition.
+            </p>
 
-          <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-            <span class="text-slate-500">Progress:</span>
-            <span id="card-stat-saudi" class="font-bold text-blue-300">-- Questions Active</span>
-          </div>
-        </div>
-
-        <div class="w-full py-3 bg-blue-600 group-hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-blue-600/20">
-          <span>Launch Question Bank</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-        </div>
-      </a>
-
-      <!-- Platform 2: 1000 Anesthesia Questions -->
-      <a href="/1000qs/" class="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-emerald-950/40 cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between mb-5">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-              <i data-lucide="book-open" class="w-6 h-6"></i>
+            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
+              <span class="text-slate-500">Progress:</span>
+              <span id="card-stat-saudi" class="font-bold text-blue-300">-- Questions Active</span>
             </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-lg">
-              1,002 Qs
-            </span>
           </div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-300 transition">
-            1000 Questions
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-            21 chapter review modules from Lippincott's Anesthesia with integrated clinical figures, explanations, and recall testing.
-          </p>
 
-          <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-            <span class="text-slate-500">Progress:</span>
-            <span id="card-stat-1000" class="font-bold text-emerald-300">-- Questions Active</span>
+          <div class="w-full py-3 bg-blue-600 group-hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-blue-600/20">
+            <span>Launch Question Bank</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
           </div>
-        </div>
+        </a>
 
-        <div class="w-full py-3 bg-emerald-600 group-hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-emerald-600/20">
-          <span>Launch Practice</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-        </div>
-      </a>
-
-      <!-- Platform 3: Miller Chapter Summaries -->
-      <a href="/summaries/" class="bg-slate-900/80 border border-slate-800 hover:border-purple-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-purple-950/40 cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between mb-5">
-            <div class="w-12 h-12 rounded-2xl bg-purple-950/70 border border-purple-800/60 text-purple-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-              <i data-lucide="file-text" class="w-6 h-6"></i>
+        <!-- Platform 2: 1000 Anesthesia Questions -->
+        <a href="/1000qs/" class="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-emerald-950/40 cursor-pointer">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
+                <i data-lucide="book-open" class="w-6 h-6"></i>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-lg">
+                1,002 Qs
+              </span>
             </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 border border-purple-800/60 px-2.5 py-1 rounded-lg">
-              Summaries
-            </span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-300 transition">
+              1000 Questions
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+              21 chapter review modules from Lippincott's Anesthesia with integrated clinical figures, explanations, and recall testing.
+            </p>
+
+            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
+              <span class="text-slate-500">Progress:</span>
+              <span id="card-stat-1000" class="font-bold text-emerald-300">-- Questions Active</span>
+            </div>
           </div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-purple-300 transition">
-            Chapter Summaries
+
+          <div class="w-full py-3 bg-emerald-600 group-hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-emerald-600/20">
+            <span>Launch Practice</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
+          </div>
+        </a>
+
+        <!-- Platform 3: Miller Chapter Summaries -->
+        <a href="/summaries/" class="bg-slate-900/80 border border-slate-800 hover:border-purple-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-purple-950/40 cursor-pointer">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-purple-950/70 border border-purple-800/60 text-purple-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
+                <i data-lucide="file-text" class="w-6 h-6"></i>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 border border-purple-800/60 px-2.5 py-1 rounded-lg">
+                Summaries
+              </span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-purple-300 transition">
+              Chapter Summaries
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+              High-yield Miller's Anesthesia textbook summaries with continuous typography, tables, and live synced recall questions.
+            </p>
+
+            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
+              <span class="text-slate-500">Progress:</span>
+              <span id="card-stat-summaries" class="font-bold text-purple-300">-- Chapters Read</span>
+            </div>
+          </div>
+
+          <div class="w-full py-3 bg-purple-600 group-hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
+            <span>Read Summaries</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- 🔗 SYNERGISTIC INTEGRATION: SUMMARIES TO QUESTION BANKS -->
+    <section class="border-t border-slate-800/80 pt-12 mb-14">
+      <div class="bg-gradient-to-br from-slate-900 via-slate-900/90 to-purple-950/30 border border-purple-900/40 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-3xl mb-8">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-800/60 text-purple-300 text-xs font-semibold mb-3">
+            <i data-lucide="link-2" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>Subject-Mapped Question Bank Synergy</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mb-3">
+            How Summaries Connect Directly to Practice Questions
           </h2>
-          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-            High-yield Miller's Anesthesia textbook summaries with continuous typography, tables, and live synced recall questions.
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Reading comprehensive textbook material is only the first step. KetofolDoc bridges reading with retention through automated, subject-level topic mapping that links each summary chapter directly into our curated question banks.
           </p>
+        </div>
 
-          <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-            <span class="text-slate-500">Progress:</span>
-            <span id="card-stat-summaries" class="font-bold text-purple-300">-- Chapters Read</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center space-x-2 text-purple-400 font-bold text-xs uppercase tracking-wider mb-2">
+                <span class="w-6 h-6 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-[11px] text-purple-300">1</span>
+                <span>Subspecialty Indexing</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Every <em>Miller's Anesthesia</em> chapter is indexed across clinical domains (e.g., Neuroanesthesia, Cardiac, Obstetric, Regional, Pharmacology, Mechanical Ventilation).
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-[11px] text-emerald-300">2</span>
+                <span>Immediate Micro-Testing</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                At the conclusion of each summary chapter, the engine dynamically generates up to 8 high-yield questions matching that specific subject from Saudi Board QB and 1000 Questions.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center space-x-2 text-blue-400 font-bold text-xs uppercase tracking-wider mb-2">
+                <span class="w-6 h-6 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-[11px] text-blue-300">3</span>
+                <span>Bidirectional SRS Sync</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Rating your recall within a summary chapter instantly updates the flashcard interval inside the standalone question banks and writes to your unified cloud progress.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 🌟 PLATFORM VISION & ARCHITECTURE SECTION -->
+    <section class="border-t border-slate-800/80 pt-12 mb-12">
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full">
+          Platform Architecture
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mt-3 mb-3">
+          Our Vision for Anesthesia Education
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          KetofolDoc was designed to eliminate fragmented studying by bridging comprehensive clinical textbook literature with cognitive active recall and real-time retention tracking.
+        </p>
+      </div>
+
+      <!-- 4 Vision Pillar Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center mb-4">
+              <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-100 mb-2">Spaced Repetition (SM-2 Engine)</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Active memory retrieval dynamically schedules future question reviews based on recall quality (Again, Hard, Good, Easy), flattening the clinical forgetting curve.
+            </p>
           </div>
         </div>
 
-        <div class="w-full py-3 bg-purple-600 group-hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
-          <span>Read Summaries</span>
-          <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center mb-4">
+              <i data-lucide="check-check" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-100 mb-2">Curated High-Yield Content</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Over 1,450 verified questions sourced from Saudi Board subspecialties and Lippincott's review modules with complete textbook rationales, figures, and pharmacology tables.
+            </p>
+          </div>
         </div>
-      </a>
 
-    </div>
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-purple-950/80 border border-purple-800/60 text-purple-400 flex items-center justify-center mb-4">
+              <i data-lucide="book-open-check" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-100 mb-2">Textbook Synthesis & Micro-Testing</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              High-yield summaries of <em>Miller's Anesthesia</em> chapters paired with embedded recall questions that update your global flashcard queue in real-time as you read.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center mb-4">
+              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-100 mb-2">Unified Board Readiness Index</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              A real-time composite score weighted across active question mastery (60%) and core literature completion (40%) to give you objective insight into exam preparedness.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
 
   </main>
 
   <!-- Footer -->
   <footer class="border-t border-slate-800/80 bg-slate-950/90 py-6 safe-bottom">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-      <p>© 2026 KetofolDoc. Designed for anesthesia education and clinical board review.</p>
+      <p>© 2026 KetofolDoc. Precision anesthesia learning ecosystem for clinical board preparation.</p>
       <div class="flex items-center space-x-4">
         <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
         <span>•</span>
@@ -312,6 +450,7 @@
     } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
+    // 🔑 KetofolDoc Unified Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -337,8 +476,10 @@
     const BENCHMARK_QUESTIONS = 1450;
     const BENCHMARK_SUMMARIES = 52;
 
+    // Direct Google Authentication Flow
     async function handleGoogleAuth() {
       if (!auth) return;
+      
       if (currentUser) {
         if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
           await signOut(auth);
@@ -385,6 +526,7 @@
       return extracted;
     }
 
+    // Render Dashboard Analytics for Authenticated Users
     function renderDashboard(userData) {
       document.getElementById('dashboard-logged-out').classList.add('hidden');
       document.getElementById('dashboard-logged-in').classList.remove('hidden');
@@ -446,6 +588,7 @@
       lucide.createIcons();
     }
 
+    // Real-Time Auth & Firestore Observer
     if (auth) {
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
