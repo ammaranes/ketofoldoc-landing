@@ -455,7 +455,26 @@
 
     const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedProgress) {
-      try { state.userProgress = JSON.parse(savedProgress); } catch (e) {}
+      try { 
+        state.userProgress = JSON.parse(savedProgress);
+        sanitizeUserProgress(state.userProgress);
+      } catch (e) {}
+    }
+
+    // 🧹 Auto-Purge Sanitizer: Removes ghost SRS entries
+    function sanitizeUserProgress(prog) {
+      if (!prog || typeof prog !== 'object') return;
+      Object.entries(prog).forEach(([deckId, deckProg]) => {
+        if (!deckProg || typeof deckProg !== 'object') return;
+        const answers = deckProg.answers || {};
+        const srs = deckProg.srs || {};
+        Object.keys(srs).forEach(idxStr => {
+          const srsObj = srs[idxStr];
+          if (answers[idxStr] === undefined && (!srsObj || !srsObj.repetitions || srsObj.repetitions === 0)) {
+            delete srs[idxStr];
+          }
+        });
+      });
     }
 
     // --- Virtual Composite Deck Generator ---
@@ -496,39 +515,45 @@
       };
     }
 
-    // Calculate Active Due Question Indices (Only previously studied cards)
-function getDueIndices(activeDeck) {
-  if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
-  const now = new Date();
-  const dueIndices = [];
-  activeDeck.questions.forEach((q, idx) => {
-    const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
-    const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
-    const parentProgress = state.userProgress[parentDeckId] || {};
-    const srs = (parentProgress.srs || {})[parentIdx];
-    
-    // STRICT: Only include questions that have an existing SRS record AND are due today
-    if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
-      dueIndices.push(idx);
+    // Calculate Active Due Question Indices (Only questions that have been genuinely studied)
+    function getDueIndices(activeDeck) {
+      if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+      const now = new Date();
+      const dueIndices = [];
+
+      activeDeck.questions.forEach((q, idx) => {
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+        const parentProgress = state.userProgress[parentDeckId] || {};
+        const answers = parentProgress.answers || {};
+        const srs = (parentProgress.srs || {})[parentIdx];
+
+        if (srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+          const isGenuinelyStudied = answers[parentIdx] !== undefined || (srs.repetitions && srs.repetitions > 0);
+          if (isGenuinelyStudied) {
+            dueIndices.push(idx);
+          }
+        }
+      });
+
+      return dueIndices;
     }
-  });
-  return dueIndices;
-}
 
-
-    // Compile Card States for Ecosystem Aggregation
+    // Compile Card States with Namespace (${deckId}_${idx}) to eliminate module ID collisions
     function compileCardStates() {
       const cardStates = {};
       Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
         if (!deckProg) return;
         const srsMap = deckProg.srs || {};
-        const deck = state.decks[deckId];
+        const answers = deckProg.answers || {};
+
         Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
           if (!srsObj || typeof srsObj !== 'object') return;
           const idx = parseInt(idxStr, 10);
-          const q = deck?.questions?.[idx];
-          const qId = q?.id || `${deckId}_${idx}`;
-          cardStates[qId] = {
+          if (answers[idx] === undefined && (!srsObj.repetitions || srsObj.repetitions === 0)) return;
+
+          const namespacedId = `${deckId}_${idx}`;
+          cardStates[namespacedId] = {
             reps: srsObj.repetitions || srsObj.reps || 0,
             interval: srsObj.interval || 0,
             easeFactor: srsObj.easeFactor || 2.5,
@@ -540,15 +565,16 @@ function getDueIndices(activeDeck) {
       return cardStates;
     }
 
-    // Apply Cross-Platform SRS Updates from Cloud
+    // Apply Namespaced SRS Updates from Cloud
     function applyCloudCardStates(cloudCardStates) {
       if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
       Object.entries(state.decks).forEach(([deckId, deck]) => {
         if (!deck.questions) return;
         deck.questions.forEach((q, idx) => {
-          const qId = q.id || `${deckId}_${idx}`;
-          if (cloudCardStates[qId]) {
-            const c = cloudCardStates[qId];
+          const namespacedId = `${deckId}_${idx}`;
+          const c = cloudCardStates[namespacedId];
+
+          if (c) {
             state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
             state.userProgress[deckId].srs = state.userProgress[deckId].srs || {};
             state.userProgress[deckId].srs[idx] = {
@@ -563,7 +589,7 @@ function getDueIndices(activeDeck) {
       });
     }
 
-    // Deep merge progress objects to avoid overwriting separate modules
+    // Deep merge progress objects
     function mergeUserProgress(localProg, remoteProg) {
       if (!remoteProg) return localProg || {};
       const merged = { ...(localProg || {}) };
@@ -579,6 +605,7 @@ function getDueIndices(activeDeck) {
           };
         }
       });
+      sanitizeUserProgress(merged);
       return merged;
     }
 
@@ -634,6 +661,7 @@ function getDueIndices(activeDeck) {
             if (saudiData.card_states) {
               applyCloudCardStates(saudiData.card_states);
             }
+            sanitizeUserProgress(state.userProgress);
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
             render();
           }
@@ -645,6 +673,7 @@ function getDueIndices(activeDeck) {
 
     function pushStateToCloud() {
       if (!db || !currentUser) return;
+      sanitizeUserProgress(state.userProgress);
       db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
         saudi_board_progress: {
           userProgress: state.userProgress,
@@ -655,6 +684,7 @@ function getDueIndices(activeDeck) {
     }
 
     function saveState() {
+      sanitizeUserProgress(state.userProgress);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
       render();
       pushStateToCloud();
@@ -810,7 +840,7 @@ function getDueIndices(activeDeck) {
       }
     });
 
-    // --- Shuffle & SRS Modes across Active Pool ---
+    // --- Shuffle & SRS Modes ---
     function generateShuffledIndices(length) {
       const arr = Array.from({ length }, (_, i) => i);
       for (let i = arr.length - 1; i > 0; i--) {
@@ -845,7 +875,7 @@ function getDueIndices(activeDeck) {
 
       state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
       state.sessionState.isShuffled = false;
-      state.sessionState.srsSessionAnswers = {}; // Fresh active recall state
+      state.sessionState.srsSessionAnswers = {};
 
       if (state.sessionState.isSRSMode) {
         const dueIndices = getDueIndices(activeDeck);
@@ -1014,7 +1044,7 @@ function getDueIndices(activeDeck) {
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Determine Selected Answer: Clean slate during SRS Mode until user selects/reveals
+      // Clean test slate during active SRS review sessions
       const selectedAnswer = state.sessionState.isSRSMode 
         ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
         : ((parentProgress.answers || {})[parentIdx]);
@@ -1282,7 +1312,7 @@ function getDueIndices(activeDeck) {
     document.getElementById('btn-auth-modal').onclick = () => document.getElementById('modal-auth').classList.remove('hidden');
     document.getElementById('btn-close-auth-modal').onclick = () => document.getElementById('modal-auth').classList.add('hidden');
 
-    // Google Sign-In / Sign-Out
+    // Google Sign-In / Sign-Out Handlers
     document.getElementById('btn-google-login').onclick = () => {
       if (!auth) return;
       const provider = new firebase.auth.GoogleAuthProvider();
