@@ -426,7 +426,6 @@
 
       <!-- Scrollable Modal Body -->
       <div class="overflow-y-auto py-4 space-y-4 flex-1">
-        <!-- Auto-Detected Context Card -->
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
             <span class="flex items-center">
@@ -439,7 +438,6 @@
           </div>
         </div>
 
-        <!-- Feedback Category Selector -->
         <div>
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
           <div class="grid grid-cols-2 gap-2">
@@ -462,7 +460,6 @@
           </div>
         </div>
 
-        <!-- Comment Box -->
         <div>
           <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
           <textarea id="feedback-comment" rows="4" placeholder="Share your suggestions, thoughts, or report an issue..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
@@ -684,7 +681,7 @@
       });
     }
 
-    // --- 💬 Landing Portal Feedback Engine ---
+    // --- 💬 Automatic Feedback Engine with Web3Forms + Firestore ---
     const feedbackModal = document.getElementById('modal-feedback');
     const feedbackComment = document.getElementById('feedback-comment');
     const feedbackStatusMsg = document.getElementById('feedback-status-msg');
@@ -712,22 +709,42 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting...";
 
-      try {
-        if (db) {
-          await addDoc(collection(db, 'feedback'), {
-            timestamp: new Date().toISOString(),
-            userId: currentUser?.uid || "anonymous",
-            userEmail: currentUser?.email || "anonymous",
-            userName: currentUser?.displayName || "Guest Doctor",
-            url: window.location.href,
-            category,
-            message: comment,
-            context: {
-              pageType: "landing_portal",
-              title: "KetofolDoc Home Portal"
-            }
-          });
+      const feedbackData = {
+        timestamp: new Date().toISOString(),
+        userId: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        userName: currentUser?.displayName || "Guest Doctor",
+        url: window.location.href,
+        category,
+        message: comment,
+        context: {
+          pageType: "landing_portal",
+          title: "KetofolDoc Home Portal"
         }
+      };
+
+      try {
+        // 1. Direct Web3Forms Email Submission
+        const emailPromise = fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "12303c13-8e61-47cc-937a-86364a6b38d6",
+            subject: `[KetofolDoc Landing] ${category}`,
+            from_name: "KetofolDoc Feedback Engine",
+            reply_to: currentUser?.email || "noreply@ketofoldoc.com",
+            "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
+            "Page URL": feedbackData.url,
+            "Category": category,
+            "Message": comment
+          })
+        });
+
+        // 2. Firestore Document Backup
+        const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
+
+        await Promise.all([emailPromise, firestorePromise]);
+
         feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
         feedbackStatusMsg.textContent = "✓ Thank you! Your feedback has been submitted.";
         setTimeout(() => {
