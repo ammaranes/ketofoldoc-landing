@@ -63,28 +63,85 @@
     </div>
   </header>
 
-  <!-- Main Command Center Canvas -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center">
+  <!-- Main Canvas -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16">
     
-    <!-- Hero Header -->
-    <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
-      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-medium mb-3">
-        <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
-        <span>Unified Anesthesia Board Ecosystem</span>
+    <!-- 1️⃣ HERO & PLATFORM VISION SECTION -->
+    <section class="space-y-10">
+      
+      <!-- Hero Header -->
+      <div class="text-center max-w-3xl mx-auto">
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold mb-4 shadow-inner">
+          <i data-lucide="compass" class="w-4 h-4 text-blue-400"></i>
+          <span>The Next-Generation Anesthesia Board Platform</span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight sm:leading-tight mb-4">
+          Precision Anesthesia <br class="hidden sm:inline" />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400">
+            Learning & Retention Hub
+          </span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto font-normal">
+          Designed to eliminate fragmented clinical revision by pairing comprehensive literature synthesis with automated spaced repetition and unified retention analytics.
+        </p>
       </div>
-      <h1 class="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight sm:leading-tight mb-3">
-        Precision Anesthesia <br class="hidden sm:inline" />
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-emerald-400 to-purple-400">
-          Learning & Retention Hub
-        </span>
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl mx-auto">
-        Empowering clinical residents and candidates with structured active recall, SM-2 spaced repetition, and synced textbook analytics.
-      </p>
-    </div>
 
-    <!-- 📊 UNIFIED BOARD READINESS DASHBOARD -->
-    <section id="dashboard-section" class="mb-12">
+      <!-- 4 Core Vision Pillars -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        
+        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition shadow-lg">
+          <div>
+            <div class="w-11 h-11 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center mb-4">
+              <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Spaced Repetition (SM-2 Engine)</h2>
+            <p class="text-sm text-slate-300 leading-relaxed font-normal">
+              Replaces passive reading with scheduled active recall. The algorithm calculates custom review intervals based on your response quality (Again, Hard, Good, Easy) to permanently defeat the forgetting curve.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/40 transition shadow-lg">
+          <div>
+            <div class="w-11 h-11 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center mb-4">
+              <i data-lucide="check-check" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Curated High-Yield Question Banks</h2>
+            <p class="text-sm text-slate-300 leading-relaxed font-normal">
+              Over 1,450 verified questions covering the Saudi Board blueprint and Lippincott's clinical review modules, featuring clear explanations, hemodynamic figures, and verified references.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500/40 transition shadow-lg">
+          <div>
+            <div class="w-11 h-11 rounded-xl bg-purple-950/80 border border-purple-800/60 text-purple-400 flex items-center justify-center mb-4">
+              <i data-lucide="book-open-check" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Textbook Synthesis & Micro-Testing</h2>
+            <p class="text-sm text-slate-300 leading-relaxed font-normal">
+              Structured summaries of <em>Miller's Anesthesia</em> chapters paired with embedded recall questions that update your global flashcard queue in real-time as you read.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-amber-500/40 transition shadow-lg">
+          <div>
+            <div class="w-11 h-11 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center mb-4">
+              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Unified Board Readiness Index</h2>
+            <p class="text-sm text-slate-300 leading-relaxed font-normal">
+              An objective composite metric weighted across active question mastery (60%) and core literature completion (40%) to provide a transparent index of exam preparedness.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2️⃣ UNIFIED BOARD READINESS DASHBOARD -->
+    <section id="dashboard-section" class="pt-4">
       
       <!-- Signed-Out Prompt Banner -->
       <div id="dashboard-logged-out" class="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-blue-950/40 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl backdrop-blur-sm">
@@ -94,12 +151,12 @@
           </div>
           <div>
             <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-1">Sync Your Live Board Readiness Stats</h2>
-            <p class="text-xs text-slate-400 leading-relaxed max-w-md">
+            <p class="text-sm text-slate-300 leading-relaxed max-w-xl font-normal">
               Sign in with Google to aggregate Spaced Repetition (SM-2) retention, flashcard mastery, and chapter reading progress across all your devices.
             </p>
           </div>
         </div>
-        <button id="btn-dashboard-signin" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center space-x-3 transition shadow-lg shadow-blue-600/20 shrink-0">
+        <button id="btn-dashboard-signin" class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center space-x-3 transition shadow-lg shadow-blue-600/20 shrink-0">
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -113,7 +170,6 @@
       <!-- Signed-In Live Dashboard Surface -->
       <div id="dashboard-logged-in" class="hidden space-y-6">
         
-        <!-- Top Board Readiness Summary Card -->
         <div class="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -136,7 +192,6 @@
           <!-- 4 Core Metric Tiles -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             
-            <!-- Tile 1: Total Reviewed -->
             <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
               <div class="flex items-center justify-between text-slate-400 mb-2">
                 <span class="text-[11px] font-semibold">Active Cards</span>
@@ -148,7 +203,6 @@
               </div>
             </div>
 
-            <!-- Tile 2: Mastered Questions -->
             <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
               <div class="flex items-center justify-between text-slate-400 mb-2">
                 <span class="text-[11px] font-semibold">Mastered</span>
@@ -160,7 +214,6 @@
               </div>
             </div>
 
-            <!-- Tile 3: Summaries Completed -->
             <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
               <div class="flex items-center justify-between text-slate-400 mb-2">
                 <span class="text-[11px] font-semibold">Summaries</span>
@@ -172,7 +225,6 @@
               </div>
             </div>
 
-            <!-- Tile 4: Average Retention -->
             <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
               <div class="flex items-center justify-between text-slate-400 mb-2">
                 <span class="text-[11px] font-semibold">Retention</span>
@@ -188,17 +240,18 @@
         </div>
 
       </div>
-
     </section>
 
-    <!-- 🌐 3-PLATFORM INTERACTIVE CARDS GRID -->
-    <section class="mb-14">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-base sm:text-lg font-bold text-slate-100 flex items-center">
-          <i data-lucide="layout-grid" class="w-4 h-4 mr-2 text-blue-400"></i>
-          Active Study Platforms
-        </h2>
-        <span class="text-xs text-slate-500">Choose a platform to begin</span>
+    <!-- 3️⃣ ACTIVE STUDY PLATFORMS -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-100 flex items-center">
+            <i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-blue-400"></i>
+            Active Study Platforms
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Select a specialized review platform to begin your study session</p>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
@@ -217,12 +270,12 @@
             <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition">
               Saudi Board QB
             </h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
-              9 subspecialty question banks with verified textbook citations, custom composite sessions, and SM-2 spaced repetition.
+            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
+              9 subspecialty question banks with verified textbook citations, custom composite practice, and SM-2 spaced repetition.
             </p>
 
             <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-500">Progress:</span>
+              <span class="text-slate-400 font-medium">Progress:</span>
               <span id="card-stat-saudi" class="font-bold text-blue-300">-- Questions Active</span>
             </div>
           </div>
@@ -247,12 +300,12 @@
             <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-300 transition">
               1000 Questions
             </h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
               21 chapter review modules from Lippincott's Anesthesia with integrated clinical figures, explanations, and recall testing.
             </p>
 
             <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-500">Progress:</span>
+              <span class="text-slate-400 font-medium">Progress:</span>
               <span id="card-stat-1000" class="font-bold text-emerald-300">-- Questions Active</span>
             </div>
           </div>
@@ -277,12 +330,12 @@
             <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-purple-300 transition">
               Chapter Summaries
             </h3>
-            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed mb-6">
+            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
               High-yield Miller's Anesthesia textbook summaries with continuous typography, tables, and live synced recall questions.
             </p>
 
             <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-500">Progress:</span>
+              <span class="text-slate-400 font-medium">Progress:</span>
               <span id="card-stat-summaries" class="font-bold text-purple-300">-- Chapters Read</span>
             </div>
           </div>
@@ -296,10 +349,10 @@
       </div>
     </section>
 
-    <!-- 🔗 SYNERGISTIC INTEGRATION: SUMMARIES TO QUESTION BANKS -->
-    <section class="border-t border-slate-800/80 pt-12 mb-14">
-      <div class="bg-gradient-to-br from-slate-900 via-slate-900/90 to-purple-950/30 border border-purple-900/40 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- 4️⃣ SYNERGY SECTION: SUMMARY-TO-QUESTION-BANK BRIDGING -->
+    <section class="pt-2">
+      <div class="bg-gradient-to-br from-slate-900 via-slate-900/95 to-purple-950/40 border border-purple-900/40 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-16 -bottom-16 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="max-w-3xl mb-8">
           <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-800/60 text-purple-300 text-xs font-semibold mb-3">
@@ -309,118 +362,50 @@
           <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mb-3">
             How Summaries Connect Directly to Practice Questions
           </h2>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
             Reading comprehensive textbook material is only the first step. KetofolDoc bridges reading with retention through automated, subject-level topic mapping that links each summary chapter directly into our curated question banks.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           
-          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500/40 transition shadow-md">
             <div>
-              <div class="flex items-center space-x-2 text-purple-400 font-bold text-xs uppercase tracking-wider mb-2">
-                <span class="w-6 h-6 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-[11px] text-purple-300">1</span>
-                <span>Subspecialty Indexing</span>
+              <div class="flex items-center space-x-3 mb-3">
+                <span class="w-7 h-7 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-xs font-bold text-purple-300">1</span>
+                <h3 class="text-base font-bold text-slate-100">Subspecialty Indexing</h3>
               </div>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                Every <em>Miller's Anesthesia</em> chapter is indexed across clinical domains (e.g., Neuroanesthesia, Cardiac, Obstetric, Regional, Pharmacology, Mechanical Ventilation).
+              <p class="text-sm text-slate-300 leading-relaxed font-normal">
+                Every chapter of <em>Miller's Anesthesia</em> is indexed across core clinical domains—including Neuroanesthesia, Cardiac, Obstetric, Regional, Pharmacology, and Mechanical Ventilation—matching the blueprint of clinical board exams.
               </p>
             </div>
           </div>
 
-          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/40 transition shadow-md">
             <div>
-              <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-2">
-                <span class="w-6 h-6 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-[11px] text-emerald-300">2</span>
-                <span>Immediate Micro-Testing</span>
+              <div class="flex items-center space-x-3 mb-3">
+                <span class="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-xs font-bold text-emerald-300">2</span>
+                <h3 class="text-base font-bold text-slate-100">Immediate Micro-Testing</h3>
               </div>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                At the conclusion of each summary chapter, the engine dynamically generates up to 8 high-yield questions matching that specific subject from Saudi Board QB and 1000 Questions.
+              <p class="text-sm text-slate-300 leading-relaxed font-normal">
+                Upon completing any summary chapter, the engine dynamically generates up to 8 targeted recall questions pulled directly from the matching Saudi Board and 1000 Questions modules.
               </p>
             </div>
           </div>
 
-          <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between">
+          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition shadow-md">
             <div>
-              <div class="flex items-center space-x-2 text-blue-400 font-bold text-xs uppercase tracking-wider mb-2">
-                <span class="w-6 h-6 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-[11px] text-blue-300">3</span>
-                <span>Bidirectional SRS Sync</span>
+              <div class="flex items-center space-x-3 mb-3">
+                <span class="w-7 h-7 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-xs font-bold text-blue-300">3</span>
+                <h3 class="text-base font-bold text-slate-100">Bidirectional SRS Sync</h3>
               </div>
-              <p class="text-xs text-slate-400 leading-relaxed">
-                Rating your recall within a summary chapter instantly updates the flashcard interval inside the standalone question banks and writes to your unified cloud progress.
+              <p class="text-sm text-slate-300 leading-relaxed font-normal">
+                Every recall rating (Again, Hard, Good, Easy) made inside a summary updates the question's mastery interval in your global queue and syncs across all devices in real time.
               </p>
             </div>
           </div>
 
         </div>
-      </div>
-    </section>
-
-    <!-- 🌟 PLATFORM VISION & ARCHITECTURE SECTION -->
-    <section class="border-t border-slate-800/80 pt-12 mb-12">
-      <div class="text-center max-w-3xl mx-auto mb-10">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full">
-          Platform Architecture
-        </span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mt-3 mb-3">
-          Our Vision for Anesthesia Education
-        </h2>
-        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
-          KetofolDoc was designed to eliminate fragmented studying by bridging comprehensive clinical textbook literature with cognitive active recall and real-time retention tracking.
-        </p>
-      </div>
-
-      <!-- 4 Vision Pillar Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        
-        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center mb-4">
-              <i data-lucide="brain-circuit" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-100 mb-2">Spaced Repetition (SM-2 Engine)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Active memory retrieval dynamically schedules future question reviews based on recall quality (Again, Hard, Good, Easy), flattening the clinical forgetting curve.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center mb-4">
-              <i data-lucide="check-check" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-100 mb-2">Curated High-Yield Content</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Over 1,450 verified questions sourced from Saudi Board subspecialties and Lippincott's review modules with complete textbook rationales, figures, and pharmacology tables.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-purple-950/80 border border-purple-800/60 text-purple-400 flex items-center justify-center mb-4">
-              <i data-lucide="book-open-check" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-100 mb-2">Textbook Synthesis & Micro-Testing</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              High-yield summaries of <em>Miller's Anesthesia</em> chapters paired with embedded recall questions that update your global flashcard queue in real-time as you read.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center mb-4">
-              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-100 mb-2">Unified Board Readiness Index</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              A real-time composite score weighted across active question mastery (60%) and core literature completion (40%) to give you objective insight into exam preparedness.
-            </p>
-          </div>
-        </div>
-
       </div>
     </section>
 
