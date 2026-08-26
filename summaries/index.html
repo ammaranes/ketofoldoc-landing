@@ -1543,7 +1543,7 @@
     };
     document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
 
-    // --- 💬 Automatic Feedback Engine ---
+    // --- 💬 Automatic Feedback Engine with Web3Forms + Firestore ---
     function captureSummaryContext() {
       const book = getActiveBook();
       const ch = getActiveChapter();
@@ -1606,19 +1606,42 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting...";
 
+      const feedbackData = {
+        timestamp: new Date().toISOString(),
+        userId: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        userName: currentUser?.displayName || "Guest Doctor",
+        url: window.location.href,
+        category,
+        message: comment,
+        context
+      };
+
       try {
-        if (db) {
-          await addDoc(collection(db, 'feedback'), {
-            timestamp: new Date().toISOString(),
-            userId: currentUser?.uid || "anonymous",
-            userEmail: currentUser?.email || "anonymous",
-            userName: currentUser?.displayName || "Guest Doctor",
-            url: window.location.href,
-            category,
-            message: comment,
-            context
-          });
-        }
+        // 1. Direct Web3Forms Email Submission
+        const emailPromise = fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "12303c13-8e61-47cc-937a-86364a6b38d6",
+            subject: `[KetofolDoc Summaries] ${category} - ${context.chapterTitle || 'Chapter Library'}`,
+            from_name: "KetofolDoc Feedback Engine",
+            reply_to: currentUser?.email || "noreply@ketofoldoc.com",
+            "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
+            "Page URL": window.location.href,
+            "Book / Section": context.bookTitle || "Miller's Anesthesia",
+            "Chapter Number": context.chapterNumber !== null ? `Chapter ${context.chapterNumber}` : "Directory View",
+            "Chapter Title": context.chapterTitle || "N/A",
+            "Category": category,
+            "User Comment": comment
+          })
+        });
+
+        // 2. Firestore Document Backup
+        const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
+
+        await Promise.all([emailPromise, firestorePromise]);
+
         feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
         feedbackStatusMsg.textContent = "✓ Thank you! Your suggestion for this chapter has been submitted.";
         setTimeout(() => {
