@@ -312,7 +312,6 @@
     } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-    // 🔑 KetofolDoc Unified Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -338,10 +337,8 @@
     const BENCHMARK_QUESTIONS = 1450;
     const BENCHMARK_SUMMARIES = 52;
 
-    // Direct Google Authentication Flow
     async function handleGoogleAuth() {
       if (!auth) return;
-      
       if (currentUser) {
         if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
           await signOut(auth);
@@ -359,22 +356,25 @@
     document.getElementById('btn-auth-header').onclick = handleGoogleAuth;
     document.getElementById('btn-dashboard-signin').onclick = handleGoogleAuth;
 
-    // Extract Cards from Schema (Supports both compiled card_states and raw userProgress)
+    // Strict Card Extractor: Only extracts cards that have genuine review history
     function extractCardList(source) {
-      if (!source) return [];
+      if (!source || typeof source !== 'object') return [];
+      
       if (source.card_states && typeof source.card_states === 'object') {
-        return Object.values(source.card_states);
+        return Object.values(source.card_states).filter(c => c && (c.reps || 0) > 0);
       }
       
-      // Fallback: parse raw userProgress structure
       const prog = source.userProgress || source;
       const extracted = [];
-      Object.values(prog).forEach(deck => {
-        if (deck && deck.srs) {
-          Object.values(deck.srs).forEach(srsItem => {
-            if (srsItem) {
+      Object.entries(prog).forEach(([deckId, deck]) => {
+        if (deck && typeof deck === 'object' && deck.srs) {
+          const answers = deck.answers || {};
+          Object.entries(deck.srs).forEach(([idxStr, srsItem]) => {
+            const reps = srsItem?.repetitions || srsItem?.reps || 0;
+            const wasAnswered = answers[idxStr] !== undefined;
+            if (srsItem && (reps > 0 || wasAnswered)) {
               extracted.push({
-                reps: srsItem.repetitions || srsItem.reps || 0,
+                reps: reps,
                 interval: srsItem.interval || 0,
                 easeFactor: srsItem.easeFactor || 2.5
               });
@@ -385,7 +385,6 @@
       return extracted;
     }
 
-    // Render Dashboard Analytics for Authenticated Users
     function renderDashboard(userData) {
       document.getElementById('dashboard-logged-out').classList.add('hidden');
       document.getElementById('dashboard-logged-in').classList.remove('hidden');
@@ -447,7 +446,6 @@
       lucide.createIcons();
     }
 
-    // Real-Time Auth & Firestore Observer
     if (auth) {
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
@@ -461,7 +459,6 @@
           document.getElementById('auth-label-header').textContent = displayLabel;
           
           if (db) {
-            // Attach real-time snapshot listener
             unsubDashboardSnapshot = onSnapshot(doc(db, 'users', user.uid), (snap) => {
               if (snap.exists()) {
                 renderDashboard(snap.data());
