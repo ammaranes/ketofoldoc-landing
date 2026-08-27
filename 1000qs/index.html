@@ -204,7 +204,7 @@
       
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
         <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
-        <!-- iOS Zoom fix with text-base -->
+        <!-- FIXED: iOS Zoom bug by setting text-base instead of text-sm -->
         <input 
           type="search" 
           id="search-input" 
@@ -291,7 +291,7 @@
 
         <div class="border-t border-slate-800/80"></div>
 
-        <!-- Multi-Select Selection Controls with Reset -->
+        <!-- Multi-Select Selection Controls -->
         <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-xs">
           <span id="selected-summary-text" class="font-semibold text-emerald-400">0 Chapters selected</span>
           <div class="flex items-center space-x-1.5">
@@ -369,20 +369,20 @@
     </div>
   </div>
 
-  <!-- Floating Feedback Trigger Button -->
+  <!-- 💬 Floating Feedback Trigger Button -->
   <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
-  <!-- Context-Aware Feedback Modal -->
+  <!-- 📝 Context-Aware Feedback Modal -->
   <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-blue-800/60 text-emerald-400 flex items-center justify-center">
             <i data-lucide="message-square" class="w-4 h-4"></i>
           </div>
           <div>
@@ -459,6 +459,37 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
+    // 🚀 CACHED DOM ELEMENTS for Performance Optimization
+    const DOM = {
+      viewEmpty: document.getElementById('view-empty'),
+      viewQuiz: document.getElementById('view-quiz'),
+      quizFooter: document.getElementById('quiz-footer'),
+      deckTitle: document.getElementById('deck-title'),
+      deckProgressText: document.getElementById('deck-progress-text'),
+      progressBarFill: document.getElementById('progress-bar-fill'),
+      emptyTitle: document.getElementById('empty-title'),
+      emptyDesc: document.getElementById('empty-desc'),
+      btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
+      questionSourceBadge: document.getElementById('question-source-badge'),
+      qNumberBadge: document.getElementById('question-number-badge'),
+      scoreBadge: document.getElementById('score-badge'),
+      shuffleBtn: document.getElementById('btn-shuffle'),
+      shuffleTag: document.getElementById('shuffle-mode-tag'),
+      srsBtn: document.getElementById('btn-srs-filter'),
+      srsTag: document.getElementById('srs-mode-tag'),
+      qStem: document.getElementById('question-stem'),
+      stemImgContainer: document.getElementById('stem-image-container'),
+      stemImg: document.getElementById('stem-image'),
+      flagBtn: document.getElementById('btn-flag'),
+      optionsContainer: document.getElementById('options-container'),
+      expBox: document.getElementById('explanation-box'),
+      expContent: document.getElementById('explanation-content'),
+      expImgContainer: document.getElementById('explanation-images-container'),
+      srsStatusTag: document.getElementById('srs-status-tag'),
+      prevBtn: document.getElementById('btn-prev'),
+      nextBtn: document.getElementById('btn-next')
+    };
+
     async function initApp() {
       let allChapters = [];
       try {
@@ -514,7 +545,7 @@
         return [];
       }
 
-      // Spaced Repetition (SM-2) Engine (Timezone Aware)
+      // Spaced Repetition (SM-2) Engine
       function calculateNextSRS(currentSRS, rating) {
         let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
         const now = new Date();
@@ -555,16 +586,21 @@
         };
       }
 
-      // Build Decks Map from allChapters
+      function normalizeChapterKey(rawKey) {
+        if (!rawKey) return 'ch_01';
+        const num = String(rawKey).replace(/\D/g, '');
+        return num ? `ch_${num.padStart(2, '0')}` : String(rawKey);
+      }
+
       const DECKS = {};
       (allChapters || []).forEach((ch, idx) => {
         const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
-        const numOnly = rawId.replace(/\D/g, '');
-        const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
+        const key = normalizeChapterKey(rawId);
+        const numOnly = rawId.replace(/\D/g, '') || String(idx + 1);
         
         DECKS[key] = {
           id: key,
-          title: ch.title ? (ch.title.toLowerCase().startsWith('ch') ? ch.title : `Ch ${numOnly || idx + 1}: ${ch.title}`) : `Chapter ${idx + 1}`,
+          title: ch.title ? (ch.title.toLowerCase().startsWith('ch') ? ch.title : `Ch ${numOnly}: ${ch.title}`) : `Chapter ${numOnly}`,
           questions: Array.isArray(ch.questions) ? ch.questions : []
         };
       });
@@ -590,7 +626,6 @@
 
       const LOCAL_STORAGE_KEY = 'anes_1000q_progress';
       const FIRESTORE_COLLECTION = 'users';
-
       const firstDeckKey = Object.keys(DECKS)[0] || 'ch_01';
 
       let state = {
@@ -606,31 +641,46 @@
         }
       };
 
-      // Strict Data Purge: Eliminates ghost copies where no answer was submitted
       function purgeGhostProgress(prog) {
-        if (!prog || typeof prog !== 'object') return;
+        if (!prog || typeof prog !== 'object') return {};
+        const normalized = {};
+
         Object.entries(prog).forEach(([deckId, deckProg]) => {
           if (!deckProg || typeof deckProg !== 'object') return;
+          const canonicalKey = normalizeChapterKey(deckId);
+          
+          normalized[canonicalKey] = normalized[canonicalKey] || { answers: {}, flags: [], srs: {} };
+          
           const answers = deckProg.answers || {};
           const srs = deckProg.srs || {};
-          
-          Object.keys(srs).forEach(idxStr => {
-            if (answers[idxStr] === undefined) {
-              delete srs[idxStr];
+          const flags = Array.isArray(deckProg.flags) ? deckProg.flags : [];
+
+          Object.entries(answers).forEach(([idxStr, ans]) => {
+            if (ans !== undefined) {
+              normalized[canonicalKey].answers[idxStr] = ans;
             }
           });
+
+          Object.entries(srs).forEach(([idxStr, srsObj]) => {
+            if (normalized[canonicalKey].answers[idxStr] !== undefined && srsObj) {
+              normalized[canonicalKey].srs[idxStr] = srsObj;
+            }
+          });
+
+          normalized[canonicalKey].flags = Array.from(new Set([...normalized[canonicalKey].flags, ...flags]));
         });
+
+        return normalized;
       }
 
       const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedProgress) {
         try { 
-          state.userProgress = JSON.parse(savedProgress);
-          purgeGhostProgress(state.userProgress);
+          const parsed = JSON.parse(savedProgress);
+          state.userProgress = purgeGhostProgress(parsed);
         } catch (e) {}
       }
 
-      // --- Fixed Virtual Composite Deck Generator ---
       function getActiveCompositeDeck() {
         const keys = Array.from(state.selectedDeckKeys);
         if (keys.length === 0) return null;
@@ -679,7 +729,6 @@
         };
       }
 
-      // Unanswered indices extractor
       function getUnansweredIndices(activeDeck) {
         if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
         const indices = [];
@@ -694,7 +743,6 @@
         return indices;
       }
 
-      // Strict Due Indices: ONLY questions with real answer history and mature due date
       function getDueIndices(activeDeck) {
         if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
         const now = new Date();
@@ -715,7 +763,6 @@
         return dueIndices;
       }
 
-      // Compile Namespaced Card States (ch_XX_idx)
       function compileCardStates() {
         const cardStates = {};
         Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
@@ -742,7 +789,6 @@
         return cardStates;
       }
 
-      // Reset Functions
       function resetChapters(keysToReset) {
         if (!keysToReset || keysToReset.length === 0) return;
 
@@ -753,10 +799,11 @@
 
         if (confirm(msg)) {
           keysToReset.forEach(key => {
-            if (state.userProgress[key]) {
-              state.userProgress[key].answers = {};
-              state.userProgress[key].srs = {};
-              state.userProgress[key].flags = [];
+            const canonicalKey = normalizeChapterKey(key);
+            if (state.userProgress[canonicalKey]) {
+              state.userProgress[canonicalKey].answers = {};
+              state.userProgress[canonicalKey].srs = {};
+              state.userProgress[canonicalKey].flags = [];
             }
           });
 
@@ -769,7 +816,6 @@
         }
       }
 
-      // Apply Namespaced SRS Updates from Cloud
       function applyCloudCardStates(cloudCardStates) {
         if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
         Object.entries(state.decks).forEach(([deckId, deck]) => {
@@ -780,7 +826,7 @@
 
             if (c) {
               state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
-              state.userProgress[deckId].srs = state.userProgress[deckId] || {};
+              state.userProgress[deckId].srs = state.userProgress[deckId].srs || {};
               state.userProgress[deckId].srs[idx] = {
                 repetitions: c.reps || c.repetitions || 0,
                 interval: c.interval || 0,
@@ -796,23 +842,26 @@
       function mergeUserProgress(localProg, remoteProg) {
         if (!remoteProg) return localProg || {};
         const merged = { ...(localProg || {}) };
+        
         Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
           if (!remoteDeck) return;
-          if (!merged[deckId]) {
-            merged[deckId] = remoteDeck;
+          const canonicalKey = normalizeChapterKey(deckId);
+          
+          if (!merged[canonicalKey]) {
+            merged[canonicalKey] = remoteDeck;
           } else {
-            merged[deckId] = {
-              answers: { ...(merged[deckId].answers || {}), ...(remoteDeck.answers || {}) },
-              flags: Array.from(new Set([...(merged[deckId].flags || []), ...(remoteDeck.flags || [])])),
-              srs: { ...(merged[deckId].srs || {}), ...(remoteDeck.srs || {}) }
+            merged[canonicalKey] = {
+              answers: { ...(merged[canonicalKey].answers || {}), ...(remoteDeck.answers || {}) },
+              flags: Array.from(new Set([...(merged[canonicalKey].flags || []), ...(remoteDeck.flags || [])])),
+              srs: { ...(merged[canonicalKey].srs || {}), ...(remoteDeck.srs || {}) }
             };
           }
         });
-        purgeGhostProgress(merged);
-        return merged;
+        
+        return purgeGhostProgress(merged);
       }
 
-      // --- Cloud Authentication & Sync ---
+      // Cloud Auth & Sync
       if (auth) {
         auth.onAuthStateChanged((user) => {
           currentUser = user;
@@ -864,7 +913,7 @@
               if (thousandData.card_states) {
                 applyCloudCardStates(thousandData.card_states);
               }
-              purgeGhostProgress(state.userProgress);
+              state.userProgress = purgeGhostProgress(state.userProgress);
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
               render();
             }
@@ -876,7 +925,7 @@
 
       function pushStateToCloud() {
         if (!db || !currentUser) return;
-        purgeGhostProgress(state.userProgress);
+        state.userProgress = purgeGhostProgress(state.userProgress);
         db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
           thousand_qs_progress: {
             userProgress: state.userProgress,
@@ -887,15 +936,13 @@
       }
 
       function saveState() {
-        purgeGhostProgress(state.userProgress);
+        state.userProgress = purgeGhostProgress(state.userProgress);
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
         render();
         pushStateToCloud();
       }
 
-      // ==========================================
       // GLOBAL SEARCH
-      // ==========================================
       const searchModal = document.getElementById('modal-search');
       const searchInput = document.getElementById('search-input');
       const searchResults = document.getElementById('search-results-list');
@@ -1036,10 +1083,10 @@
         if (!isTyping && searchModal.classList.contains('hidden') && document.getElementById('modal-feedback').classList.contains('hidden')) {
           if (e.key === 'ArrowRight') {
             e.preventDefault();
-            document.getElementById('btn-next').click();
+            DOM.nextBtn.click();
           } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            document.getElementById('btn-prev').click();
+            DOM.prevBtn.click();
           } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
             e.preventDefault();
             document.getElementById('btn-reveal').click();
@@ -1047,7 +1094,7 @@
         }
       });
 
-      // --- Modes & Navigation Handlers ---
+      // Modes & Navigation Handlers
       function generateShuffledIndices(length) {
         const arr = Array.from({ length }, (_, i) => i);
         for (let i = arr.length - 1; i > 0; i--) {
@@ -1156,18 +1203,18 @@
         return true;
       }
 
-      // --- Main UI Rendering (UNCUT AND FULLY FUNCTIONAL) ---
+      // --- Main UI Rendering (Optimized with DOM Caching) ---
       function render() {
         lucide.createIcons();
         const activeDeck = getActiveCompositeDeck();
 
         if (!activeDeck || activeDeck.questions.length === 0) {
-          document.getElementById('view-empty').classList.remove('hidden');
-          document.getElementById('view-quiz').classList.add('hidden');
-          document.getElementById('quiz-footer').classList.add('hidden');
-          document.getElementById('deck-title').textContent = '1000 Anesthesia Questions';
-          document.getElementById('deck-progress-text').textContent = '0 / 0 Completed';
-          document.getElementById('progress-bar-fill').style.width = '0%';
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
+          DOM.deckTitle.textContent = '1000 Anesthesia Questions';
+          DOM.deckProgressText.textContent = '0 / 0 Completed';
+          DOM.progressBarFill.style.width = '0%';
           return;
         }
 
@@ -1184,32 +1231,32 @@
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
         const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
 
-        // Display Completed Screen if all questions answered in current selection
+        // Display Completed Screen
         if (activeTotal === 0 && !state.sessionState.isSRSMode) {
-          document.getElementById('view-empty').classList.remove('hidden');
-          document.getElementById('view-quiz').classList.add('hidden');
-          document.getElementById('quiz-footer').classList.add('hidden');
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
 
           if (activeDeck.isCompleted) {
-            document.getElementById('empty-title').textContent = "Chapter Completed!";
-            document.getElementById('empty-desc').textContent = "You have answered every question in the selected chapter(s). Click below to reset and practice again.";
-            document.getElementById('btn-reset-current-deck').classList.remove('hidden');
+            DOM.emptyTitle.textContent = "Chapter Completed!";
+            DOM.emptyDesc.textContent = "You have answered every question in the selected chapter(s). Click below to reset and practice again.";
+            DOM.btnResetCurrentDeck.classList.remove('hidden');
           } else {
-            document.getElementById('empty-title').textContent = "No Chapters Selected";
-            document.getElementById('empty-desc').textContent = "Select one or more chapters from the menu to start practicing.";
-            document.getElementById('btn-reset-current-deck').classList.add('hidden');
+            DOM.emptyTitle.textContent = "No Chapters Selected";
+            DOM.emptyDesc.textContent = "Select one or more chapters from the menu to start practicing.";
+            DOM.btnResetCurrentDeck.classList.add('hidden');
           }
 
-          document.getElementById('deck-title').textContent = activeDeck.title;
-          document.getElementById('deck-progress-text').textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
-          document.getElementById('progress-bar-fill').style.width = '100%';
+          DOM.deckTitle.textContent = activeDeck.title;
+          DOM.deckProgressText.textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
+          DOM.progressBarFill.style.width = '100%';
           lucide.createIcons();
           return;
         }
 
-        document.getElementById('view-empty').classList.add('hidden');
-        document.getElementById('view-quiz').classList.remove('hidden');
-        document.getElementById('quiz-footer').classList.remove('hidden');
+        DOM.viewEmpty.classList.add('hidden');
+        DOM.viewQuiz.classList.remove('hidden');
+        DOM.quizFooter.classList.remove('hidden');
 
         if (state.sessionState.currentIndex >= activeTotal) {
           state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
@@ -1223,25 +1270,23 @@
         const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
         
-        // Display the origin chapter name
+        // Display origin chapter name
         const sourceDeck = state.decks[parentDeckId];
-        const sourceBadge = document.getElementById('question-source-badge');
-        if (sourceBadge) {
-          sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
+        if (DOM.questionSourceBadge) {
+          DOM.questionSourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
         }
         
-        // Update Header & Linear Progress
-        document.getElementById('deck-title').textContent = activeDeck.title;
+        DOM.deckTitle.textContent = activeDeck.title;
         
         const totalOriginal = activeDeck.totalOriginal || activeDeck.questions.length;
         const completedCount = activeDeck.totalAnswered || 0;
         const remainingCount = Math.max(0, totalOriginal - completedCount);
 
-        document.getElementById('deck-progress-text').textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
+        DOM.deckProgressText.textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
         const pct = totalOriginal > 0 ? (completedCount / totalOriginal) * 100 : 0;
-        document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+        DOM.progressBarFill.style.width = `${pct}%`;
 
-        // Calculate Accuracy across all selected chapters
+        // Calculate Accuracy
         let answeredCount = 0;
         let correctCount = 0;
 
@@ -1263,63 +1308,49 @@
         });
 
         const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
-        document.getElementById('score-badge').textContent = `Accuracy: ${acc}%`;
-
-        // Shuffle & SRS Buttons / Tags
-        const shuffleBtn = document.getElementById('btn-shuffle');
-        const shuffleTag = document.getElementById('shuffle-mode-tag');
-        const srsBtn = document.getElementById('btn-srs-filter');
-        const srsTag = document.getElementById('srs-mode-tag');
+        DOM.scoreBadge.textContent = `Accuracy: ${acc}%`;
 
         if (state.sessionState.isShuffled) {
-          shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
-          shuffleTag.classList.remove('hidden');
-          srsTag.classList.add('hidden');
-          srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+          DOM.shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.remove('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         } else if (state.sessionState.isSRSMode) {
-          srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
-          srsTag.classList.remove('hidden');
-          shuffleTag.classList.add('hidden');
-          shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          document.getElementById('question-number-badge').textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
+          DOM.srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsTag.classList.remove('hidden');
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
         } else {
-          shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          shuffleTag.classList.add('hidden');
-          srsTag.classList.add('hidden');
-          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         }
 
-        // Stem Text & Optional Stem Image
-        document.getElementById('question-stem').textContent = q.stem || q.question || q.text || '';
-        const stemImgContainer = document.getElementById('stem-image-container');
-        const stemImg = document.getElementById('stem-image');
+        DOM.qStem.textContent = q.stem || q.question || q.text || '';
         const rawImg = q.image || q.figure || q.stemImage;
         if (rawImg) {
           const cleanPath = String(rawImg).startsWith('/') ? String(rawImg).slice(1) : rawImg;
-          stemImg.src = cleanPath;
-          stemImgContainer.classList.remove('hidden');
+          DOM.stemImg.src = cleanPath;
+          DOM.stemImgContainer.classList.remove('hidden');
         } else {
-          stemImgContainer.classList.add('hidden');
+          DOM.stemImgContainer.classList.add('hidden');
         }
 
-        // Flag state
         const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         const isFlagged = (parentProgress.flags || []).includes(parentIdx);
-        const flagBtn = document.getElementById('btn-flag');
-        flagBtn.className = isFlagged 
+        DOM.flagBtn.className = isFlagged 
           ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
           : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-        // Selected Answer Handling
         const selectedAnswer = state.sessionState.isSRSMode 
           ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
           : ((parentProgress.answers || {})[parentIdx]);
 
-        // Render Options safely
-        const optionsContainer = document.getElementById('options-container');
-        optionsContainer.innerHTML = '';
+        DOM.optionsContainer.innerHTML = '';
         const normalizedOpts = getNormalizedOptions(q);
 
         normalizedOpts.forEach(({ key: letter, text }) => {
@@ -1344,67 +1375,58 @@
           btn.appendChild(textSpan);
           btn.onclick = () => handleSelectOption(q, letter);
           
-          optionsContainer.appendChild(btn);
+          DOM.optionsContainer.appendChild(btn);
         });
 
-        // Explanation & Reference Box
-        const expBox = document.getElementById('explanation-box');
-        const expImgContainer = document.getElementById('explanation-images-container');
         const expText = q.explanation || q.rationale || '';
 
         if (selectedAnswer && (expText || q.correctAnswer)) {
-          expBox.classList.remove('hidden');
-          document.getElementById('explanation-content').innerHTML = `
+          DOM.expBox.classList.remove('hidden');
+          DOM.expContent.innerHTML = `
             <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
             <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
           `;
 
-          // Update SRS Status Tag
           const srsData = (parentProgress.srs || {})[parentIdx];
-          const srsTagStatus = document.getElementById('srs-status-tag');
-          if (srsTagStatus) {
+          if (DOM.srsStatusTag) {
             if (srsData && srsData.dueDate) {
               const daysLeft = Math.ceil((new Date(srsData.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-              srsTagStatus.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srsData.interval}d)`;
-              srsTagStatus.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
+              DOM.srsStatusTag.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srsData.interval}d)`;
+              DOM.srsStatusTag.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
             } else {
-              srsTagStatus.textContent = 'Not rated yet';
-              srsTagStatus.className = 'text-[10px] text-slate-500';
+              DOM.srsStatusTag.textContent = 'Not rated yet';
+              DOM.srsStatusTag.className = 'text-[10px] text-slate-500';
             }
           }
 
-          // Render explanation figures if present
           const expImages = q.explanationImages || q.explanation_images || [];
           if (Array.isArray(expImages) && expImages.length > 0) {
-            expImgContainer.innerHTML = '';
+            DOM.expImgContainer.innerHTML = '';
             expImages.forEach(src => {
               if (src) {
                 const cleanSrc = String(src).startsWith('/') ? String(src).slice(1) : src;
                 const img = document.createElement('img');
                 img.src = cleanSrc;
                 img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
-                expImgContainer.appendChild(img);
+                DOM.expImgContainer.appendChild(img);
               }
             });
-            expImgContainer.classList.remove('hidden');
-          } else if (expImgContainer) {
-            expImgContainer.classList.add('hidden');
+            DOM.expImgContainer.classList.remove('hidden');
+          } else if (DOM.expImgContainer) {
+            DOM.expImgContainer.classList.add('hidden');
           }
         } else {
-          expBox.classList.add('hidden');
+          DOM.expBox.classList.add('hidden');
         }
 
-        // Update Navigation Buttons (Next / Prev States)
-        const prevBtn = document.getElementById('btn-prev');
-        const nextBtn = document.getElementById('btn-next');
-        if (prevBtn) {
-          prevBtn.disabled = qPointer <= 0;
-          prevBtn.classList.toggle('opacity-50', qPointer <= 0);
-          prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
+        if (DOM.prevBtn) {
+          DOM.prevBtn.disabled = qPointer <= 0;
+          DOM.prevBtn.classList.toggle('opacity-50', qPointer <= 0);
+          DOM.prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
         }
-        if (nextBtn) {
+        if (DOM.nextBtn) {
           const isLast = qPointer >= activeTotal - 1;
-          nextBtn.innerHTML = isLast 
+          DOM.nextBtn.innerHTML = isLast 
             ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
             : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
         }
@@ -1440,22 +1462,18 @@
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
-        state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId] || {};
+        state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId].srs || {};
         
-        // Prevent Ghost Purge bug by placing a placeholder answer if the user didn't select an option
         if (!state.userProgress[parentDeckId].answers[parentIdx]) {
            state.userProgress[parentDeckId].answers[parentIdx] = 'REVIEWED'; 
         }
         
-        // Calculate and store updated SRS data
         const updatedSRS = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
         state.userProgress[parentDeckId].srs[parentIdx] = updatedSRS;
 
-        // Immediately force badge update in DOM
-        const srsTagStatus = document.getElementById('srs-status-tag');
-        if (srsTagStatus) {
-          srsTagStatus.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
-          srsTagStatus.className = updatedSRS.interval <= 1 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
+        if (DOM.srsStatusTag) {
+          DOM.srsStatusTag.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
+          DOM.srsStatusTag.className = updatedSRS.interval <= 1 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
         }
 
         saveState();
@@ -1546,7 +1564,7 @@
         resetChapters(Array.from(state.selectedDeckKeys));
       };
 
-      document.getElementById('btn-reset-current-deck').onclick = () => {
+      DOM.btnResetCurrentDeck.onclick = () => {
         resetChapters(Array.from(state.selectedDeckKeys));
       };
 
@@ -1568,11 +1586,11 @@
         document.getElementById('modal-decks').classList.add('hidden');
       };
 
-      document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
-      document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
-      document.getElementById('btn-next').onclick = handleNextNavigation;
+      DOM.shuffleBtn.onclick = () => toggleShuffleMode();
+      DOM.srsBtn.onclick = () => toggleSRSMode();
+      DOM.nextBtn.onclick = handleNextNavigation;
 
-      document.getElementById('btn-prev').onclick = () => {
+      DOM.prevBtn.onclick = () => {
         if (state.sessionState.currentIndex > 0) { 
           state.sessionState.currentIndex--; 
           saveState(); 
@@ -1591,7 +1609,7 @@
         }
       };
 
-      document.getElementById('btn-flag').onclick = () => {
+      DOM.flagBtn.onclick = () => {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || !activeDeck.questions.length) return;
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
@@ -1633,7 +1651,6 @@
         auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
       };
 
-      // Automatic Feedback Engine with Web3Forms + Firestore
       function captureCurrentContext() {
         const activeDeck = getActiveCompositeDeck();
         const qPointer = state.sessionState.currentIndex || 0;
