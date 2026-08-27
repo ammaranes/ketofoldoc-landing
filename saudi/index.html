@@ -1460,7 +1460,7 @@
         }
       };
 
-      // Render the Multi-Select Module List with Checkboxes
+      // Render the Module List with Solo-Select and Multi-Select Support
       function renderDeckList() {
         const list = document.getElementById('deck-list');
         list.innerHTML = '';
@@ -1490,13 +1490,19 @@
               : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
           }`;
           
+          // 🔒 Safely sanitize the title before injecting it into the DOM
+          const safeTitle = window.DOMPurify ? window.DOMPurify.sanitize(deck.title) : deck.title;
+          
           item.innerHTML = `
             <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
-              <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 focus:ring-offset-0 pointer-events-none" />
+              <!-- Dedicated Checkbox for Multi-Select -->
+              <div class="checkbox-tap-target p-1.5 -m-1.5 hover:bg-slate-700/50 rounded-lg transition flex items-center justify-center shrink-0" title="Toggle Multi-Select">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 focus:ring-offset-0 pointer-events-none" />
+              </div>
               <div class="min-w-0 flex-1">
-                <div class="font-bold text-xs sm:text-sm truncate text-slate-100">${deck.title}</div>
+                <div class="font-bold text-xs sm:text-sm truncate text-slate-100">${safeTitle}</div>
                 <div class="text-[11px] text-slate-400 mt-0.5 flex items-center space-x-2">
-                  <span>${answered}/${total} answered</span>
+                  <span>${answered}/${total} completed</span>
                   ${acc !== null ? `<span>•</span><span class="${acc >= 75 ? 'text-emerald-400' : 'text-amber-400'}">${acc}% acc</span>` : ''}
                 </div>
               </div>
@@ -1506,7 +1512,16 @@
             </span>
           `;
 
+          // 1. Row Click: Solo Select (Deselect all others and pick only this module)
           item.onclick = () => {
+            state.selectedDeckKeys = new Set([id]);
+            renderDeckList();
+          };
+
+          // 2. Checkbox Click: Toggle Multi-Select (Adds/Removes without clearing others)
+          const checkboxBtn = item.querySelector('.checkbox-tap-target');
+          checkboxBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevents row click from firing
             if (state.selectedDeckKeys.has(id)) {
               state.selectedDeckKeys.delete(id);
             } else {
