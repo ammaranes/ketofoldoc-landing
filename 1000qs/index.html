@@ -53,7 +53,7 @@
             </h1>
             <span class="text-slate-600 text-xs">•</span>
             <p id="deck-progress-text" class="text-[11px] font-medium text-emerald-400 truncate leading-snug">
-              0 / 0 Answered
+              0 / 0 Completed
             </p>
           </div>
         </div>
@@ -77,7 +77,7 @@
           <i data-lucide="bookmark" class="w-5 h-5"></i>
         </button>
         
-        <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-blue-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
+        <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
           <div id="auth-avatar" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
             <i data-lucide="user" class="w-4 h-4"></i>
           </div>
@@ -97,32 +97,33 @@
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-36 flex flex-col justify-between">
     
     <!-- Empty & Completed State Screen -->
-<div id="view-empty" class="hidden my-auto text-center py-12 px-4">
-  <div class="w-16 h-16 bg-emerald-950/80 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-800/60">
-    <i data-lucide="check-circle-2" class="w-8 h-8"></i>
-  </div>
-  <h2 id="empty-title" class="text-xl font-bold text-slate-100 mb-2">All Questions Completed!</h2>
-  <p id="empty-desc" class="text-sm text-slate-400 max-w-md mx-auto mb-6">You have answered all questions in the selected chapter(s).</p>
-  <div class="flex items-center justify-center space-x-3">
-    <button id="btn-reset-current-deck" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-lg shadow-rose-600/20">
-      <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-      <span>Reset & Practice Again</span>
-    </button>
-    <button onclick="document.getElementById('btn-menu').click()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
-      Choose Chapters
-    </button>
-  </div>
-</div>
+    <div id="view-empty" class="hidden my-auto text-center py-12 px-4">
+      <div class="w-16 h-16 bg-emerald-950/80 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-800/60">
+        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+      </div>
+      <h2 id="empty-title" class="text-xl font-bold text-slate-100 mb-2">All Questions Completed!</h2>
+      <p id="empty-desc" class="text-sm text-slate-400 max-w-md mx-auto mb-6">You have answered all questions in the selected chapter(s).</p>
+      <div class="flex items-center justify-center space-x-3">
+        <button id="btn-reset-current-deck" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-lg shadow-rose-600/20">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Reset & Practice Again</span>
+        </button>
+        <button onclick="document.getElementById('btn-menu').click()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
+          Choose Chapters
+        </button>
+      </div>
+    </div>
+
     <!-- Active Question View -->
     <div id="view-quiz" class="flex-1 flex flex-col">
-      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3">
-        <div class="flex items-center space-x-2">
-          <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300">Question 1</span>
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2">
+        <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
+          <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
           <span id="question-source-badge" class="px-2.5 py-1 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0"></span>
-          <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider">Shuffled</span>
-          <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 rounded text-[10px] uppercase font-bold tracking-wider">SRS Due Mode</span>
+          <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">Shuffled</span>
+          <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">SRS Due Mode</span>
         </div>
-        <span id="score-badge" class="text-slate-400">Accuracy: 100%</span>
+        <span id="score-badge" class="text-slate-400 shrink-0">Accuracy: 100%</span>
       </div>
 
       <!-- Question Stem & Optional Stem Image -->
@@ -203,7 +204,7 @@
       
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
         <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
-        <!-- FIXED: iOS Zoom bug by setting text-base instead of text-sm -->
+        <!-- iOS Zoom fix with text-base -->
         <input 
           type="search" 
           id="search-input" 
@@ -301,7 +302,7 @@
               Clear
             </button>
             <button id="btn-reset-selected" class="px-2.5 py-1 bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded-lg transition font-medium text-[11px] flex items-center space-x-1">
-              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
               <span>Reset</span>
             </button>
           </div>
@@ -368,20 +369,20 @@
     </div>
   </div>
 
-  <!-- 💬 Floating Feedback Trigger Button -->
+  <!-- Floating Feedback Trigger Button -->
   <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
-  <!-- 📝 Context-Aware Feedback Modal -->
+  <!-- Context-Aware Feedback Modal -->
   <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-blue-800/60 text-emerald-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center">
             <i data-lucide="message-square" class="w-4 h-4"></i>
           </div>
           <div>
@@ -458,8 +459,6 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
-    // We wrap everything in an async initApp to prevent blocking the UI
-    // if the module import fails due to network issues.
     async function initApp() {
       let allChapters = [];
       try {
@@ -469,7 +468,7 @@
         console.error("Failed to load module ./decks/index.js", err);
       }
 
-      // 🛠️ Formatting Helper with DOMPurify XSS Prevention
+      // Formatting Helper with DOMPurify XSS Prevention
       function formatMarkdown(text) {
         if (!text) return '';
         const rawHtml = String(text)
@@ -479,7 +478,7 @@
         return window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
       }
 
-      // 🕒 Debounce Helper for Performance
+      // Debounce Helper for Performance
       function debounce(func, timeout = 300) {
         let timer;
         return (...args) => {
@@ -488,7 +487,7 @@
         };
       }
 
-      // 🧩 Options Normalization Helper
+      // Options Normalization Helper
       function getNormalizedOptions(q) {
         if (!q || !q.options) return [];
         if (Array.isArray(q.options)) {
@@ -515,7 +514,7 @@
         return [];
       }
 
-      // 🧠 Spaced Repetition (SM-2) Engine (Timezone Aware)
+      // Spaced Repetition (SM-2) Engine (Timezone Aware)
       function calculateNextSRS(currentSRS, rating) {
         let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
         const now = new Date();
@@ -543,7 +542,6 @@
         const MAX_INTERVAL = 90;
         if (interval > MAX_INTERVAL) interval = MAX_INTERVAL;
 
-        // Set due date to midnight of the target local day
         const nextDue = new Date();
         nextDue.setDate(now.getDate() + interval);
         nextDue.setHours(0, 0, 0, 0);
@@ -608,7 +606,7 @@
         }
       };
 
-      // 🧹 Strict Data Purge: Eliminates ghost copies where no answer was ever submitted
+      // Strict Data Purge: Eliminates ghost copies where no answer was submitted
       function purgeGhostProgress(prog) {
         if (!prog || typeof prog !== 'object') return;
         Object.entries(prog).forEach(([deckId, deckProg]) => {
@@ -632,50 +630,69 @@
         } catch (e) {}
       }
 
-      // --- Virtual Composite Deck Generator ---
+      // --- Fixed Virtual Composite Deck Generator ---
       function getActiveCompositeDeck() {
-  const keys = Array.from(state.selectedDeckKeys);
-  if (keys.length === 0) return null;
+        const keys = Array.from(state.selectedDeckKeys);
+        if (keys.length === 0) return null;
 
-  const combinedQuestions = [];
-  let totalAvailableInDecks = 0;
+        const combinedQuestions = [];
+        let totalAvailableInDecks = 0;
+        let totalAnsweredInDecks = 0;
 
-  keys.forEach(key => {
-    const deck = state.decks[key];
-    if (deck && Array.isArray(deck.questions)) {
-      totalAvailableInDecks += deck.questions.length;
-      const answeredMap = state.userProgress[key]?.answers || {};
+        keys.forEach(key => {
+          const deck = state.decks[key];
+          if (deck && Array.isArray(deck.questions)) {
+            totalAvailableInDecks += deck.questions.length;
+            const answeredMap = state.userProgress[key]?.answers || {};
 
-      deck.questions.forEach((q, idx) => {
-        // Automatically include only UNANSWERED questions
-        if (answeredMap[idx] === undefined) {
-          combinedQuestions.push({
-            ...q,
-            _parentDeckId: key,
-            _parentIndex: idx
-          });
+            deck.questions.forEach((q, idx) => {
+              const isAnswered = answeredMap[idx] !== undefined;
+              if (isAnswered) totalAnsweredInDecks++;
+
+              combinedQuestions.push({
+                ...q,
+                _parentDeckId: key,
+                _parentIndex: idx,
+                _isAnswered: isAnswered
+              });
+            });
+          }
+        });
+
+        const remainingCount = totalAvailableInDecks - totalAnsweredInDecks;
+        let title = "Custom Practice";
+        if (keys.length === 1) {
+          title = state.decks[keys[0]]?.title || "Practice";
+        } else if (keys.length === Object.keys(state.decks).length) {
+          title = `All Chapters (${remainingCount} Left)`;
+        } else {
+          title = `${keys.length} Chapters (${remainingCount} Left)`;
         }
-      });
-    }
-  });
 
-  let title = "Custom Practice";
-  if (keys.length === 1) {
-    title = state.decks[keys[0]]?.title || "Practice";
-  } else if (keys.length === Object.keys(state.decks).length) {
-    title = `All Chapters (${combinedQuestions.length} Left)`;
-  } else {
-    title = `${keys.length} Chapters (${combinedQuestions.length} Left)`;
-  }
+        return {
+          id: "composite_session",
+          title: title,
+          questions: combinedQuestions,
+          totalOriginal: totalAvailableInDecks,
+          totalAnswered: totalAnsweredInDecks,
+          isCompleted: totalAvailableInDecks > 0 && remainingCount === 0
+        };
+      }
 
-  return {
-    id: "composite_session",
-    title: title,
-    questions: combinedQuestions,
-    totalOriginal: totalAvailableInDecks,
-    isCompleted: totalAvailableInDecks > 0 && combinedQuestions.length === 0
-  };
-}
+      // Unanswered indices extractor
+      function getUnansweredIndices(activeDeck) {
+        if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+        const indices = [];
+        activeDeck.questions.forEach((q, idx) => {
+          const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+          const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+          const answers = state.userProgress[parentDeckId]?.answers || {};
+          if (answers[parentIdx] === undefined) {
+            indices.push(idx);
+          }
+        });
+        return indices;
+      }
 
       // Strict Due Indices: ONLY questions with real answer history and mature due date
       function getDueIndices(activeDeck) {
@@ -727,39 +744,31 @@
 
       // Reset Functions
       function resetChapters(keysToReset) {
-  if (!keysToReset || keysToReset.length === 0) return;
+        if (!keysToReset || keysToReset.length === 0) return;
 
-  const count = keysToReset.length;
-  const msg = count === 1 
-    ? `Reset progress for ${state.decks[keysToReset[0]]?.title || 'this chapter'}? All answered questions will be restored.`
-    : `Reset progress for all ${count} selected chapters? All answered questions will be restored.`;
+        const count = keysToReset.length;
+        const msg = count === 1 
+          ? `Reset progress for ${state.decks[keysToReset[0]]?.title || 'this chapter'}? All answered questions will be restored.`
+          : `Reset progress for all ${count} selected chapters? All answered questions will be restored.`;
 
-  if (confirm(msg)) {
-    keysToReset.forEach(key => {
-      if (state.userProgress[key]) {
-        state.userProgress[key].answers = {};
-        state.userProgress[key].srs = {};
-        state.userProgress[key].flags = [];
+        if (confirm(msg)) {
+          keysToReset.forEach(key => {
+            if (state.userProgress[key]) {
+              state.userProgress[key].answers = {};
+              state.userProgress[key].srs = {};
+              state.userProgress[key].flags = [];
+            }
+          });
+
+          state.sessionState.currentIndex = 0;
+          state.sessionState.order = [];
+          state.sessionState.isSRSMode = false;
+          state.sessionState.srsSessionAnswers = {};
+          saveState();
+          renderDeckList();
+        }
       }
-    });
 
-    state.sessionState.currentIndex = 0;
-    state.sessionState.order = [];
-    saveState();
-    renderDeckList();
-  }
-}
-
-// Reset button in drawer
-document.getElementById('btn-reset-selected').onclick = () => {
-  resetChapters(Array.from(state.selectedDeckKeys));
-};
-
-// Reset button on completion screen
-document.getElementById('btn-reset-current-deck').onclick = () => {
-  resetChapters(Array.from(state.selectedDeckKeys));
-};
-      
       // Apply Namespaced SRS Updates from Cloud
       function applyCloudCardStates(cloudCardStates) {
         if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
@@ -771,7 +780,7 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
 
             if (c) {
               state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
-              state.userProgress[deckId].srs = state.userProgress[deckId].srs || {};
+              state.userProgress[deckId].srs = state.userProgress[deckId] || {};
               state.userProgress[deckId].srs[idx] = {
                 repetitions: c.reps || c.repetitions || 0,
                 interval: c.interval || 0,
@@ -885,7 +894,7 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
       }
 
       // ==========================================
-      // 🔍 GLOBAL SEARCH
+      // GLOBAL SEARCH
       // ==========================================
       const searchModal = document.getElementById('modal-search');
       const searchInput = document.getElementById('search-input');
@@ -1009,7 +1018,6 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
       document.getElementById('btn-search').onclick = openSearchModal;
       document.getElementById('btn-close-search').onclick = closeSearchModal;
 
-      // Debounce the search input to improve performance
       searchInput.addEventListener('input', debounce((e) => {
         renderSearchResults(e.target.value);
       }));
@@ -1039,7 +1047,7 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
         }
       });
 
-      // --- Modes ---
+      // --- Modes & Navigation Handlers ---
       function generateShuffledIndices(length) {
         const arr = Array.from({ length }, (_, i) => i);
         for (let i = arr.length - 1; i > 0; i--) {
@@ -1057,14 +1065,13 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
         state.sessionState.isShuffled = !state.sessionState.isShuffled;
         state.sessionState.srsSessionAnswers = {};
 
+        const basePool = getUnansweredIndices(activeDeck);
         if (state.sessionState.isShuffled) {
-          state.sessionState.order = generateShuffledIndices(activeDeck.questions.length);
-          state.sessionState.currentIndex = 0;
+          state.sessionState.order = generateShuffledIndices(basePool.length).map(i => basePool[i]);
         } else {
-          const prevActual = (state.sessionState.order && state.sessionState.order.length > 0) ? state.sessionState.order[state.sessionState.currentIndex] : state.sessionState.currentIndex;
-          state.sessionState.currentIndex = prevActual || 0;
-          state.sessionState.order = [];
+          state.sessionState.order = basePool;
         }
+        state.sessionState.currentIndex = 0;
         saveState();
       }
 
@@ -1082,14 +1089,14 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
           if (dueIndices.length === 0) {
             alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
             state.sessionState.isSRSMode = false;
-            state.sessionState.order = [];
+            state.sessionState.order = getUnansweredIndices(activeDeck);
             state.sessionState.currentIndex = 0;
           } else {
             state.sessionState.order = [...dueIndices];
             state.sessionState.currentIndex = 0;
           }
         } else {
-          state.sessionState.order = [];
+          state.sessionState.order = getUnansweredIndices(activeDeck);
           state.sessionState.currentIndex = 0;
         }
 
@@ -1116,15 +1123,25 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
             } else {
               alert("🎉 Outstanding! You have reviewed all SRS due cards for this session.");
               state.sessionState.isSRSMode = false;
-              state.sessionState.order = [];
+              state.sessionState.order = getUnansweredIndices(activeDeck);
               state.sessionState.currentIndex = 0;
               state.sessionState.srsSessionAnswers = {};
               saveState();
             }
           } else {
-            if (confirm("You've reached the end of the selected questions. Restart from Question 1?")) {
-              state.sessionState.currentIndex = 0;
+            const remainingUnanswered = getUnansweredIndices(activeDeck);
+            if (remainingUnanswered.length === 0) {
               saveState();
+            } else {
+              if (confirm("You've reached the end of the current practice queue. Continue with remaining unanswered questions?")) {
+                if (state.sessionState.isShuffled) {
+                  state.sessionState.order = generateShuffledIndices(remainingUnanswered.length).map(i => remainingUnanswered[i]);
+                } else {
+                  state.sessionState.order = remainingUnanswered;
+                }
+                state.sessionState.currentIndex = 0;
+                saveState();
+              }
             }
           }
         }
@@ -1144,35 +1161,55 @@ document.getElementById('btn-reset-current-deck').onclick = () => {
         lucide.createIcons();
         const activeDeck = getActiveCompositeDeck();
 
-if (!activeDeck || activeDeck.questions.length === 0) {
-  document.getElementById('view-empty').classList.remove('hidden');
-  document.getElementById('view-quiz').classList.add('hidden');
-  document.getElementById('quiz-footer').classList.add('hidden');
-  
-  if (activeDeck && activeDeck.isCompleted) {
-    document.getElementById('empty-title').textContent = "Chapter Completed!";
-    document.getElementById('empty-desc').textContent = "You have answered every question in the selected chapter(s). Click below to reset and practice again.";
-    document.getElementById('btn-reset-current-deck').classList.remove('hidden');
-  } else {
-    document.getElementById('empty-title').textContent = "No Chapters Selected";
-    document.getElementById('empty-desc').textContent = "Select one or more chapters from the menu to start practicing.";
-    document.getElementById('btn-reset-current-deck').classList.add('hidden');
-  }
+        if (!activeDeck || activeDeck.questions.length === 0) {
+          document.getElementById('view-empty').classList.remove('hidden');
+          document.getElementById('view-quiz').classList.add('hidden');
+          document.getElementById('quiz-footer').classList.add('hidden');
+          document.getElementById('deck-title').textContent = '1000 Anesthesia Questions';
+          document.getElementById('deck-progress-text').textContent = '0 / 0 Completed';
+          document.getElementById('progress-bar-fill').style.width = '0%';
+          return;
+        }
 
-  document.getElementById('deck-title').textContent = '1000 Anesthesia Questions';
-  document.getElementById('deck-progress-text').textContent = '0 Questions Left';
-  document.getElementById('progress-bar-fill').style.width = '100%';
-  lucide.createIcons();
-  return;
-}
+        // Initialize unanswered queue if empty and not in SRS mode
+        if (!state.sessionState.isSRSMode && (!state.sessionState.order || state.sessionState.order.length === 0)) {
+          const unans = getUnansweredIndices(activeDeck);
+          if (state.sessionState.isShuffled) {
+            state.sessionState.order = generateShuffledIndices(unans.length).map(i => unans[i]);
+          } else {
+            state.sessionState.order = unans;
+          }
+        }
+
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
+
+        // Display Completed Screen if all questions answered in current selection
+        if (activeTotal === 0 && !state.sessionState.isSRSMode) {
+          document.getElementById('view-empty').classList.remove('hidden');
+          document.getElementById('view-quiz').classList.add('hidden');
+          document.getElementById('quiz-footer').classList.add('hidden');
+
+          if (activeDeck.isCompleted) {
+            document.getElementById('empty-title').textContent = "Chapter Completed!";
+            document.getElementById('empty-desc').textContent = "You have answered every question in the selected chapter(s). Click below to reset and practice again.";
+            document.getElementById('btn-reset-current-deck').classList.remove('hidden');
+          } else {
+            document.getElementById('empty-title').textContent = "No Chapters Selected";
+            document.getElementById('empty-desc').textContent = "Select one or more chapters from the menu to start practicing.";
+            document.getElementById('btn-reset-current-deck').classList.add('hidden');
+          }
+
+          document.getElementById('deck-title').textContent = activeDeck.title;
+          document.getElementById('deck-progress-text').textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
+          document.getElementById('progress-bar-fill').style.width = '100%';
+          lucide.createIcons();
+          return;
+        }
 
         document.getElementById('view-empty').classList.add('hidden');
         document.getElementById('view-quiz').classList.remove('hidden');
         document.getElementById('quiz-footer').classList.remove('hidden');
-
-        const totalQ = activeDeck.questions.length;
-        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
-        const activeTotal = hasCustomOrder ? state.sessionState.order.length : totalQ;
 
         if (state.sessionState.currentIndex >= activeTotal) {
           state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
@@ -1190,29 +1227,45 @@ if (!activeDeck || activeDeck.questions.length === 0) {
         const sourceDeck = state.decks[parentDeckId];
         const sourceBadge = document.getElementById('question-source-badge');
         if (sourceBadge) {
-        sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
+          sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
         }
         
+        // Update Header & Linear Progress
         document.getElementById('deck-title').textContent = activeDeck.title;
         
+        const totalOriginal = activeDeck.totalOriginal || activeDeck.questions.length;
+        const completedCount = activeDeck.totalAnswered || 0;
+        const remainingCount = Math.max(0, totalOriginal - completedCount);
+
+        document.getElementById('deck-progress-text').textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
+        const pct = totalOriginal > 0 ? (completedCount / totalOriginal) * 100 : 0;
+        document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+
+        // Calculate Accuracy across all selected chapters
         let answeredCount = 0;
         let correctCount = 0;
-        activeDeck.questions.forEach(item => {
-          const itemProg = state.userProgress[item._parentDeckId] || {};
-          const ans = (itemProg.answers || {})[item._parentIndex];
-          if (ans) {
-            answeredCount++;
-            if (ans === item.correctAnswer) correctCount++;
+
+        state.selectedDeckKeys.forEach(deckId => {
+          const deck = state.decks[deckId];
+          const deckProg = state.userProgress[deckId] || {};
+          const answers = deckProg.answers || {};
+
+          if (deck && Array.isArray(deck.questions)) {
+            Object.entries(answers).forEach(([idxStr, ans]) => {
+              const idx = parseInt(idxStr, 10);
+              const questionItem = deck.questions[idx];
+              if (questionItem && ans !== 'REVIEWED') {
+                answeredCount++;
+                if (questionItem.correctAnswer === ans) correctCount++;
+              }
+            });
           }
         });
-
-        document.getElementById('deck-progress-text').textContent = `${answeredCount} / ${totalQ} Answered`;
-        const pct = totalQ > 0 ? (answeredCount / totalQ) * 100 : 0;
-        document.getElementById('progress-bar-fill').style.width = `${pct}%`;
 
         const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
         document.getElementById('score-badge').textContent = `Accuracy: ${acc}%`;
 
+        // Shuffle & SRS Buttons / Tags
         const shuffleBtn = document.getElementById('btn-shuffle');
         const shuffleTag = document.getElementById('shuffle-mode-tag');
         const srsBtn = document.getElementById('btn-srs-filter');
@@ -1235,9 +1288,10 @@ if (!activeDeck || activeDeck.questions.length === 0) {
           srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
           shuffleTag.classList.add('hidden');
           srsTag.classList.add('hidden');
-          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${totalQ}`;
+          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         }
 
+        // Stem Text & Optional Stem Image
         document.getElementById('question-stem').textContent = q.stem || q.question || q.text || '';
         const stemImgContainer = document.getElementById('stem-image-container');
         const stemImg = document.getElementById('stem-image');
@@ -1250,6 +1304,7 @@ if (!activeDeck || activeDeck.questions.length === 0) {
           stemImgContainer.classList.add('hidden');
         }
 
+        // Flag state
         const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         const isFlagged = (parentProgress.flags || []).includes(parentIdx);
         const flagBtn = document.getElementById('btn-flag');
@@ -1257,10 +1312,12 @@ if (!activeDeck || activeDeck.questions.length === 0) {
           ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
           : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
+        // Selected Answer Handling
         const selectedAnswer = state.sessionState.isSRSMode 
           ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
           : ((parentProgress.answers || {})[parentIdx]);
 
+        // Render Options safely
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = '';
         const normalizedOpts = getNormalizedOptions(q);
@@ -1276,7 +1333,6 @@ if (!activeDeck || activeDeck.questions.length === 0) {
             btn.className += 'bg-slate-900 border-slate-800 hover:border-slate-700 active:bg-slate-800 text-slate-200';
           }
           
-          // Secure Option Rendering
           const letterSpan = document.createElement('span');
           letterSpan.className = "font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 shrink-0";
           letterSpan.textContent = letter;
@@ -1291,18 +1347,19 @@ if (!activeDeck || activeDeck.questions.length === 0) {
           optionsContainer.appendChild(btn);
         });
 
+        // Explanation & Reference Box
         const expBox = document.getElementById('explanation-box');
         const expImgContainer = document.getElementById('explanation-images-container');
         const expText = q.explanation || q.rationale || '';
 
         if (selectedAnswer && (expText || q.correctAnswer)) {
           expBox.classList.remove('hidden');
-          // Using DOMPurify to prevent XSS from Markdown
           document.getElementById('explanation-content').innerHTML = `
             <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
             <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
           `;
 
+          // Update SRS Status Tag
           const srsData = (parentProgress.srs || {})[parentIdx];
           const srsTagStatus = document.getElementById('srs-status-tag');
           if (srsTagStatus) {
@@ -1316,6 +1373,7 @@ if (!activeDeck || activeDeck.questions.length === 0) {
             }
           }
 
+          // Render explanation figures if present
           const expImages = q.explanationImages || q.explanation_images || [];
           if (Array.isArray(expImages) && expImages.length > 0) {
             expImgContainer.innerHTML = '';
@@ -1336,6 +1394,7 @@ if (!activeDeck || activeDeck.questions.length === 0) {
           expBox.classList.add('hidden');
         }
 
+        // Update Navigation Buttons (Next / Prev States)
         const prevBtn = document.getElementById('btn-prev');
         const nextBtn = document.getElementById('btn-next');
         if (prevBtn) {
@@ -1381,7 +1440,7 @@ if (!activeDeck || activeDeck.questions.length === 0) {
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
-        state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId].srs || {};
+        state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId] || {};
         
         // Prevent Ghost Purge bug by placing a placeholder answer if the user didn't select an option
         if (!state.userProgress[parentDeckId].answers[parentIdx]) {
@@ -1483,13 +1542,28 @@ if (!activeDeck || activeDeck.questions.length === 0) {
         renderDeckList();
       };
 
+      document.getElementById('btn-reset-selected').onclick = () => {
+        resetChapters(Array.from(state.selectedDeckKeys));
+      };
+
+      document.getElementById('btn-reset-current-deck').onclick = () => {
+        resetChapters(Array.from(state.selectedDeckKeys));
+      };
+
       document.getElementById('btn-launch-multi').onclick = () => {
         if (state.selectedDeckKeys.size === 0) return;
+        const activeDeck = getActiveCompositeDeck();
         state.sessionState.currentIndex = 0;
-        state.sessionState.order = [];
-        state.sessionState.isShuffled = false;
         state.sessionState.isSRSMode = false;
         state.sessionState.srsSessionAnswers = {};
+
+        const unans = getUnansweredIndices(activeDeck);
+        if (state.sessionState.isShuffled) {
+          state.sessionState.order = generateShuffledIndices(unans.length).map(i => unans[i]);
+        } else {
+          state.sessionState.order = unans;
+        }
+
         saveState();
         document.getElementById('modal-decks').classList.add('hidden');
       };
@@ -1559,7 +1633,7 @@ if (!activeDeck || activeDeck.questions.length === 0) {
         auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
       };
 
-      // --- 💬 Automatic Feedback Engine with Web3Forms + Firestore ---
+      // Automatic Feedback Engine with Web3Forms + Firestore
       function captureCurrentContext() {
         const activeDeck = getActiveCompositeDeck();
         const qPointer = state.sessionState.currentIndex || 0;
@@ -1642,7 +1716,6 @@ if (!activeDeck || activeDeck.questions.length === 0) {
         };
 
         try {
-          // 1. Direct Web3Forms Email Submission
           const emailPromise = fetch("https://api.web3forms.com/submit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1663,7 +1736,6 @@ if (!activeDeck || activeDeck.questions.length === 0) {
             })
           });
 
-          // 2. Firestore Document Backup
           const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
 
           await Promise.all([emailPromise, firestorePromise]);
