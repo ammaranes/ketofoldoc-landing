@@ -110,6 +110,7 @@
       <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3">
         <div class="flex items-center space-x-2">
           <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300">Question 1</span>
+          <span id="question-source-badge" class="px-2.5 py-1 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0"></span>
           <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider">Shuffled</span>
           <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 rounded text-[10px] uppercase font-bold tracking-wider">SRS Due Mode</span>
         </div>
@@ -637,7 +638,7 @@
             });
           }
         });
-
+       
         if (combinedQuestions.length === 0) return null;
 
         let title = "Custom Practice";
@@ -1118,7 +1119,14 @@
 
         const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
-
+        
+        // Display the origin chapter name
+        const sourceDeck = state.decks[parentDeckId];
+        const sourceBadge = document.getElementById('question-source-badge');
+        if (sourceBadge) {
+        sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
+        }
+        
         document.getElementById('deck-title').textContent = activeDeck.title;
         
         let answeredCount = 0;
