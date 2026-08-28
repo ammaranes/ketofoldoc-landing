@@ -417,7 +417,7 @@ export const chapter09 = [
       "A": "Postural hypotension and lightheadedness",
       "B": "Constipation and urinary retention",
       "C": "Vena cava and aortic vascular injury",
-      "D": "Retroperitoneal hemorrhage CHAPTER 9 ANSWERS"
+      "D": "Retroperitoneal hemorrhage"
     },
     "correctAnswer": "B",
     "explanation": "Potential complications of a celiac plexus block include postural hypotension from the visceral sympathectomy and vasodilation due to the local anesthetic injection. Both the vena cava and the aorta are in close proximity and susceptible to intravascular injury/injection. Other potential complications include a pneumothorax, retroperitoneal hemorrhage, injury to the kidneys or pancreas, and sexual dysfunction. The visceral sympathetic chain is in close proximity, and blockade may result in unopposed parasympathetic activity that may lead to increased gastrointestinal motility and diarrhea. Orthopedic Anesthesia Thomas Halaszynski"
