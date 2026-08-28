@@ -226,7 +226,7 @@ export const chapter04 = [
     "correctAnswer": "C",
     "explanation": "In the CVP waveform depicted below, the A wave represents atrial contraction, the C wave represents bulging of the tricuspid valve into the atrium during the beginning of systole, the X decent occurs during systole and corresponds to atrial relaxation, the V wave represents filling of the atrium while the tricuspid valve is closed, and the Y descent occurs when the tricuspid valve opens and the atrium starts to empty. Figure 4-4.",
     "explanationImages": [
-      "/images/ch04/fig_4_4.png"
+      "/1000qs/images/ch04/fig_4_4.png"
     ]
   },
   {
@@ -243,7 +243,7 @@ export const chapter04 = [
     "correctAnswer": "B",
     "explanation": "In the CVP waveform depicted in Figure 4-4, the A wave represents atrial contraction, the C wave represents bulging of the tricuspid valve into the atrium during the beginning of systole, the X decent occurs during systole and corresponds to atrial relaxation, the V wave represents filling of the atrium while the tricuspid valve is closed, and the Y descent occurs when the tricuspid valve opens and the atrium starts to empty.",
     "explanationImages": [
-      "/images/ch04/fig_4_4.png"
+      "/1000qs/images/ch04/fig_4_4.png"
     ]
   },
   {
@@ -307,7 +307,7 @@ export const chapter04 = [
     "chapter": 4,
     "chapterTitle": "Patient Monitoring",
     "stem": "During placement of a pulmonary artery catheter, you are watching the pressure tracing, as shown. At the point indicated by the arrow, the catheter tip is located in the Figure 4-1.",
-    "image": "/images/ch04/fig_4_1.png",
+    "image": "/1000qs/images/ch04/fig_4_1.png",
     "options": {
       "A": "Right atrium",
       "B": "Right ventricle",
@@ -317,7 +317,7 @@ export const chapter04 = [
     "correctAnswer": "B",
     "explanation": "A pulmonary artery catheter is placed while monitoring the pressure changes measured at the tip of the catheter. The first section shows a traditional CVP waveform measured in the right atrium. As the catheter is advanced, a systolic step-up is seen when entering the right ventricle, a diastolic step-up when entering the pulmonary artery, and a return to a traditional CVP waveform when entering the wedge position. Figure 4-5.",
     "explanationImages": [
-      "/images/ch04/fig_4_5.png"
+      "/1000qs/images/ch04/fig_4_5.png"
     ]
   },
   {
@@ -591,7 +591,7 @@ export const chapter04 = [
     "chapter": 4,
     "chapterTitle": "Patient Monitoring",
     "stem": "In the capnogram below, the segment that correlates with the exhalation of anatomic dead space is represented by points Figure 4-2.",
-    "image": "/images/ch04/fig_4_2.png",
+    "image": "/1000qs/images/ch04/fig_4_2.png",
     "options": {
       "A": "A to B",
       "B": "A to C",
@@ -606,7 +606,7 @@ export const chapter04 = [
     "chapter": 4,
     "chapterTitle": "Patient Monitoring",
     "stem": "In the capnogram (Fig. 4-2), the segment correlating with inspiration is represented by points",
-    "image": "/images/ch04/fig_4_2.png",
+    "image": "/1000qs/images/ch04/fig_4_2.png",
     "options": {
       "A": "A to B",
       "B": "A to C",
@@ -635,7 +635,7 @@ export const chapter04 = [
     "chapter": 4,
     "chapterTitle": "Patient Monitoring",
     "stem": "The capnograph depicted in Figure 4-3 is most likely a result of Figure 4-3.",
-    "image": "/images/ch04/fig_4_3.png",
+    "image": "/1000qs/images/ch04/fig_4_3.png",
     "options": {
       "A": "Pulmonary embolism",
       "B": "Bronchospasm or airway obstruction",
@@ -710,7 +710,7 @@ export const chapter04 = [
       "A": "25%",
       "B": "50%",
       "C": "75%",
-      "D": "90% CHAPTER 4 ANSWERS"
+      "D": "90%"
     },
     "correctAnswer": "C",
     "explanation": "Understanding the limitations of neuromuscular twitch monitoring devices is fundamental for an anesthesia provider. At the point the fourth twitch reappears, still up to 75% to 80% of acetylcholine receptors may be blocked. Adequate reversal (neostigmine–glycopyrrolate) should be given, and clinical signs for return of neuromuscular function should be used to gauge readiness for extubation. Fluid Management and Blood Transfusion Rebecca Kalman and Edward Bittner"
