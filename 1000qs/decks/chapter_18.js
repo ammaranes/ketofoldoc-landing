@@ -692,7 +692,7 @@ export const chapter18 = [
       "A": "Decreased as compared to adults",
       "B": "Increased as compared to adults",
       "C": "Same as adults",
-      "D": "Cannot be predicted CHAPTER 18 ANSWERS"
+      "D": "Cannot be predicted"
     },
     "correctAnswer": "A",
     "explanation": "Because of shorter circulation times than adults, all pediatric patients have a shorter onset time (up to 50% less) of muscle relaxants. Nonetheless, intravenous succinylcholine (1–1.5 mg/kg) has the fastest onset among muscle relaxants. Significantly larger volume of distribution is attributed to larger dose requirements in infants. With the notable exclusion of succinylcholine, mivacurium, and possibly cisatracurium, infants require significantly less muscle relaxant than older children. Moreover, based on weight, older children require higher doses than adults for some neuromuscular blocking agents (e.g., mivacurium and atracurium). As with adults, a more rapid intubation can be achieved with a muscle relaxant dose that is 1.5 to 2 times the ED95 dose at the expense of prolonging the duration of action. Critical Care David Stahl, Daniel Johnson, and Edward Bittner"
