@@ -1425,7 +1425,7 @@ export const chapter01 = [
       "A": "Fluid bolus prior to aortic clamping",
       "B": "Fluid bolus after aortic clamp release",
       "C": "Administration of mannitol",
-      "D": "Minimization of cross-clamp time CHAPTER 1 ANSWERS"
+      "D": "Minimization of cross-clamp time"
     },
     "correctAnswer": "D",
     "explanation": "The incidence of renal failure after abdominal aortic aneurysm surgery is 5.4%, of which 0.6% requires hemodialysis. Loop diuretics (furosemide), dopamine, mannitol, fenoldopam, and N-acetylcysteine are proposed renal protective agents; however, there is no concrete evidence to support their use. The mainstay of renal preservation is by reducing aortic cross-clamping time, adequate fluid resuscitation, and avoidance of nephrotoxins (nonsteroidal anti-inflammatory drugs, angiotensin-converting-enzyme inhibitors, aminoglycoside antibiotics). Airway Management Yuriy Bronshteyn"
