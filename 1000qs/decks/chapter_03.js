@@ -362,7 +362,7 @@ export const chapter03 = [
       "A": "Sevoflurane",
       "B": "Halothane",
       "C": "Isoflurane",
-      "D": "Desflurane CHAPTER 3 ANSWERS"
+      "D": "Desflurane"
     },
     "correctAnswer": "D",
     "explanation": "Desflurane produces the highest amount of carbon monoxide in the CO2-absorbent canister, which can increase carboxyhemoglobin blood concentration. Production of carbon monoxide is increased by using low fresh gas flow rates, high concentrations of volatile agent, and a dry absorbent. Patient Monitoring Darren Hyatt, Ala Nozari, and Edward Bittner"
