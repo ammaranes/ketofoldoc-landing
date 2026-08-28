@@ -1427,25 +1427,24 @@ if (rawImg) {
           }
 
           const expImages = q.explanationImages || q.explanation_images || [];
-          if (Array.isArray(expImages) && expImages.length > 0) {
-            DOM.expImgContainer.innerHTML = '';
-            expImages.forEach(src => {
-              if (src) {
-                const cleanSrc = String(src).startsWith('/') ? String(src).slice(1) : src;
-                const img = document.createElement('img');
-                img.src = cleanSrc;
-                img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
-                DOM.expImgContainer.appendChild(img);
-              }
-            });
-            DOM.expImgContainer.classList.remove('hidden');
-          } else if (DOM.expImgContainer) {
-            DOM.expImgContainer.classList.add('hidden');
-          }
-        } else {
-          DOM.expBox.classList.add('hidden');
-        }
-
+if (Array.isArray(expImages) && expImages.length > 0) {
+  DOM.expImgContainer.innerHTML = '';
+  expImages.forEach(src => {
+    if (src) {
+      let cleanSrc = String(src);
+      if (!cleanSrc.startsWith('/') && !cleanSrc.startsWith('http')) {
+        cleanSrc = '/' + cleanSrc;
+      }
+      const img = document.createElement('img');
+      img.src = cleanSrc;
+      img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
+      DOM.expImgContainer.appendChild(img);
+    }
+  });
+  DOM.expImgContainer.classList.remove('hidden');
+} else if (DOM.expImgContainer) {
+  DOM.expImgContainer.classList.add('hidden');
+}
         if (DOM.prevBtn) {
           DOM.prevBtn.disabled = qPointer <= 0;
           DOM.prevBtn.classList.toggle('opacity-50', qPointer <= 0);
