@@ -648,32 +648,61 @@
       DOM.cardStatSumm.textContent = '-- Chapters Read';
     }
 
-    // Real-Time Auth & Firestore Observer
-    if (auth) {
-      onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (unsubDashboardSnapshot) {
-          unsubDashboardSnapshot();
-          unsubDashboardSnapshot = null;
-        }
+    // --- 🔄 HYBRID AUTHENTICATION & REAL-TIME SYNC ENGINE ---
 
-        if (user) {
-          DOM.authHeaderLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-          
-          if (db) {
-            unsubDashboardSnapshot = onSnapshot(doc(db, 'users', user.uid), (snap) => {
-              if (snap.exists()) renderDashboard(snap.data());
-              else renderDashboard({});
-            }, (err) => {
-              console.error("Dashboard sync error:", err);
-              renderDashboard({});
-            });
-          }
-        } else {
-          renderLoggedOut();
+    // 1. Centralized State Handler
+    function handleAuthState(user) {
+      currentUser = user;
+      
+      // Clear any existing listeners to prevent duplicates
+      if (unsubDashboardSnapshot) {
+        unsubDashboardSnapshot();
+        unsubDashboardSnapshot = null;
+      }
+
+      if (user) {
+        // Immediately update Nav Header
+        DOM.authHeaderLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+        
+        // 🚀 Optimistic UI Update: Instantly reveal dashboard (hides Sign-In banner)
+        renderDashboard({});
+        
+        // Connect to Live Firestore Data
+        if (db) {
+          unsubDashboardSnapshot = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+            if (snap.exists()) renderDashboard(snap.data());
+            else renderDashboard({});
+          }, (err) => {
+            console.error("Dashboard sync error:", err);
+            renderDashboard({});
+          });
         }
-      });
+      } else {
+        renderLoggedOut();
+      }
     }
+
+    // 2. Standard Firebase Observer (Fires on initial load & active login/logout)
+    if (auth) {
+      onAuthStateChanged(auth, handleAuthState);
+    }
+
+    // 3. 🛡️ Safari bfcache (Back-Forward Cache) Defeater
+    // Forces the UI to re-sync if the user swipes back to this page on iOS
+    window.addEventListener('pageshow', (event) => {
+      // event.persisted is true if the page was restored from Safari's memory freeze
+      if (event.persisted && auth && auth.currentUser) {
+        handleAuthState(auth.currentUser);
+      }
+    });
+
+    // 4. Tab Visibility Defeater
+    // Forces a re-sync if the user switches browser tabs and comes back
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && auth && auth.currentUser) {
+        handleAuthState(auth.currentUser);
+      }
+    });
 
     // Single Lucide render for static icons on load
     lucide.createIcons();
