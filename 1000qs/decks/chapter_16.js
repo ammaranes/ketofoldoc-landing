@@ -137,7 +137,7 @@ export const chapter16 = [
       "A": "Has a longer duration of action",
       "B": "Is more soluble in blood than nitrogen",
       "C": "Is inert and will not expand",
-      "D": "Is contraindicated in outpatient surgery Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later."
+      "D": "Is contraindicated in outpatient surgery"
     },
     "correctAnswer": "A",
     "explanation": "SF6 is an inert gas that is much less soluble than nitrogen (the major component of air) in blood and, therefore, will have a longer duration of action (10 days) compared to an air bubble. Bubble size doubles within 24 hours after injection of SF6 because nitrogen from inhaled air will enter more rapidly into the bubble than sulfur can diffuse out of it. This slow bubble expansion usually does not pathologically affect IOP. However, inspired N2O, which is 117 times more diffusible than hexafluoride (compared to 35 times more than nitrogen), will rapidly enter the SF6 bubble such that IOP will rise significantly within 30 minutes after the eye is closed. As with air, repeat general anesthesia with N2O should be avoided until the SF6 bubble is fully resorbed."
@@ -146,7 +146,7 @@ export const chapter16 = [
     "id": 11,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "What parameter is considered the earliest sign and symptom of an ensuing hypermetabolic state following succinylcholine administration?",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. What parameter is considered the earliest sign and symptom of an ensuing hypermetabolic state following succinylcholine administration?",
     "options": {
       "A": "Hyperthermia",
       "B": "Hypotension",
@@ -160,7 +160,7 @@ export const chapter16 = [
     "id": 12,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Midway through the surgery, when surgical traction in the operative field is applied, patient’s heart rate plummets from 110 bpm down to 55 bpm. The pairing that accurately reflects the afferent and efferent limbs, respectively, of this reflex is",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. Midway through the surgery, when surgical traction in the operative field is applied, patient’s heart rate plummets from 110 bpm down to 55 bpm. The pairing that accurately reflects the afferent and efferent limbs, respectively, of this reflex is",
     "options": {
       "A": "Trigeminal nerve vagus nerve",
       "B": "Optic nerve vagus nerve",
@@ -174,7 +174,7 @@ export const chapter16 = [
     "id": 13,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "The most appropriate first step in the management of this hemodynamic instability is",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. The most appropriate first step in the management of this hemodynamic instability is",
     "options": {
       "A": "Epinephrine",
       "B": "Atropine",
@@ -188,7 +188,7 @@ export const chapter16 = [
     "id": 14,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "At the conclusion of the surgery, postoperative nausea and vomiting should be anticipated and can be minimized by all of the following, except",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. At the conclusion of the surgery, postoperative nausea and vomiting should be anticipated and can be minimized by all of the following, except",
     "options": {
       "A": "Serotonin (5-HT3) antagonist",
       "B": "Propofol infusion",
@@ -277,7 +277,7 @@ export const chapter16 = [
       "A": "Central retinal artery occlusion",
       "B": "Oculocardiac reflex",
       "C": "Puncture of the globe",
-      "D": "Horner syndrome Questions 21 to 22 A patient is given propofol 20 mg intravenously just before placement of a retrobulbar block (0.5% bupivacaine—3 mL) to provide ocular akinesia for ocular surgery."
+      "D": "Horner syndrome"
     },
     "correctAnswer": "D",
     "explanation": "Common complications attributed to a retrobulbar block include retrobulbar hemorrhage with possible central artery occlusion, oculocardiac reflex, puncture of the posterior globe, penetration of the optic nerve, and inadvertent intrathecal injection. Horner syndrome is not commonly seen following retrobulbar blocks; instead, it results from an interruption of the sympathetic nerve supply to the head/face, resulting in a triad of miosis, ptosis, and anhidrosis."
@@ -286,7 +286,7 @@ export const chapter16 = [
     "id": 21,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "As the surgeon attempts to place a lid speculum, the patient squints, preventing adequate placement. Additional blockade of which muscle can provide additional akinesia?",
+    "stem": "Questions 21 to 22 A patient is given propofol 20 mg intravenously just before placement of a retrobulbar block (0.5% bupivacaine—3 mL) to provide ocular akinesia for ocular surgery. As the surgeon attempts to place a lid speculum, the patient squints, preventing adequate placement. Additional blockade of which muscle can provide additional akinesia?",
     "options": {
       "A": "Orbicularis oculi",
       "B": "Temporalis",
@@ -300,12 +300,12 @@ export const chapter16 = [
     "id": 22,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Moments later, apnea occurs followed by complete loss of consciousness. The most likely etiology to explain this event is",
+    "stem": "Questions 21 to 22 A patient is given propofol 20 mg intravenously just before placement of a retrobulbar block (0.5% bupivacaine—3 mL) to provide ocular akinesia for ocular surgery. Moments later, apnea occurs followed by complete loss of consciousness. The most likely etiology to explain this event is",
     "options": {
       "A": "Subarachnoid injection of local anesthetic",
       "B": "Effects of propofol",
       "C": "Oculocardiac reflex",
-      "D": "Intravenous injection of local anesthetic Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe."
+      "D": "Intravenous injection of local anesthetic"
     },
     "correctAnswer": "A",
     "explanation": "There is 1% to 3% risk of complications with retrobulbar block, ranging from mild to severe. Possible complications include accidental subarachnoid injection, which can cause a “total spinal” leading to apnea, unconsciousness, and cardiorespiratory collapse."
@@ -314,7 +314,7 @@ export const chapter16 = [
     "id": 23,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "The most appropriate anesthetic plan to consider is",
+    "stem": "Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe. The most appropriate anesthetic plan to consider is",
     "options": {
       "A": "Retrobulbar block followed by monitored anesthesia care (MAC)",
       "B": "IV induction of general anesthesia avoiding muscle relaxants",
@@ -328,7 +328,7 @@ export const chapter16 = [
     "id": 24,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Anesthetic strategies that can minimize intraocular pressure (IOP) increase and lessen his risk of ocular extrusion include all of the following, except",
+    "stem": "Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe. Anesthetic strategies that can minimize intraocular pressure (IOP) increase and lessen his risk of ocular extrusion include all of the following, except",
     "options": {
       "A": "Ketamine",
       "B": "Hyperventilation",
@@ -342,7 +342,7 @@ export const chapter16 = [
     "id": 25,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Fifteen minutes after the start of surgery, while the surgeon is retracting the medial rectus muscle, the patient becomes hypotensive and bradycardic. The first-line therapy to address this cardiovascular derangement is",
+    "stem": "Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe. Fifteen minutes after the start of surgery, while the surgeon is retracting the medial rectus muscle, the patient becomes hypotensive and bradycardic. The first-line therapy to address this cardiovascular derangement is",
     "options": {
       "A": "Atropine 1 mg IV",
       "B": "Phenylephrine 100 μg IV",
@@ -356,7 +356,7 @@ export const chapter16 = [
     "id": 26,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "The patient’s vital signs normalize and anesthesia is maintained with desflurane and nitrous oxide. Later in the case, conjunctival instillation of a phenylephrine (10%) solution results in immediate escalation of blood pressure from 105/70 to 220/115 mm Hg, while his pulse falls from 86 to 35 bpm. The ECG reveals new onset of ectopic ventricular complexes. The most appropriate treatment option at this time is",
+    "stem": "Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe. The patient’s vital signs normalize and anesthesia is maintained with desflurane and nitrous oxide. Later in the case, conjunctival instillation of a phenylephrine (10%) solution results in immediate escalation of blood pressure from 105/70 to 220/115 mm Hg, while his pulse falls from 86 to 35 bpm. The ECG reveals new onset of ectopic ventricular complexes. The most appropriate treatment option at this time is",
     "options": {
       "A": "Ask the surgeon to stop",
       "B": "Administer nitroprusside",
@@ -370,7 +370,7 @@ export const chapter16 = [
     "id": 27,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "At the conclusion of the surgery, patient is extubated and brought to the recovery room (PACU) in a stable condition. Thirty minutes later, when he is more awake, he notes unilateral eye discomfort in the nonsurgical eye. He has associated tearing, conjunctivitis, photophobia, and pain, which is worsened with blinking. These eye symptoms are most likely caused by",
+    "stem": "Questions 23 to 27 A 57-year-old otherwise-healthy male was leaving a dinner party when he was involved in a rollover car accident during which a foreign object became lodged into his right eye. He is taken to the OR for emergent surgical repair of a penetrating wound to his right globe. At the conclusion of the surgery, patient is extubated and brought to the recovery room (PACU) in a stable condition. Thirty minutes later, when he is more awake, he notes unilateral eye discomfort in the nonsurgical eye. He has associated tearing, conjunctivitis, photophobia, and pain, which is worsened with blinking. These eye symptoms are most likely caused by",
     "options": {
       "A": "Retinal hemorrhage",
       "B": "Oculogyric crisis",
@@ -417,7 +417,7 @@ export const chapter16 = [
       "A": "Tongue is smaller and floppy",
       "B": "Airway is narrowest at the glottic opening",
       "C": "Position of the larynx is more anterior in the neck",
-      "D": "Epiglottis is flat and firm Questions 31 to 32 A 3-year-old patient arrives for rescheduled tonsillectomy and adenoidectomy with another acute upper respiratory tract infection (URI). Her initial surgery was postponed 3 weeks ago as she had a URI at that time as well. Exam reveals a runny nose with greenish-yellow discharge with an intermittant wet cough. She is afebrile with normal vital signs."
+      "D": "Epiglottis is flat and firm"
     },
     "correctAnswer": "C",
     "explanation": "Recognizing the anatomical differences between an adult and a pediatric airway is important. One of the most obvious differences is the tongue itself. The pediatric tongue is larger, in relation to the amount of free space in the oropharynx, when compared to the adult tongue. With regards to the pediatric epiglottis, it tends to be large and floppy with a more oblong configuration, making epiglottis control with a laryngoscope blade more challenging. Additionally, the position of the adult larynx is at about the level C5–C6; the pediatric larynx is more cephalad, at about the level of the C3–C4. This is an important anatomical airway consideration, since the higher larynx tends to be more anterior as well (Fig 16-2). Figure 16-2."
@@ -426,7 +426,7 @@ export const chapter16 = [
     "id": 31,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Postponement of surgery will reduce the risk of",
+    "stem": "Questions 31 to 32 A 3-year-old patient arrives for rescheduled tonsillectomy and adenoidectomy with another acute upper respiratory tract infection (URI). Her initial surgery was postponed 3 weeks ago as she had a URI at that time as well. Exam reveals a runny nose with greenish-yellow discharge with an intermittant wet cough. She is afebrile with normal vital signs. Postponement of surgery will reduce the risk of",
     "options": {
       "A": "Laryngospasm",
       "B": "Hemorrhage",
@@ -440,12 +440,12 @@ export const chapter16 = [
     "id": 32,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Surgery proceeded without incident; however, 2 hours later in the recovery room (PACU), she vomits a large blood clot followed by ongoing bleeding. She appears pale and anxious. Vitals reveal heart rate = 130 bpm, respiratory rate = 25 bpm, and blood pressure = 77/35 mm Hg. Her capillary refill time is 4 seconds. The most appropriate next step in management at this time is",
+    "stem": "Questions 31 to 32 A 3-year-old patient arrives for rescheduled tonsillectomy and adenoidectomy with another acute upper respiratory tract infection (URI). Her initial surgery was postponed 3 weeks ago as she had a URI at that time as well. Exam reveals a runny nose with greenish-yellow discharge with an intermittant wet cough. She is afebrile with normal vital signs. Surgery proceeded without incident; however, 2 hours later in the recovery room (PACU), she vomits a large blood clot followed by ongoing bleeding. She appears pale and anxious. Vitals reveal heart rate = 130 bpm, respiratory rate = 25 bpm, and blood pressure = 77/35 mm Hg. Her capillary refill time is 4 seconds. The most appropriate next step in management at this time is",
     "options": {
       "A": "Insertion of orogastric tube to empty the stomach of blood",
       "B": "Emergent return to the operating room",
       "C": "Administer anxiolysis medication",
-      "D": "Provide liberal fluid resuscitation Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college."
+      "D": "Provide liberal fluid resuscitation"
     },
     "correctAnswer": "D",
     "explanation": "Hemorrhage from a bleeding tonsillar bed in the postoperative period is a hazardous complication. Her vitals reveal hypovolemia and as such, initial management should be to resuscitate the patient prior to returning to the operating room to minimize morbidity associated with anemia and hypovolemia in the setting of repeat general anesthesia. Also assume that patient will now have a difficult airway with a “full stomach.”"
@@ -454,7 +454,7 @@ export const chapter16 = [
     "id": 33,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Minimizing airway fire hazards associated with laser surgery can be accomplished by use of all of the following, except",
+    "stem": "Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college. Minimizing airway fire hazards associated with laser surgery can be accomplished by use of all of the following, except",
     "options": {
       "A": "Intermittent mode laser emissions",
       "B": "An air/oxygen anesthetic technique",
@@ -468,7 +468,7 @@ export const chapter16 = [
     "id": 34,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Ten minutes later, the surgeon yells “FIRE!” The most appropriate next step is to",
+    "stem": "Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college. Ten minutes later, the surgeon yells “FIRE!” The most appropriate next step is to",
     "options": {
       "A": "Ventilate with air",
       "B": "Increase Fio2 to 1.0",
@@ -482,7 +482,7 @@ export const chapter16 = [
     "id": 35,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "One hour later while recovering in the PACU, the patient is noted to have stridor and difficulty breathing. At this time, the most appropriate next step in his airway management includes",
+    "stem": "Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college. One hour later while recovering in the PACU, the patient is noted to have stridor and difficulty breathing. At this time, the most appropriate next step in his airway management includes",
     "options": {
       "A": "Administration of aerosolized epinephrine",
       "B": "Endotracheal intubation",
@@ -529,7 +529,7 @@ export const chapter16 = [
       "A": "Duration of the procedure is limited by the increase in carbon dioxide",
       "B": "Denitrogenation should be performed prior to apnea",
       "C": "PaCO2 remains unchanged for the first 15 minutes",
-      "D": "Functional residual capacity and body weight influence the rate of desaturation Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice."
+      "D": "Functional residual capacity and body weight influence the rate of desaturation"
     },
     "correctAnswer": "C",
     "explanation": "Apneic oxygenation relies on mass movement oxygenation. With the onset of apnea, a low pressure develops in the airspace of the lungs, as more oxygen is absorbed (230 mL/min) than CO2 is released (200 mL/min). If the airways are open, 100% oxygen supplied to the upper airways will follow the pressure gradient and flow into the lungs, replacing the oxygen consumed. The uptake of oxygen into the blood will then remain at relatively normal levels, recognizing that the lack of ventilation will eventually cause marked hypercapnia and acidosis."
@@ -538,7 +538,7 @@ export const chapter16 = [
     "id": 39,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "True statements about this patient include all of the following, except",
+    "stem": "Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice. True statements about this patient include all of the following, except",
     "options": {
       "A": "A flow–volume loop on spirometry can evaluate tracheal compression",
       "B": "The airway may obstruct with sedation",
@@ -552,7 +552,7 @@ export const chapter16 = [
     "id": 40,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "To attenuate risk of a “cannot ventilate, cannot intubate” scenario, an awake airway intubation is discussed. The neural structure that does not need to be blocked in order to provide adequate airway analgesia for a nasal intubation is",
+    "stem": "Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice. To attenuate risk of a “cannot ventilate, cannot intubate” scenario, an awake airway intubation is discussed. The neural structure that does not need to be blocked in order to provide adequate airway analgesia for a nasal intubation is",
     "options": {
       "A": "Hypoglossal nerve",
       "B": "Sphenopalatine ganglion",
@@ -566,7 +566,7 @@ export const chapter16 = [
     "id": 41,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "At the conclusion of a complicated 4-hour resection, the patient is extubated and brought to the recovery room. One hour after extubation, the patient complains of dyspnea with stridorous respiration. Initial steps include all of the following, except",
+    "stem": "Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice. At the conclusion of a complicated 4-hour resection, the patient is extubated and brought to the recovery room. One hour after extubation, the patient complains of dyspnea with stridorous respiration. Initial steps include all of the following, except",
     "options": {
       "A": "Intravenous administration of calcium",
       "B": "Nebulized racemic epinephrine",
@@ -580,7 +580,7 @@ export const chapter16 = [
     "id": 42,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "If bilateral recurrent laryngeal nerves were unintentionally severed, the likely finding on direct laryngoscopy would be",
+    "stem": "Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice. If bilateral recurrent laryngeal nerves were unintentionally severed, the likely finding on direct laryngoscopy would be",
     "options": {
       "A": "Paralysis of the cricothyroid muscles",
       "B": "Intermediate position of the cords",
@@ -594,12 +594,12 @@ export const chapter16 = [
     "id": 43,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Instead, postoperative direct laryngoscopy reveals normal position of the cords at rest, widely open glottic opening at maximal inspiration, and symmetrically moving cords during quiet breathing but with weak phonation and inability to speak loudly or shout. The most likely etiology is",
+    "stem": "Questions 39 to 43 A 35-year-old male with a toxic multinodular goiter presents for thyroidectomy with radical neck dissection. He denies any other significant medical history. Review of systems reveals orthopnea and dysphagia with a recent change in the caliber of his voice. Instead, postoperative direct laryngoscopy reveals normal position of the cords at rest, widely open glottic opening at maximal inspiration, and symmetrically moving cords during quiet breathing but with weak phonation and inability to speak loudly or shout. The most likely etiology is",
     "options": {
       "A": "Recurrent laryngeal nerve paralysis",
       "B": "Superior laryngeal nerve (SLN) paralysis",
       "C": "External airway compression",
-      "D": "Vagus nerve paralysis Questions 44 to 45 A 27-year-old male arrives to the operating room with laryngotracheal injuries stemming from a motorcycle collision. He presents with hoarseness and dyspnea while sitting, but is unable to lie flat due to worsening dyspnea. He is unable to swallow, and is drooling/spitting moderately blood-stained sputum. His anterior neck is diffusely swollen and exquisitely tender with notable subcutaneous emphysema. Oxygen saturation is 100% with supplemental oxygen via face mask. Review of imaging reveals a thyroid cartilage fracture horizontally and crossing the midline."
+      "D": "Vagus nerve paralysis"
     },
     "correctAnswer": "B",
     "explanation": "In the case of lesions to the SLNs, adduction and abduction of the vocal cords remain intact. SLN lesions instead lead to weak tensor strength (cricothyroid muscle), leaving the voice hoarse, weak, breathy, and with the inability to scream or shout. Other associated findings would be loss of sensation above the cords, leaving patient vulnerable to inhalation of any material present in the pharynx."
@@ -608,7 +608,7 @@ export const chapter16 = [
     "id": 44,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "The most appropriate approach to his airway management is",
+    "stem": "Questions 44 to 45 A 27-year-old male arrives to the operating room with laryngotracheal injuries stemming from a motorcycle collision. He presents with hoarseness and dyspnea while sitting, but is unable to lie flat due to worsening dyspnea. He is unable to swallow, and is drooling/spitting moderately blood-stained sputum. His anterior neck is diffusely swollen and exquisitely tender with notable subcutaneous emphysema. Oxygen saturation is 100% with supplemental oxygen via face mask. Review of imaging reveals a thyroid cartilage fracture horizontally and crossing the midline. The most appropriate approach to his airway management is",
     "options": {
       "A": "Tracheostomy",
       "B": "Laryngeal mask airway",
@@ -622,12 +622,12 @@ export const chapter16 = [
     "id": 45,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "His injury would be consistent with trauma to this zone of his neck:",
+    "stem": "Questions 44 to 45 A 27-year-old male arrives to the operating room with laryngotracheal injuries stemming from a motorcycle collision. He presents with hoarseness and dyspnea while sitting, but is unable to lie flat due to worsening dyspnea. He is unable to swallow, and is drooling/spitting moderately blood-stained sputum. His anterior neck is diffusely swollen and exquisitely tender with notable subcutaneous emphysema. Oxygen saturation is 100% with supplemental oxygen via face mask. Review of imaging reveals a thyroid cartilage fracture horizontally and crossing the midline. His injury would be consistent with trauma to this zone of his neck:",
     "options": {
       "A": "Zone I",
       "B": "Zone II",
       "C": "Zone III",
-      "D": "Zone IV Questions 46 to 47 During thyroidectomy for carcinoma, a 22-year-old patient develops tachycardia to 115 bpm while blood pressure intensifies to 145/100 mm Hg. The inhaled anesthetic is deepened and minute ventilation is increased. Thirty minutes later, tachycardia and hypertension persists despite all efforts (Table 16-1). Table 16-1"
+      "D": "Zone IV"
     },
     "correctAnswer": "B",
     "explanation": "The neck is divided into three zones: zone I, including the thoracic inlet, up to the level of the cricothyroid membrane, is treated as an upper thoracic injury. Zone III, above the angle of the mandible, is treated as a head injury. In this case, fracture of the thyroid cartilage represents an injury of the neck in zone II. For ease of memory, consider that the cricoid cartilage demarcates the border between zones I and II and the angle of the mandible separates zone II from zone III (Fig 16-5). Figure 16-5."
@@ -636,7 +636,8 @@ export const chapter16 = [
     "id": 46,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "The appropriate treatment to consider at this time is",
+    "stem": "Questions 46 to 47 During thyroidectomy for carcinoma, a 22-year-old patient develops tachycardia to 115 bpm while blood pressure intensifies to 145/100 mm Hg. The inhaled anesthetic is deepened and minute ventilation is increased. Thirty minutes later, tachycardia and hypertension persists despite all efforts (Table 16-1). Table 16-1. The appropriate treatment to consider at this time is",
+    "image": "/1000qs/images/ch16/fig_16_1.png",
     "options": {
       "A": "Propranolol",
       "B": "Acetaminophen",
@@ -650,12 +651,13 @@ export const chapter16 = [
     "id": 47,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Diagnosis of malignant hyperthermia is most commonly confirmed by",
+    "stem": "Questions 46 to 47 During thyroidectomy for carcinoma, a 22-year-old patient develops tachycardia to 115 bpm while blood pressure intensifies to 145/100 mm Hg. The inhaled anesthetic is deepened and minute ventilation is increased. Thirty minutes later, tachycardia and hypertension persists despite all efforts (Table 16-1). Table 16-1. Diagnosis of malignant hyperthermia is most commonly confirmed by",
+    "image": "/1000qs/images/ch16/fig_16_1.png",
     "options": {
       "A": "Caffeine halothane contracture test (CHCT)",
       "B": "Urinalysis",
       "C": "Arterial blood gas",
-      "D": "Core temperature >42°C CHAPTER 16 ANSWERS"
+      "D": "Core temperature >42°C"
     },
     "correctAnswer": "A",
     "explanation": "More than 30 different mutations are linked to malignant hyperthermia susceptibility. Genetic testing is available to establish a diagnosis, but the CHCT remains the criterion standard. Obstetric Anesthesia Thoha Pham"
