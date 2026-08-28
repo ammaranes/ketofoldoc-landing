@@ -277,7 +277,7 @@ export const chapter17 = [
       "A": "Decreased albumin levels contributing to higher free blood levels of highly protein-bound drugs",
       "B": "Decreased liver function tests due to decreased blood flow",
       "C": "Decreased concentration levels of coagulation factors leading to easy bruisability",
-      "D": "Decreased activity of plasma cholinesterase resulting in significantly longer duration of action of succinylcholine Questions 21 to 23 After 18 hours of laboring and adherence to a strict nonpharmacologic natural birth plan, the patient experiences late decelerations and fetal distress, requiring emergent cesarean section."
+      "D": "Decreased activity of plasma cholinesterase resulting in significantly longer duration of action of succinylcholine"
     },
     "correctAnswer": "A",
     "explanation": "Similar to physiologic anemia of pregnancy, dilution of serum albumin will result in higher free blood levels of highly protein-bound drugs (e.g., fentanyl and midazolam), resulting in a more robust clinical effect as compared to the nonpregnant state. Though plasma cholinesterase activity is also decreased, this is unlikely to be of clinical significance with regard to the duration of action of succinylcholine."
@@ -286,7 +286,7 @@ export const chapter17 = [
     "id": 21,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "To minimize the risk of aspiration and resultant pneumonitis,",
+    "stem": "Questions 21 to 23 After 18 hours of laboring and adherence to a strict nonpharmacologic natural birth plan, the patient experiences late decelerations and fetal distress, requiring emergent cesarean section. To minimize the risk of aspiration and resultant pneumonitis,",
     "options": {
       "A": "Place patient in left-uterine displacement",
       "B": "Give H2-receptor antagonist to decrease the pH of gastric fluid present in the stomach",
@@ -300,7 +300,7 @@ export const chapter17 = [
     "id": 22,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The most common cause of late decelerations in fetal heart rate (FHR) (down to 90 bpm) is",
+    "stem": "Questions 21 to 23 After 18 hours of laboring and adherence to a strict nonpharmacologic natural birth plan, the patient experiences late decelerations and fetal distress, requiring emergent cesarean section. The most common cause of late decelerations in fetal heart rate (FHR) (down to 90 bpm) is",
     "options": {
       "A": "Fetal vagal reflex",
       "B": "Compression of the fetal head",
@@ -314,12 +314,12 @@ export const chapter17 = [
     "id": 23,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "After performing a single-shot intrathecal anesthetic consisting of 7.5 mg of preservative-free bupivacaine and 25 μg of fentanyl, the surgical incision is made and systemic hypotension (78/44 mm Hg) ensued. To avoid significant decreases in uterine blood flow, first-line therapy to consider is",
+    "stem": "Questions 21 to 23 After 18 hours of laboring and adherence to a strict nonpharmacologic natural birth plan, the patient experiences late decelerations and fetal distress, requiring emergent cesarean section. After performing a single-shot intrathecal anesthetic consisting of 7.5 mg of preservative-free bupivacaine and 25 μg of fentanyl, the surgical incision is made and systemic hypotension (78/44 mm Hg) ensued. To avoid significant decreases in uterine blood flow, first-line therapy to consider is",
     "options": {
       "A": "Provide additional inhaled nitric oxide (NO) to vasodilate the uterine vasculature",
       "B": "Increase maternal cardiac output with use of epinephrine",
       "C": "Increase intravascular volume with fluids",
-      "D": "Use reverse Trendelenburg to decrease aortocaval compression Questions 24 to 25 With increasing concern of variable decelerations, a male fetus is delivered with vacuum assistance. The amniotic fluid was noted to be meconium stained. Initial evaluation reveals a cyanotic limp infant with a heart rate of 80 bpm, poor respiratory efforts, and grimacing in response to suctioning."
+      "D": "Use reverse Trendelenburg to decrease aortocaval compression"
     },
     "correctAnswer": "C",
     "explanation": "The uterine vasculature is not autoregulated and remains essentially maximally dilated under normal conditions during pregnancy. Epidural or spinal anesthesia does not pathologically alter uterine blood flow as long as maternal hypotension is avoided. Acceptable options include left-uterine displacement to minimize aortocaval compression, increase IV fluids to improve volume status, Trendelenburg position to encourage venous return, and α-adrenergic agents to increase maternal arterial blood pressure. Prompt correction of maternal hypotension will lead to best neonatal outcome."
@@ -328,7 +328,7 @@ export const chapter17 = [
     "id": 24,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Patient’s Apgar score would be",
+    "stem": "Questions 24 to 25 With increasing concern of variable decelerations, a male fetus is delivered with vacuum assistance. The amniotic fluid was noted to be meconium stained. Initial evaluation reveals a cyanotic limp infant with a heart rate of 80 bpm, poor respiratory efforts, and grimacing in response to suctioning. Patient’s Apgar score would be",
     "options": {
       "A": "0",
       "B": "3",
@@ -342,7 +342,7 @@ export const chapter17 = [
     "id": 25,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Appropriate initial steps in the resuscitation efforts would include all of the following, except",
+    "stem": "Questions 24 to 25 With increasing concern of variable decelerations, a male fetus is delivered with vacuum assistance. The amniotic fluid was noted to be meconium stained. Initial evaluation reveals a cyanotic limp infant with a heart rate of 80 bpm, poor respiratory efforts, and grimacing in response to suctioning. Appropriate initial steps in the resuscitation efforts would include all of the following, except",
     "options": {
       "A": "Tracheal suctioning",
       "B": "Provide radiant heat source",
@@ -753,7 +753,7 @@ export const chapter17 = [
       "A": "Is associated with high end-tidal CO2",
       "B": "Should be treated with nitrous oxide",
       "C": "Is associated with expired nitrogen",
-      "D": "Induces severe hypertension Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts."
+      "D": "Induces severe hypertension"
     },
     "correctAnswer": "C",
     "explanation": "VAE has a very high incidence during cesarean sections secondary to entrainment of room air from ruptured or severed veins. The sudden development of hypotension, hypoxia, and a drop in end-tidal CO2 suggests the presence of a VAE. Supportive therapy includes flooding the surgical field with normal saline and placing the patient in Trendelenburg position with a left-lateral tilt. Medical gases such as carbon dioxide, nitrous oxide, and helium will aggravate this condition by expanding the pulmonary vascular bubbles that can create an air lock with mechanical flow obstruction. If central venous catheter or pulmonary artery catheter is in place, the trapped air may be aspirated. Expired nitrogen is the most sensitive VAE-detection method, as the largest component of air is nitrogen."
@@ -762,7 +762,7 @@ export const chapter17 = [
     "id": 55,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The appropriate next step considering persistent fetal bradycardia (<80 bpm) is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The appropriate next step considering persistent fetal bradycardia (<80 bpm) is",
     "options": {
       "A": "Administer 1 mg/kg of rocuronium intravenously",
       "B": "Use bag-mask ventilation and allow surgical delivery to proceed",
@@ -776,7 +776,7 @@ export const chapter17 = [
     "id": 56,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The fetus is quickly delivered (skin-to-skin time of 18 minutes). However, 10 minutes after delivery, her uterus is noted to be boggy and bleeding persists. The appropriate treatment option is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The fetus is quickly delivered (skin-to-skin time of 18 minutes). However, 10 minutes after delivery, her uterus is noted to be boggy and bleeding persists. The appropriate treatment option is",
     "options": {
       "A": "Bolus oxytocin (Pitocin) 20 U intravenously",
       "B": "Bolus methylergonovine (Methergine) 0.2 mg intravenously",
@@ -790,7 +790,7 @@ export const chapter17 = [
     "id": 57,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Two hours later, the patient remains apneic and intubated in the intensive care unit. She is sedated and mechanically ventilated (TV = 450, RR = 12, FIO2 = 0.4) with the arterial blood gas revealing a pH of 7.45, PaO2 of 100 mm Hg, and PaCO2 of 37 mm Hg with a base excess of zero. Her examination reveals absent deep-tendon reflexes throughout. ECG reveals intermittent ventricular bigeminy. This situation could be explained by",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. Two hours later, the patient remains apneic and intubated in the intensive care unit. She is sedated and mechanically ventilated (TV = 450, RR = 12, FIO2 = 0.4) with the arterial blood gas revealing a pH of 7.45, PaO2 of 100 mm Hg, and PaCO2 of 37 mm Hg with a base excess of zero. Her examination reveals absent deep-tendon reflexes throughout. ECG reveals intermittent ventricular bigeminy. This situation could be explained by",
     "options": {
       "A": "Hypermagnesemia",
       "B": "Severe hypovolemic shock",
@@ -804,7 +804,7 @@ export const chapter17 = [
     "id": 58,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "At 3 weeks’ postpartum, the patient has absence of lactation and denies return of her menstrual cycle. Review of systems is positive for intolerance to cold, constipation, hair loss, and 2-pound weight gain. The best explanation for this constellation of symptoms is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. At 3 weeks’ postpartum, the patient has absence of lactation and denies return of her menstrual cycle. Review of systems is positive for intolerance to cold, constipation, hair loss, and 2-pound weight gain. The best explanation for this constellation of symptoms is",
     "options": {
       "A": "Amenorrhea–galactorrhea syndrome",
       "B": "Sheehan syndrome",
