@@ -678,7 +678,7 @@ export const chapter17 = [
     "id": 49,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "A 42-year-old G1P0 at 294 weeks’ gestation is undergoing intracranial clipping of a large arteriovenous malformation, following sudden onset of a severe headache with associated nausea/vomiting. Patient is intubated in the interventional radiology suite and ventilated with settings of TV = 500 mL, respiratory rate = 14 bpm, PEEP = 5 cm H2O, and FIO2 = 1.0. Arterial blood gas (ABG) 30 minutes later reveals pH = 7.55, PaO2 = 502, PaCO2 = 19, and HCO3 = 21. These findings are associated with all of the following, except",
+    "stem": "A 42-year-old G1P0 at 29+4 weeks’ gestation is undergoing intracranial clipping of a large arteriovenous malformation, following sudden onset of a severe headache with associated nausea/vomiting. Patient is intubated in the interventional radiology suite and ventilated with settings of TV = 500 mL, respiratory rate = 14 bpm, PEEP = 5 cm H2O, and FIO2 = 1.0. Arterial blood gas (ABG) 30 minutes later reveals pH = 7.55, PaO2 = 502, PaCO2 = 19, and HCO3 = 21. These findings are associated with all of the following, except",
     "options": {
       "A": "Decreased fetal cerebral oxygen delivery",
       "B": "Decreased placental transfer of oxygen",
@@ -809,7 +809,7 @@ export const chapter17 = [
       "A": "Amenorrhea–galactorrhea syndrome",
       "B": "Sheehan syndrome",
       "C": "Fibromyalgia",
-      "D": "Meigs syndrome CHAPTER 17 ANSWERS"
+      "D": "Meigs syndrome 
     },
     "correctAnswer": "B",
     "explanation": "During pregnancy, hypertrophy and hyperplasia of lactotrophs result in enlargement of the anterior pituitary, but without a corresponding increase in blood supply. As such, major hemorrhage or hypotension during labor and delivery can result in anterior pituitary ischemia and necrosis. Sheehan syndrome specifically is hypopituitarism caused by ischemic necrosis during the peripartum period. Pediatric Anesthesia Dipty Mangla and Ashish Sinha"
