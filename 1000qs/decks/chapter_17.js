@@ -95,7 +95,7 @@ export const chapter17 = [
       "A": "2-Chloroprocaine neurotoxicity",
       "B": "Inadvertent subdural injection",
       "C": "Anterior spinal artery syndrome",
-      "D": "Brown-Séquard syndrome Questions 8 to 9 A 23-year-old female, in early labor, was transferred from an outside hospital at 37 weeks’ gestation with a history of a congenital bicuspid aortic valve. The patient reports dyspnea throughout her pregnancy, and had a recent syncopal event. Subsequently, transthoracic echocardiogram revealed a mean aortic valve gradient of 45 mm Hg and an aortic valve area of 1.2 cm2."
+      "D": "Brown-Séquard syndrome"
     },
     "correctAnswer": "C",
     "explanation": "The anterior spinal cord achieves its blood supply from the anterior spinal artery, which is single and unpaired. Due to this, injury or thrombosis can lead to a unique constellation of symptoms consisting of loss of motor function, pain, and temperature below the level of the injury, bilaterally. The posterior columns, carrying fine touch and proprioception, are preserved as paired posterior spinal arteries supply."
@@ -104,7 +104,7 @@ export const chapter17 = [
     "id": 8,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Two hours later, she endorses abdominal pain (8/10) and is requesting analgesia. The most appropriate option for her pain management during labor and delivery is",
+    "stem": "Questions 8 to 9 A 23-year-old female, in early labor, was transferred from an outside hospital at 37 weeks’ gestation with a history of a congenital bicuspid aortic valve. The patient reports dyspnea throughout her pregnancy, and had a recent syncopal event. Subsequently, transthoracic echocardiogram revealed a mean aortic valve gradient of 45 mm Hg and an aortic valve area of 1.2 cm2. Two hours later, she endorses abdominal pain (8/10) and is requesting analgesia. The most appropriate option for her pain management during labor and delivery is",
     "options": {
       "A": "Spinal anesthetic with bupivacaine",
       "B": "Epidural anesthesia with adequate volume preloading",
@@ -118,7 +118,7 @@ export const chapter17 = [
     "id": 9,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Despite an appropriate increase in her cardiac output and plasma volume, her systemic blood pressure does not increase during the course of her pregnancy because of",
+    "stem": "Questions 8 to 9 A 23-year-old female, in early labor, was transferred from an outside hospital at 37 weeks’ gestation with a history of a congenital bicuspid aortic valve. The patient reports dyspnea throughout her pregnancy, and had a recent syncopal event. Subsequently, transthoracic echocardiogram revealed a mean aortic valve gradient of 45 mm Hg and an aortic valve area of 1.2 cm2. Despite an appropriate increase in her cardiac output and plasma volume, her systemic blood pressure does not increase during the course of her pregnancy because of",
     "options": {
       "A": "Decrease in systemic vascular resistance",
       "B": "Compression of the vena cava",
