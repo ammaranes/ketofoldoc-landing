@@ -697,7 +697,7 @@ export const chapter20 = [
       "A": "Craniotomy",
       "B": "Colectomy",
       "C": "Gastric bypass",
-      "D": "Hip arthroplasty CHAPTER 20 ANSWERS"
+      "D": "Hip arthroplasty"
     },
     "correctAnswer": "A",
     "explanation": "A number of patient, procedural, and postoperative factors can contribute to the development of postoperative hypertension. Patients with a history of essential hypertension are at greatest risk for significant systemic hypertension in the postanesthesia care unit. Advanced age, history of cigarette smoking, and preexisting renal disease are other patient-related risk factors for postoperative hypertension. Surgical procedures that predispose the patient to postoperative hypertension include craniotomy and carotid endarterectomy. Other common postoperative causes of hypertension include pain, hypoxemia, hypoventilation and associated hypercapnia, emergence excitement, shivering, bladder distension, drug withdrawal, and hypervolemia. Miscellaneous Topics Paul Sikka and Thomas Halaszynski"
