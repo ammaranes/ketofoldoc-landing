@@ -123,7 +123,7 @@ export const chapter14 = [
       "A": "Hemolytic transfusion reaction",
       "B": "Leukoagglutinin reaction",
       "C": "Dilutional thrombocytopenia",
-      "D": "Dilutional coagulopathy Questions 10 to 12 A 26-year-old male patient with a history of severe ulcerative colitis, unresponsive to conservative measures, presents for elective open total abdominal colectomy with end ileostomy. He has been unable to eat for the last 2 weeks and was started on total parenteral nutrition (TPN) several days prior."
+      "D": "Dilutional coagulopathy"
     },
     "correctAnswer": "A",
     "explanation": "An acute hemolytic transfusion reaction is associated with hemolysis of transfused blood, usually related to ABO incompatibility with associated hemoglobinuria. Pulmonary leukoagglutinin reaction is related to the presence of antileukocyte antibodies in donor plasma leading to transfusion- related acute lung injury."
@@ -132,7 +132,7 @@ export const chapter14 = [
     "id": 10,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Intraoperative effect that should be expected and monitored for is",
+    "stem": "Questions 10 to 12 A 26-year-old male patient with a history of severe ulcerative colitis, unresponsive to conservative measures, presents for elective open total abdominal colectomy with end ileostomy. He has been unable to eat for the last 2 weeks and was started on total parenteral nutrition (TPN) several days prior. Intraoperative effect that should be expected and monitored for is",
     "options": {
       "A": "Dilutional anemia",
       "B": "Hyperglycemia",
@@ -146,7 +146,7 @@ export const chapter14 = [
     "id": 11,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "At the conclusion of the surgery, the patient fails to regain consciousness. The metabolic complication of TPN (Table 14-1) that is likely is Table 14-1 Metabolic Complications of TPN. Glucose (hypoglycemia, hyperosmolar nonketotic coma) Protein (hyperammonemia) Hypercalcemia Hypophosphatemia Essential fatty acid deficiency Vitamin toxicity",
+    "stem": "Questions 10 to 12 A 26-year-old male patient with a history of severe ulcerative colitis, unresponsive to conservative measures, presents for elective open total abdominal colectomy with end ileostomy. He has been unable to eat for the last 2 weeks and was started on total parenteral nutrition (TPN) several days prior. At the conclusion of the surgery, the patient fails to regain consciousness. The metabolic complication of TPN (Table 14-1) that is likely is Table 14-1 Metabolic Complications of TPN. Glucose (hypoglycemia, hyperosmolar nonketotic coma) Protein (hyperammonemia) Hypercalcemia Hypophosphatemia Essential fatty acid deficiency Vitamin toxicity",
     "options": {
       "A": "Azotemia",
       "B": "Hyperkalemia",
@@ -160,7 +160,7 @@ export const chapter14 = [
     "id": 12,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Consider that the patient opens his eyes and is extubated in the operating room. However, 15 minutes after arriving to the recovery room (PACU) he is unable to maintain adequate ventilation and oxygenation. Physical exam reveals profound global weakness with absent reflexes. The specific electrolyte abnormality that should be evaluated considering his TPN requirement is",
+    "stem": "Questions 10 to 12 A 26-year-old male patient with a history of severe ulcerative colitis, unresponsive to conservative measures, presents for elective open total abdominal colectomy with end ileostomy. He has been unable to eat for the last 2 weeks and was started on total parenteral nutrition (TPN) several days prior. Consider that the patient opens his eyes and is extubated in the operating room. However, 15 minutes after arriving to the recovery room (PACU) he is unable to maintain adequate ventilation and oxygenation. Physical exam reveals profound global weakness with absent reflexes. The specific electrolyte abnormality that should be evaluated considering his TPN requirement is",
     "options": {
       "A": "Potassium",
       "B": "Phosphate",
@@ -291,7 +291,7 @@ export const chapter14 = [
       "A": "Resting tachycardia",
       "B": "Widened pulse pressure",
       "C": "Increased peripheral vascular resistance",
-      "D": "Increased cardiac output Questions 22 to 23 A 120-kg diabetic male is scheduled for emergent pinning of his mandible after a motor vehicle accident. His wife reports that he snores loudly every night with occurrences of breathing cessation. Medical history is also significant for hypertension controlled with a diuretic. On physical examination, he has a large tongue and a wide neck with inadequate mouth opening revealing a Mallampati grade 4 view. His BMI is 38 kg/m2 with a neck circumference of 44 cm."
+      "D": "Increased cardiac output"
     },
     "correctAnswer": "C",
     "explanation": "Cirrhosis is typically associated with several cardiovascular abnormalities including a hyperdynamic circulation characterized by increased cardiac output and decreased peripheral resistance. Other cardiovascular changes include a resting tachycardia, warm peripheries, a bounding pulse, and a widened pulse pressure."
@@ -300,7 +300,7 @@ export const chapter14 = [
     "id": 22,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Arterial blood gas (ABG) finding that would confirm Pickwickian syndrome is",
+    "stem": "Questions 22 to 23 A 120-kg diabetic male is scheduled for emergent pinning of his mandible after a motor vehicle accident. His wife reports that he snores loudly every night with occurrences of breathing cessation. Medical history is also significant for hypertension controlled with a diuretic. On physical examination, he has a large tongue and a wide neck with inadequate mouth opening revealing a Mallampati grade 4 view. His BMI is 38 kg/m2 with a neck circumference of 44 cm. Arterial blood gas (ABG) finding that would confirm Pickwickian syndrome is",
     "options": {
       "A": "pH = 7.44, PaCO2 = 44, PaO2 = 90, HCO3 = 24",
       "B": "pH = 7.35, PaCO2 = 44, PaO2 = 65, HCO3 = 26",
@@ -314,7 +314,7 @@ export const chapter14 = [
     "id": 23,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The dose of thiopental required for rapid-sequence induction would be increased, as compared with what would be required at his ideal body weight, because of changes in",
+    "stem": "Questions 22 to 23 A 120-kg diabetic male is scheduled for emergent pinning of his mandible after a motor vehicle accident. His wife reports that he snores loudly every night with occurrences of breathing cessation. Medical history is also significant for hypertension controlled with a diuretic. On physical examination, he has a large tongue and a wide neck with inadequate mouth opening revealing a Mallampati grade 4 view. His BMI is 38 kg/m2 with a neck circumference of 44 cm. The dose of thiopental required for rapid-sequence induction would be increased, as compared with what would be required at his ideal body weight, because of changes in",
     "options": {
       "A": "Decreased basal metabolic rate",
       "B": "Increased blood volume",
@@ -347,7 +347,7 @@ export const chapter14 = [
       "A": "Creatinine",
       "B": "INR (international normalized ratio)",
       "C": "Bilirubin",
-      "D": "Albumin Questions 26 to 28 A 30-year-old male patient without preoperative renal dysfunction is undergoing a primary orthotopic liver transplant (OLT) for failure due to inherited α1- antitrypsin deficiency."
+      "D": "Albumin"
     },
     "correctAnswer": "D",
     "explanation": "The MELD score is a formulaic calculation utilizing three variables: creatinine, INR, and bilirubin. For dialysis-dependent patients, the creatinine score is automatically set to 4 mg/dL despite true serum levels. MELD score = 10 × [0.957 × log e (creatinine) + log e (bilirubin) + 1.12 × log e (INR)] + 6.43"
@@ -356,7 +356,7 @@ export const chapter14 = [
     "id": 26,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "During cross-clamping of the suprahepatic inferior vena cava (IVC), the most accurate effect created by use of venovenous bypass (VVB) is that it",
+    "stem": "Questions 26 to 28 A 30-year-old male patient without preoperative renal dysfunction is undergoing a primary orthotopic liver transplant (OLT) for failure due to inherited α1- antitrypsin deficiency. During cross-clamping of the suprahepatic inferior vena cava (IVC), the most accurate effect created by use of venovenous bypass (VVB) is that it",
     "options": {
       "A": "Induces urinary retention",
       "B": "Prevents metabolic acidosis",
@@ -370,7 +370,7 @@ export const chapter14 = [
     "id": 27,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Immediately before unclamping and reperfusion of the transplanted liver, sodium bicarbonate and calcium chloride are administered intravenously to counteract",
+    "stem": "Questions 26 to 28 A 30-year-old male patient without preoperative renal dysfunction is undergoing a primary orthotopic liver transplant (OLT) for failure due to inherited α1- antitrypsin deficiency. Immediately before unclamping and reperfusion of the transplanted liver, sodium bicarbonate and calcium chloride are administered intravenously to counteract",
     "options": {
       "A": "Coagulopathy",
       "B": "Decreased cardiac output",
@@ -384,7 +384,7 @@ export const chapter14 = [
     "id": 28,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "At the end of the case as the drapes are taken down, diffuse microvascular bleeding is noted in this patient who required 15 U of blood during his intraoperative course. Platelet count is 40,000/mm3, prothrombin time is 18 seconds, activated partial thromboplastin time (PTT) is 54 seconds, D- dimer is 2,000 ng/mL, and serum fibrinogen concentration is 40 mg/dL. The most likely cause of bleeding is",
+    "stem": "Questions 26 to 28 A 30-year-old male patient without preoperative renal dysfunction is undergoing a primary orthotopic liver transplant (OLT) for failure due to inherited α1- antitrypsin deficiency. At the end of the case as the drapes are taken down, diffuse microvascular bleeding is noted in this patient who required 15 U of blood during his intraoperative course. Platelet count is 40,000/mm3, prothrombin time is 18 seconds, activated partial thromboplastin time (PTT) is 54 seconds, D- dimer is 2,000 ng/mL, and serum fibrinogen concentration is 40 mg/dL. The most likely cause of bleeding is",
     "options": {
       "A": "Disseminated intravascular coagulation (DIC)",
       "B": "Abnormal platelet function",
@@ -459,7 +459,7 @@ export const chapter14 = [
       "A": "Diabetes mellitus",
       "B": "Celiac plexus block",
       "C": "Vagotomy",
-      "D": "μ-Receptor agonism Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2)."
+      "D": "μ-Receptor agonism"
     },
     "correctAnswer": "B",
     "explanation": "Sympathetic celiac plexus blockade leaves parasympathetic fibers unopposed with associated increased gastrointestinal motility and possible diarrhea."
@@ -468,7 +468,7 @@ export const chapter14 = [
     "id": 34,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "All of the following are correct statements regarding pathophysiologic changes associated with creation of the pneumoperitoneum, except",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). All of the following are correct statements regarding pathophysiologic changes associated with creation of the pneumoperitoneum, except",
     "options": {
       "A": "Increased risk of reflux and aspiration",
       "B": "Decreased venous return",
@@ -482,7 +482,7 @@ export const chapter14 = [
     "id": 35,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Inherent risks of abdominal laparoscopy include",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). Inherent risks of abdominal laparoscopy include",
     "options": {
       "A": "Renal failure",
       "B": "Bronchospasm",
@@ -496,7 +496,7 @@ export const chapter14 = [
     "id": 36,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The patient is placed in a steep Trendelenburg position. Her oxygen saturation begins to gradually decline over the course of several minutes while being ventilated with 100% oxygen (FIO2 = 1.0). The initial step in the management of her hypoxemia is",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). The patient is placed in a steep Trendelenburg position. Her oxygen saturation begins to gradually decline over the course of several minutes while being ventilated with 100% oxygen (FIO2 = 1.0). The initial step in the management of her hypoxemia is",
     "options": {
       "A": "Add positive end–expiratory pressure (PEEP)",
       "B": "Intravenous bolus of 500 mL saline",
@@ -510,7 +510,7 @@ export const chapter14 = [
     "id": 37,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The exploratory surgery progresses slowly. Over the next 3 hours, her EtCO2 begins to gradually rise, requiring increasing minute ventilation. All of the following contribute to the degree of systemic CO2 absorption, except",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). The exploratory surgery progresses slowly. Over the next 3 hours, her EtCO2 begins to gradually rise, requiring increasing minute ventilation. All of the following contribute to the degree of systemic CO2 absorption, except",
     "options": {
       "A": "Solubility of the gas",
       "B": "Intra-abdominal pressures (IAP)",
@@ -524,7 +524,7 @@ export const chapter14 = [
     "id": 38,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Each of the following is hemodynamic change associated with hypercarbia, except",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). Each of the following is hemodynamic change associated with hypercarbia, except",
     "options": {
       "A": "Arrhythmias",
       "B": "Bradycardia",
@@ -538,7 +538,7 @@ export const chapter14 = [
     "id": 39,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The surgery continues on with a request to increase the pneumoperitoneum to 30 mm Hg to improve the surgical view. All of the following are appropriate in the differential diagnosis for hypotension during laparoscopy, except",
+    "stem": "Questions 34 to 39 A 33-year-old otherwise-healthy female suffering from moderately severe abdominal pain of unclear etiology is set to undergo an exploratory laparoscopy. The abdominal cavity is insufflated using carbon dioxide (CO2). The surgery continues on with a request to increase the pneumoperitoneum to 30 mm Hg to improve the surgical view. All of the following are appropriate in the differential diagnosis for hypotension during laparoscopy, except",
     "options": {
       "A": "Compression of the inferior vena cava",
       "B": "Increase cardiac afterload",
@@ -585,7 +585,7 @@ export const chapter14 = [
       "A": "Proceed with total IV anesthesia (TIVA), avoiding inhaled anesthetics",
       "B": "Avoid regional anesthesia",
       "C": "Liberally infuse intravenous fluids",
-      "D": "Use metoclopramide to decrease gastric secretions Questions 43 to 45 A 70-year-old 70-kg male with benign prostatic hypertrophy and difficulty with urination presents for a transurethral resection of his 65-g prostate (TURP). His other pertinent history includes hypertension and hyperlipidemia, both well controlled. He has a remote history of a lumbar spinal fusion with no current lumbar symptomatology. The patient requests a general anesthetic for the procedure and refuses spinal anesthesia."
+      "D": "Use metoclopramide to decrease gastric secretions"
     },
     "correctAnswer": "A",
     "explanation": "Transplant recipients are always under various regimens of immunosuppression to prevent organ rejection. Clinically significant reductions in serum levels of these medications can be caused by dilution with massive fluid resuscitation perioperatively, as well as with cardiopulmonary bypass. Many immunosuppressants are metabolized in the liver via the cytochrome P450 system such that drugs administered during anesthesia (or perioperatively) may affect blood levels including increased concentrations with cimetidine and metoclopramide and decreased levels with octreotide. Regional anesthesia and/or TIVA are reasonable options to minimize PONV in this patient."
@@ -594,7 +594,7 @@ export const chapter14 = [
     "id": 43,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Assuming the use of a hypotonic irrigant, these factors will contribute to the amount of fluid absorbed by the patient, except",
+    "stem": "Questions 43 to 45 A 70-year-old 70-kg male with benign prostatic hypertrophy and difficulty with urination presents for a transurethral resection of his 65-g prostate (TURP). His other pertinent history includes hypertension and hyperlipidemia, both well controlled. He has a remote history of a lumbar spinal fusion with no current lumbar symptomatology. The patient requests a general anesthetic for the procedure and refuses spinal anesthesia. Assuming the use of a hypotonic irrigant, these factors will contribute to the amount of fluid absorbed by the patient, except",
     "options": {
       "A": "Venous pressure",
       "B": "Hydrostatic pressure of the irrigation infusion",
@@ -608,7 +608,7 @@ export const chapter14 = [
     "id": 44,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "In the recovery room, he complains of bothersome localized suprapubic pain and is requesting pain medicine. He denies pain or discomfort anywhere else. His review of systems is negative for fevers or chills. The relatively common complication of this procedure that should be ruled out at this time is",
+    "stem": "Questions 43 to 45 A 70-year-old 70-kg male with benign prostatic hypertrophy and difficulty with urination presents for a transurethral resection of his 65-g prostate (TURP). His other pertinent history includes hypertension and hyperlipidemia, both well controlled. He has a remote history of a lumbar spinal fusion with no current lumbar symptomatology. The patient requests a general anesthetic for the procedure and refuses spinal anesthesia. In the recovery room, he complains of bothersome localized suprapubic pain and is requesting pain medicine. He denies pain or discomfort anywhere else. His review of systems is negative for fevers or chills. The relatively common complication of this procedure that should be ruled out at this time is",
     "options": {
       "A": "Hyponatremia",
       "B": "Glycine toxicity",
@@ -622,7 +622,7 @@ export const chapter14 = [
     "id": 45,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The patient is administered hydromorphone intravenously, and 20 minutes later is feeling well with minimal pain complaints. At this time, his postoperative laboratories have returned, revealing a serum sodium value of 130 mEq/L. The most appropriate next step in the management of his hyponatremia is",
+    "stem": "Questions 43 to 45 A 70-year-old 70-kg male with benign prostatic hypertrophy and difficulty with urination presents for a transurethral resection of his 65-g prostate (TURP). His other pertinent history includes hypertension and hyperlipidemia, both well controlled. He has a remote history of a lumbar spinal fusion with no current lumbar symptomatology. The patient requests a general anesthetic for the procedure and refuses spinal anesthesia. The patient is administered hydromorphone intravenously, and 20 minutes later is feeling well with minimal pain complaints. At this time, his postoperative laboratories have returned, revealing a serum sodium value of 130 mEq/L. The most appropriate next step in the management of his hyponatremia is",
     "options": {
       "A": "Hypertonic saline infusion",
       "B": "Fluid restriction",
@@ -641,7 +641,7 @@ export const chapter14 = [
       "A": "Hypernatremia",
       "B": "Decreased risk for acute tubular necrosis",
       "C": "Metabolic alkalosis",
-      "D": "Hyperkalemia Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure."
+      "D": "Hyperkalemia"
     },
     "correctAnswer": "C",
     "explanation": "As with many diuretics, furosemide can cause dehydration and electrolyte imbalance, including loss of potassium, calcium, sodium, and magnesium. Excessive use of furosemide will most likely lead to a metabolic alkalosis due to hypochloremia and hypokalemia."
@@ -650,7 +650,7 @@ export const chapter14 = [
     "id": 47,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The step of the epidural placement that should be avoided in this patient is",
+    "stem": "Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure. The step of the epidural placement that should be avoided in this patient is",
     "options": {
       "A": "Loss of resistance to air",
       "B": "Loss of resistance to hanging drop",
@@ -664,7 +664,7 @@ export const chapter14 = [
     "id": 48,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Once the epidural is adequately placed and the patient is immersed sitting in the water tank, the physiologic change that should be expected is",
+    "stem": "Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure. Once the epidural is adequately placed and the patient is immersed sitting in the water tank, the physiologic change that should be expected is",
     "options": {
       "A": "Decreased central venous pressure",
       "B": "Increased vital capacity",
@@ -678,7 +678,7 @@ export const chapter14 = [
     "id": 49,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Extracorporeal shock wave lithotripsy therapy proceeds with the shock wave synchronized with what ECG phase of the cardiac cycle?",
+    "stem": "Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure. Extracorporeal shock wave lithotripsy therapy proceeds with the shock wave synchronized with what ECG phase of the cardiac cycle?",
     "options": {
       "A": "The P wave",
       "B": "The Q wave",
@@ -692,7 +692,7 @@ export const chapter14 = [
     "id": 50,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Which of the following statements would be considered false with regard to extracorporeal shock wave lithotripsy (ESWL)?",
+    "stem": "Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure. Which of the following statements would be considered false with regard to extracorporeal shock wave lithotripsy (ESWL)?",
     "options": {
       "A": "Delivery of the shock wave is timed to coincide with the ventricular refractory phase",
       "B": "Neuraxial anesthesia up to T2 sensory level is adequate",
@@ -706,7 +706,7 @@ export const chapter14 = [
     "id": 51,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "All of the following are contraindications to immersion extracorporeal shock wave lithotripsy, except",
+    "stem": "Questions 47 to 51 A 38-year-old woman is set to undergo extracorporeal shock wave lithotripsy to disintegrate a painful stone trapped in her upper ureter. The patient is requesting an epidural anesthetic and is choosing to be otherwise awake and cooperative with her positioning and procedure. All of the following are contraindications to immersion extracorporeal shock wave lithotripsy, except",
     "options": {
       "A": "Harrington rod implants",
       "B": "Abdominally placed rate-responsive cardiac pacemaker",
@@ -753,7 +753,7 @@ export const chapter14 = [
       "A": "Hyaline casts",
       "B": "Urine specific gravity <1.010",
       "C": "Muddy casts",
-      "D": "Fractional excretion of sodium of 4% Questions 55 to 56 A 75-year-old patient who is awaiting urgent laparotomy has had oliguria for the past 12 hours since the onset of his acute abdominal pain last night. His medical history includes well-controlled hypertension. Vital signs include a BP of 120/65 mm Hg and a HR of 72 bpm. His laboratory findings reveal Urine osmolality: 550 mOsm/L Urine specific gravity: 1.020 Urine sodium concentration: 15 mmol/L Fractional excretion of sodium: 0.5% Ratio of urine-to-plasma urea concentration: 10"
+      "D": "Fractional excretion of sodium of 4%"
     },
     "correctAnswer": "A",
     "explanation": "Acute tubular necrosis is classified as a “renal” (e.g., not prerenal or postrenal) cause of acute kidney injury. Diagnosis is made by a fractional excretion of sodium >3%, greater than expected urine sodium concentration with low osmolality and presence of muddy casts on urinalysis. A sensitive indicator of tubular function is sodium handling because the ability of an injured tubule to reabsorb sodium is impaired, whereas an intact tubule can maintain this resorptive capacity. If the patient has tubular damage for any reason, the urinary sodium will be greater than expected. Keep in mind that the use of diuretics, however, can complicate the interpretation of these results. Low urine flow, concentrated urine, or an acidic environment can contribute to the formation of hyaline casts, pointing to hypovolemia and prerenal failure (Table 14-3). Table 14-3 Differentiation between Prerenal and Intrinsic Renal Failure. PARAMETER PRERENAL FAILURE ACUTE TUBULAR NECR Urine Na+ (meq/L) <20 >40 Urine osmolality (mOsm/kg) >500 <350 FENa % <1 >2 Urea % <35 >35 Urine specific gravity >1,020 <1,010 Urine:plasma urea ratio >10:1 <7:1"
@@ -762,7 +762,7 @@ export const chapter14 = [
     "id": 55,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "The most appropriate treatment of his oliguria is",
+    "stem": "Questions 55 to 56 A 75-year-old patient who is awaiting urgent laparotomy has had oliguria for the past 12 hours since the onset of his acute abdominal pain last night. His medical history includes well-controlled hypertension. Vital signs include a BP of 120/65 mm Hg and a HR of 72 bpm. His laboratory findings reveal Urine osmolality: 550 mOsm/L Urine specific gravity: 1.020 Urine sodium concentration: 15 mmol/L Fractional excretion of sodium: 0.5% Ratio of urine-to-plasma urea concentration: 10. The most appropriate treatment of his oliguria is",
     "options": {
       "A": "Fluid restriction",
       "B": "Fluid challenge",
@@ -776,7 +776,7 @@ export const chapter14 = [
     "id": 56,
     "chapter": 14,
     "chapterTitle": "Gastrointestinal, Liver, and Renal Diseases",
-    "stem": "Fluid resuscitation is done with 4 L of normal saline. The potential acid– base abnormality that can occur is",
+    "stem": "Questions 55 to 56 A 75-year-old patient who is awaiting urgent laparotomy has had oliguria for the past 12 hours since the onset of his acute abdominal pain last night. His medical history includes well-controlled hypertension. Vital signs include a BP of 120/65 mm Hg and a HR of 72 bpm. His laboratory findings reveal Urine osmolality: 550 mOsm/L Urine specific gravity: 1.020 Urine sodium concentration: 15 mmol/L Fractional excretion of sodium: 0.5% Ratio of urine-to-plasma urea concentration: 10. Fluid resuscitation is done with 4 L of normal saline. The potential acid– base abnormality that can occur is",
     "options": {
       "A": "Hyperchloremic acidosis",
       "B": "Metabolic alkalosis",
@@ -795,7 +795,7 @@ export const chapter14 = [
       "A": "Meperidine",
       "B": "Codeine",
       "C": "Dextropropoxyphene",
-      "D": "Fentanyl CHAPTER 14 ANSWERS"
+      "D": "Fentanyl"
     },
     "correctAnswer": "D",
     "explanation": "Chronic pain is common in chronic kidney disease and most will rate their pain as moderate to severe. The absorption, metabolism, and renal clearance of opioids are complex in renal failure. However, with the appropriate selection and titration of opioids, patients with renal failure can achieve analgesia with minimal risk of adverse effects. Meperidine is not recommended in renal failure due to accumulation of normeperidine, which may cause seizures. Morphine is not recommended for chronic use in renal insufficiency due to the rapid accumulation of its active nondialyzable metabolite (morphine-6-glucuronide). Codeine has been reported to cause profound renal toxicity, which can be delayed and may occur after trivial doses. Dextropropoxyphene is associated with central nervous system and cardiac toxicity and is not recommended for use in patients with renal failure. On the other hand, fentanyl is considered relatively safe in renal failure, as it has no active metabolites. Endocrine Diseases Jean Kwo and Edward Bittner"
