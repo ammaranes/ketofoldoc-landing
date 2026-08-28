@@ -291,7 +291,7 @@ export const chapter10 = [
       "A": "Spinal cord injury",
       "B": "Ischemia induced by hypoperfusion",
       "C": "Intraoperative bleeding",
-      "D": "All of the above CHAPTER 10 ANSWERS"
+      "D": "All of the above"
     },
     "correctAnswer": "D",
     "explanation": "There are a host of reasons causing negative SSEP-tracing changes. In addition to several anesthetic considerations (from anesthetic agent choice to techniques used), there are surgical techniques and considerations that can influence SSEP. Direct trauma, ischemia, and pressure to the spinal cord are capable of inducing acute changes on SSEP. In addition, spinal cord ischemia changes secondary to decreased blood supply, and/or vessel injury (stretching/pressure) may take as much as a half an hour to manifest itself. Cardiovascular Anesthesia Deppu Ushakumari and Ashish Sinha"
