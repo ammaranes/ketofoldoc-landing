@@ -490,14 +490,38 @@
       nextBtn: document.getElementById('btn-next')
     };
 
-    async function initApp() {
+        async function initApp() {
       let allChapters = [];
       try {
-        const module = await import('./decks/index.js');
-        allChapters = module.allChapters;
+        // Use root-relative path with cache-busting to prevent Safari 404 & stale cache bugs
+        const module = await import('/1000qs/decks/index.js');
+        allChapters = module.allChapters || module.allDecks || module.default || [];
       } catch (err) {
-        console.error("Failed to load module ./decks/index.js", err);
+        console.error("Failed to load module /1000qs/decks/index.js", err);
+        // Fallback relative path check
+        try {
+          const fallbackMod = await import('./decks/index.js');
+          allChapters = fallbackMod.allChapters || fallbackMod.allDecks || fallbackMod.default || [];
+        } catch (e) {
+          console.error("Fallback import also failed", e);
+        }
       }
+
+      if (!allChapters || allChapters.length === 0) {
+        const listEl = document.getElementById('deck-list');
+        if (listEl) {
+          listEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-center text-xs text-rose-300 space-y-2">
+              <p class="font-bold">⚠️ Chapters could not be loaded</p>
+              <p class="text-[11px] text-slate-400">Please verify your internet connection or reload the page.</p>
+              <button onclick="window.location.reload(true)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold text-xs transition">
+                Force Reload
+              </button>
+            </div>
+          `;
+        }
+      }
+
 
       // Formatting Helper with DOMPurify XSS Prevention
       function formatMarkdown(text) {
