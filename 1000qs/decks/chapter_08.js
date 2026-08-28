@@ -655,7 +655,7 @@ export const chapter08 = [
       "A": "Performance of paravertebral blockade creates identical concerns about potential hemodynamic compromise as do thoracic epidural blocks",
       "B": "Local anesthetic toxicity as the paravertebral space is very vascular",
       "C": "Possible epidural spread of local anesthetics from either one or both the paravertebral catheters",
-      "D": "Venous bleeding into the paravertebral space resulting in large volumes of local anesthetic absorption from the paravertebral blocks CHAPTER 8 ANSWERS"
+      "D": "Venous bleeding into the paravertebral space resulting in large volumes of local anesthetic absorption from the paravertebral blocks"
     },
     "correctAnswer": "C",
     "explanation": "A potential advantage of paravertebral blockade compared to neuraxial blockade is a reduced incidence of creating an intense sympathectomy resulting in hemodynamic compromise. However, when bilateral paravertebral blocks are performed, the potential exists that epidural spread could be significant, resulting in an observation of a moderate BP decrease. Pain Management Thomas Halaszynski"
