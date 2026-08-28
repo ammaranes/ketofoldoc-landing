@@ -9,12 +9,17 @@
   <title>KetofolDoc | Anesthesia Board Preparation & Analytics Hub</title>
   
   <!-- Favicon & Touch Icons -->
-  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Firebase SDKs (v9 Compat Mode - Aligned with Sub-Platforms) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -31,7 +36,7 @@
       
       <!-- Brand Logo & Title -->
       <a href="/" class="flex items-center space-x-3 group">
-        <img src="logo.svg" alt="KetofolDoc Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain group-hover:border-slate-500 transition" />
+        <img src="/logo.svg" alt="KetofolDoc Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain group-hover:border-slate-500 transition" />
         <div>
           <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight block leading-tight group-hover:text-blue-400 transition">
             KetofolDoc
@@ -49,7 +54,7 @@
           3 Platforms Live
         </span>
 
-        <!-- Google Sign-In Header Trigger -->
+        <!-- Dynamic Auth Header Trigger -->
         <button id="btn-auth-header" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500/60 rounded-xl text-xs font-semibold text-slate-200 flex items-center space-x-2 transition shadow-sm">
           <svg id="google-icon-header" class="w-3.5 h-3.5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -64,11 +69,11 @@
     </div>
   </header>
 
-  <!-- Main Content Canvas -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-10 sm:space-y-16">
+  <!-- Main Content Canvas (Fixed Header Overlap with pt-8 sm:pt-12) -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16 space-y-10 sm:space-y-16">
     
-    <!-- 1️⃣ HERO SECTION (Streamlined with Quick Actions) -->
-    <section class="text-center max-w-3xl mx-auto pt-4 sm:pt-8">
+    <!-- 1️⃣ HERO SECTION -->
+    <section class="text-center max-w-3xl mx-auto pt-2 sm:pt-6">
       <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold mb-4 shadow-inner">
         <i data-lucide="compass" class="w-4 h-4 text-blue-400"></i>
         <span>The Next-Generation Anesthesia Board Platform</span>
@@ -296,14 +301,13 @@
       </div>
     </section>
 
-    <!-- 4️⃣ ABOUT / VISION PILLARS (Moved Down for UX) -->
+    <!-- 4️⃣ WHY KETOFOLDOC PILLARS -->
     <section class="pt-8 border-t border-slate-800/60">
       <div class="text-center max-w-2xl mx-auto mb-10">
         <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mb-3">Why KetofolDoc?</h2>
         <p class="text-sm text-slate-400">The science behind our precision learning ecosystem.</p>
       </div>
 
-      <!-- 4 Core Vision Pillars -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition shadow-lg">
           <div>
@@ -415,13 +419,13 @@
 
   </main>
 
-  <!-- 💬 Floating Feedback Trigger Button -->
+  <!-- Floating Feedback Trigger Button -->
   <button id="btn-feedback-trigger" class="fixed bottom-6 right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-4 py-2.5 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-blue-400"></i>
     <span>Feedback</span>
   </button>
 
-  <!-- 📝 Global Context-Aware Feedback Modal -->
+  <!-- Global Context-Aware Feedback Modal -->
   <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
@@ -477,7 +481,6 @@
 
         <div>
           <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
-          <!-- Fixed iOS Safari Zoom Bug by changing text-xs sm:text-sm to text-base -->
           <textarea id="feedback-comment" rows="4" placeholder="Share your suggestions, thoughts, or report an issue..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
         </div>
 
@@ -509,13 +512,8 @@
     </div>
   </footer>
 
-  <!-- Firebase Modular SDK & Google Auth Engine -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { getFirestore, doc, onSnapshot, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-    // 🔑 KetofolDoc Unified Firebase Configuration
+  <!-- Firebase Auth & Real-Time Sync Engine (Compatible v9 Execution) -->
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -528,9 +526,9 @@
     let auth = null, db = null, currentUser = null, unsubDashboardSnapshot = null;
 
     try {
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
     } catch (e) {
       console.warn("Firebase initialization warning:", e);
     }
@@ -538,7 +536,6 @@
     const BENCHMARK_QUESTIONS = 1450;
     const BENCHMARK_SUMMARIES = 52;
 
-    // 🚀 CACHED DOM ELEMENTS for Performance in Snapshot Listeners
     const DOM = {
       greeting: document.getElementById('dash-greeting'),
       readinessPercent: document.getElementById('dash-readiness-percent'),
@@ -559,28 +556,35 @@
     async function handleGoogleAuth() {
       if (!auth) return;
       if (currentUser) {
-        if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) await signOut(auth);
+        if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
+          await auth.signOut();
+        }
       } else {
-        const provider = new GoogleAuthProvider();
-        try { await signInWithPopup(auth, provider); } catch (err) { console.error("Google sign-in failed:", err); }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try { 
+          await auth.signInWithPopup(provider); 
+        } catch (err) { 
+          console.error("Google sign-in failed:", err); 
+        }
       }
     }
 
     document.getElementById('btn-auth-header').onclick = handleGoogleAuth;
     document.getElementById('btn-dashboard-signin').onclick = handleGoogleAuth;
 
-    // Extractor Logic
+    // Card State Extractor Supporting All Progress Formats
     function extractCardList(source) {
       if (!source || typeof source !== 'object') return [];
       if (source.card_states && typeof source.card_states === 'object') {
-        return Object.values(source.card_states).filter(c => c && (c.reps || 0) > 0);
+        return Object.values(source.card_states).filter(c => c && ((c.reps || c.repetitions || 0) > 0 || c.interval > 0));
       }
       const prog = source.userProgress || source;
       const extracted = [];
       Object.entries(prog).forEach(([deckId, deck]) => {
-        if (deck && typeof deck === 'object' && deck.srs) {
+        if (deck && typeof deck === 'object') {
           const answers = deck.answers || {};
-          Object.entries(deck.srs).forEach(([idxStr, srsItem]) => {
+          const srs = deck.srs || {};
+          Object.entries(srs).forEach(([idxStr, srsItem]) => {
             const reps = srsItem?.repetitions || srsItem?.reps || 0;
             const wasAnswered = answers[idxStr] !== undefined;
             if (srsItem && (reps > 0 || wasAnswered)) {
@@ -592,7 +596,21 @@
       return extracted;
     }
 
-    // Render Dashboard Analytics 
+    // Load Local Storage Data as Instant Cache
+    function getInstantLocalData() {
+      let saudiProg = null, thousandProg = null, summProg = null;
+      try { saudiProg = JSON.parse(localStorage.getItem('anesthesia_user_progress')); } catch(e) {}
+      try { thousandProg = JSON.parse(localStorage.getItem('anes_1000q_progress')); } catch(e) {}
+      try { summProg = JSON.parse(localStorage.getItem('ketofoldoc_summaries_progress')); } catch(e) {}
+
+      return {
+        saudi_board_progress: { userProgress: saudiProg },
+        thousand_qs_progress: { userProgress: thousandProg },
+        summaries_progress: summProg
+      };
+    }
+
+    // Render Dashboard Analytics
     function renderDashboard(userData) {
       DOM.loggedOutView.classList.add('hidden');
       DOM.loggedInView.classList.remove('hidden');
@@ -605,7 +623,7 @@
       const readChapters = userData?.summaries_progress?.readChapters || {};
 
       const allCards = [...saudiCards, ...thousandCards];
-      const totalReviewed = allCards.filter(c => (c.reps || 0) > 0).length;
+      const totalReviewed = allCards.filter(c => (c.reps || 0) > 0 || (c.interval || 0) > 0).length;
       const masteredCards = allCards.filter(c => (c.interval || 0) >= 21).length;
       const summariesCount = Object.keys(readChapters).length;
 
@@ -614,18 +632,16 @@
         if (c.easeFactor) { totalEase += c.easeFactor; easeCount++; }
       });
       
-      // Cleaned Retention Logic Edge Cases
       const avgEase = easeCount > 0 ? ((totalEase / easeCount) / 2.5) * 100 : 0;
       let retentionPercent = 0;
       if (totalReviewed > 0) {
-        retentionPercent = avgEase > 0 ? Math.min(100, Math.round(avgEase)) : 82; // Fallback estimate if ease data missing but cards reviewed
+        retentionPercent = avgEase > 0 ? Math.min(100, Math.round(avgEase)) : 82;
       }
 
       const qScore = Math.min(1, totalReviewed / BENCHMARK_QUESTIONS) * 60;
       const mScore = Math.min(1, summariesCount / BENCHMARK_SUMMARIES) * 40;
       const overallReadiness = Math.min(100, Math.round(qScore + mScore));
 
-      // Updating UI safely with textContent via cached elements
       DOM.readinessPercent.textContent = `${overallReadiness}%`;
       DOM.readinessBar.style.width = `${overallReadiness}%`;
       DOM.statTotal.textContent = totalReviewed.toLocaleString();
@@ -633,8 +649,8 @@
       DOM.statSummaries.textContent = summariesCount.toLocaleString();
       DOM.statRetention.textContent = `${retentionPercent}%`;
 
-      DOM.cardStatSaudi.textContent = `${saudiCards.filter(c => (c.reps || 0) > 0).length} Active Cards`;
-      DOM.cardStat1000.textContent = `${thousandCards.filter(c => (c.reps || 0) > 0).length} Active Cards`;
+      DOM.cardStatSaudi.textContent = `${saudiCards.length} Active Cards`;
+      DOM.cardStat1000.textContent = `${thousandCards.length} Active Cards`;
       DOM.cardStatSumm.textContent = `${summariesCount} / ${BENCHMARK_SUMMARIES} Read`;
     }
 
@@ -648,33 +664,33 @@
       DOM.cardStatSumm.textContent = '-- Chapters Read';
     }
 
-    // --- 🔄 HYBRID AUTHENTICATION & REAL-TIME SYNC ENGINE ---
-
-    // 1. Centralized State Handler
+    // Unified Reactive Auth & Real-Time Sync Handler
     function handleAuthState(user) {
       currentUser = user;
       
-      // Clear any existing listeners to prevent duplicates
       if (unsubDashboardSnapshot) {
         unsubDashboardSnapshot();
         unsubDashboardSnapshot = null;
       }
 
       if (user) {
-        // Immediately update Nav Header
         DOM.authHeaderLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
         
-        // 🚀 Optimistic UI Update: Instantly reveal dashboard (hides Sign-In banner)
-        renderDashboard({});
+        // Instant Local Cache Hydration (No white flash / zero loading state)
+        const localCache = getInstantLocalData();
+        renderDashboard(localCache);
         
-        // Connect to Live Firestore Data
+        // Live Real-Time Firestore Sync
         if (db) {
-          unsubDashboardSnapshot = onSnapshot(doc(db, 'users', user.uid), (snap) => {
-            if (snap.exists()) renderDashboard(snap.data());
-            else renderDashboard({});
+          unsubDashboardSnapshot = db.collection('users').doc(user.uid).onSnapshot((snap) => {
+            if (snap.exists) {
+              renderDashboard(snap.data());
+            } else {
+              renderDashboard(localCache);
+            }
           }, (err) => {
-            console.error("Dashboard sync error:", err);
-            renderDashboard({});
+            console.warn("Dashboard sync error:", err);
+            renderDashboard(localCache);
           });
         }
       } else {
@@ -682,32 +698,28 @@
       }
     }
 
-    // 2. Standard Firebase Observer (Fires on initial load & active login/logout)
     if (auth) {
-      onAuthStateChanged(auth, handleAuthState);
+      auth.onAuthStateChanged(handleAuthState);
     }
 
-    // 3. 🛡️ Safari bfcache (Back-Forward Cache) Defeater
-    // Forces the UI to re-sync if the user swipes back to this page on iOS
+    // Instant Navigation Defeaters (Fixes Safari Back-Swipe & Inactive Tab Restores)
     window.addEventListener('pageshow', (event) => {
-      // event.persisted is true if the page was restored from Safari's memory freeze
+      // 🛡️ Added event.persisted check to prevent double-firing on initial page load
       if (event.persisted && auth && auth.currentUser) {
         handleAuthState(auth.currentUser);
       }
     });
 
-    // 4. Tab Visibility Defeater
-    // Forces a re-sync if the user switches browser tabs and comes back
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && auth && auth.currentUser) {
         handleAuthState(auth.currentUser);
       }
     });
 
-    // Single Lucide render for static icons on load
+    // Icons initialization
     lucide.createIcons();
 
-    // --- 💬 Automatic Feedback Engine ---
+    // Feedback Engine
     const feedbackModal = document.getElementById('modal-feedback');
     const feedbackComment = document.getElementById('feedback-comment');
     const feedbackStatusMsg = document.getElementById('feedback-status-msg');
@@ -716,7 +728,7 @@
       feedbackModal.classList.remove('hidden');
       feedbackComment.value = '';
       feedbackStatusMsg.classList.add('hidden');
-      lucide.createIcons(); // only update icons inside the modal 
+      lucide.createIcons();
     };
 
     document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
@@ -759,7 +771,7 @@
           })
         });
 
-        const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
+        const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
         await Promise.all([emailPromise, firestorePromise]);
 
         feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
