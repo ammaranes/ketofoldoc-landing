@@ -809,7 +809,7 @@ export const chapter17 = [
       "A": "Amenorrhea–galactorrhea syndrome",
       "B": "Sheehan syndrome",
       "C": "Fibromyalgia",
-      "D": "Meigs syndrome 
+      "D": "Meigs syndrome", 
     },
     "correctAnswer": "B",
     "explanation": "During pregnancy, hypertrophy and hyperplasia of lactotrophs result in enlargement of the anterior pituitary, but without a corresponding increase in blood supply. As such, major hemorrhage or hypotension during labor and delivery can result in anterior pituitary ischemia and necrosis. Sheehan syndrome specifically is hypopituitarism caused by ischemic necrosis during the peripartum period. Pediatric Anesthesia Dipty Mangla and Ashish Sinha"
