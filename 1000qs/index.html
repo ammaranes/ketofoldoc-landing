@@ -1355,15 +1355,18 @@
         }
 
         DOM.qStem.textContent = q.stem || q.question || q.text || '';
-        const rawImg = q.image || q.figure || q.stemImage;
-        if (rawImg) {
-          const cleanPath = String(rawImg).startsWith('/') ? String(rawImg).slice(1) : rawImg;
-          DOM.stemImg.src = cleanPath;
-          DOM.stemImgContainer.classList.remove('hidden');
-        } else {
-          DOM.stemImgContainer.classList.add('hidden');
-        }
+const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
 
+if (rawImg) {
+  let imgPath = String(rawImg);
+  if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+    imgPath = '/' + imgPath;
+  }
+  DOM.stemImg.src = imgPath;
+  DOM.stemImgContainer.classList.remove('hidden');
+} else {
+  DOM.stemImgContainer.classList.add('hidden');
+}
         const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         const isFlagged = (parentProgress.flags || []).includes(parentIdx);
         DOM.flagBtn.className = isFlagged 
