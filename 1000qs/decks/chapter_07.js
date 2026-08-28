@@ -459,7 +459,7 @@ export const chapter07 = [
       "A": "Breakthrough pain in a patient who is confused, treat with additional pain medications",
       "B": "Stat MRI of the back to rule out neuraxial hematoma",
       "C": "Surgical complication, consult orthopedics",
-      "D": "Symptomatic spinal stenosis, consult neurology for suggestions CHAPTER 7 ANSWERS"
+      "D": "Symptomatic spinal stenosis, consult neurology for suggestions"
     },
     "correctAnswer": "B",
     "explanation": "Epidural hematoma may present with back pain, focal neurological deficits, and bowel and bladder dysfunction. If a neuraxial hematoma is suspected, emergent intervention needs to be taken to confirm diagnosis and then to perform an emergency decompression as soon as possible to avoid permanent spinal cord/nerve roots injury. Peripheral Nerve Blocks Thomas Halaszynski"
