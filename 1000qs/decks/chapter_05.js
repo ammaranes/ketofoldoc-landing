@@ -128,7 +128,7 @@ export const chapter05 = [
     "correctAnswer": "C",
     "explanation": "The level of 2,3-DPG in stored blood is reduced, causing decreased oxygen unloading to the tissues. Hypothermia also causes a leftward shift of the oxyhemoglobin dissociation curve (Fig. 5-1). Figure 5-1.",
     "explanationImages": [
-      "/images/ch05/fig_5_1.png"
+      "/1000qs/images/ch05/fig_5_1.png"
     ]
   },
   {
@@ -420,7 +420,7 @@ export const chapter05 = [
       "A": "A-positive RBCs",
       "B": "A-negative RBCs",
       "C": "O-negative RBCs",
-      "D": "RhoGAM CHAPTER 5 ANSWERS"
+      "D": "RhoGAM"
     },
     "correctAnswer": "C",
     "explanation": "In an emergency situation that requires transfusion before type and compatibility testing can be performed, O-negative packed red blood cells may be administered. Even if the patient’s blood type becomes known and available, after 2 units of type O-negative packed red blood cells have been transfused, subsequent transfusions should continue with O-negative blood. RhoGAM is not indicated since the patient’s blood type is Rh+. Anesthetic Pharmacology Mian Ahmad and Ashish Sinha"
