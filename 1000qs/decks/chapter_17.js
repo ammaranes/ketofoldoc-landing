@@ -445,7 +445,7 @@ export const chapter17 = [
       "A": "Lumbar epidural",
       "B": "Pudendal nerve block",
       "C": "Lumbar sympathetic block",
-      "D": "Paracervical block Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles."
+      "D": "Paracervical block"
     },
     "correctAnswer": "B",
     "explanation": "Lumbar sympathetic blocks and paracervical blocks, though rarely performed for labor analgesia, are appropriate targets during the first stage of labor. However, paracervical blocks are rarely used in current practice because of an association with fetal bradycardia. Epidural and combined spinal–epidural techniques are ideal, in that they are able to block the visceral afferent fibers responsible for the first stage of labor and the somatic nerve fibers through which the second stage is transmitted. The obstetrician can also provide pudendal blocks during delivery to mitigate somatic pain during the second stage, though cannot mitigate visceral first stage pain."
@@ -454,7 +454,7 @@ export const chapter17 = [
     "id": 33,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The statement about her disorder that is most likely true is",
+    "stem": "Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles. The statement about her disorder that is most likely true is",
     "options": {
       "A": "Eclampsia is imminent",
       "B": "Preeclampsia is a syndrome manifested after the 36th week of gestation",
@@ -468,7 +468,7 @@ export const chapter17 = [
     "id": 34,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The patient is started on oxytocin to augment her labor, and the patient is now requesting a labor epidural. Anesthetic considerations include",
+    "stem": "Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles. The patient is started on oxytocin to augment her labor, and the patient is now requesting a labor epidural. Anesthetic considerations include",
     "options": {
       "A": "The presence of hypertension and edema requires further workup before proceeding",
       "B": "No workup is required prior to performing epidural anesthesia, as this will treat her hypertension",
@@ -482,7 +482,7 @@ export const chapter17 = [
     "id": 35,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "After a review of her laboratory results, a lumbar (L3–L4) epidural was placed without incident (including lack of CSF, and negative test dose after administration of 45 mg lidocaine with 1:200,000 epinephrine). Epidural anesthesia is then initiated with a bolus of 15 mg of bupivacaine. Variable decelerations are noted minutes later on fetal heart rate monitoring. If scalp pH reveals fetal acidosis, compared with a normal pH, the anesthetic absorbed by the fetus will be present in",
+    "stem": "Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles. After a review of her laboratory results, a lumbar (L3–L4) epidural was placed without incident (including lack of CSF, and negative test dose after administration of 45 mg lidocaine with 1:200,000 epinephrine). Epidural anesthesia is then initiated with a bolus of 15 mg of bupivacaine. Variable decelerations are noted minutes later on fetal heart rate monitoring. If scalp pH reveals fetal acidosis, compared with a normal pH, the anesthetic absorbed by the fetus will be present in",
     "options": {
       "A": "Higher concentration, most in ionized form",
       "B": "Lower concentration, most in ionized form",
@@ -496,7 +496,7 @@ export const chapter17 = [
     "id": 36,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "The patient has now been receiving a dilute infusion (bupivacaine 0.125% with 2 μg/mL fentanyl) for the past 3 hours and reports good pain relief with a bilateral T5 sensory level. Her blood pressure is now 85/45 mm Hg, and her heart rate is 120 bpm. The fetal heart rate pattern begins to show late decelerations. The most appropriate management in this patient includes",
+    "stem": "Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles. The patient has now been receiving a dilute infusion (bupivacaine 0.125% with 2 μg/mL fentanyl) for the past 3 hours and reports good pain relief with a bilateral T5 sensory level. Her blood pressure is now 85/45 mm Hg, and her heart rate is 120 bpm. The fetal heart rate pattern begins to show late decelerations. The most appropriate management in this patient includes",
     "options": {
       "A": "Immediate bedside cesarean delivery",
       "B": "Administration of phenylephrine",
@@ -510,7 +510,7 @@ export const chapter17 = [
     "id": 37,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "As augmentation of labor continues, patient’s blood pressure slowly climbs again, with waning epidural analgesic benefit. Highest pressure was noted to be 166/112 mm Hg with heart rate sustained over 100 bpm. The most appropriate pharmacologic option for acute treatment of severe hypertension in a preeclamptic patient is",
+    "stem": "Questions 33 to 37 A 37-year-old G9P4 patient at 38 weeks of gestation presents for management of labor and delivery. She denies any medical history and admits to minimal prenatal care. The patient is moderately hypertensive (160/95) with associated pitting edema at her ankles. As augmentation of labor continues, patient’s blood pressure slowly climbs again, with waning epidural analgesic benefit. Highest pressure was noted to be 166/112 mm Hg with heart rate sustained over 100 bpm. The most appropriate pharmacologic option for acute treatment of severe hypertension in a preeclamptic patient is",
     "options": {
       "A": "Magnesium",
       "B": "Dopamine",
@@ -809,7 +809,7 @@ export const chapter17 = [
       "A": "Amenorrhea–galactorrhea syndrome",
       "B": "Sheehan syndrome",
       "C": "Fibromyalgia",
-      "D": "Meigs syndrome", 
+      "D": "Meigs syndrome" 
     },
     "correctAnswer": "B",
     "explanation": "During pregnancy, hypertrophy and hyperplasia of lactotrophs result in enlargement of the anterior pituitary, but without a corresponding increase in blood supply. As such, major hemorrhage or hypotension during labor and delivery can result in anterior pituitary ischemia and necrosis. Sheehan syndrome specifically is hypopituitarism caused by ischemic necrosis during the peripartum period. Pediatric Anesthesia Dipty Mangla and Ashish Sinha"
