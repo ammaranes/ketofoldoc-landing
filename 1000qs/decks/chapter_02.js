@@ -428,12 +428,12 @@ export const chapter02 = [
     "chapter": 2,
     "chapterTitle": "Airway Management",
     "stem": "An otherwise healthy patient with a history of daytime sleepiness and snoring from laryngeal papillomatosis undergoes polysomnography and spirometry, which shows dynamic inspiratory obstruction. The flow–volume loop that would be most consistent with this patient’s condition is Figure 2-1",
-    "image": "/images/ch02/fig_2_1.png",
+    "image": "/1000qs/images/ch02/fig_2_1.png",
     "options": {
       "A": "Figure 2-1A",
       "B": "Figure 2-1B",
       "C": "Figure 2-1C",
-      "D": "Figure 2-1D CHAPTER 2 ANSWERS"
+      "D": "Figure 2-1D"
     },
     "correctAnswer": "B",
     "explanation": "Flow–volume loops can help differentiate fixed vs. dynamic causes of airway obstruction. They can also help to distinguish extrathoracic vs. intrathoracic sources of the obstruction. During the inspiratory phase of spontaneous ventilation, an extrathoracic obstruction is drawn into the pathway of air movement by subatmospheric intraluminal pressures. In contrast, an intrathoracic obstruction is stented open during inspiration by the negative extraluminal intrathoracic pressure. During expiration in a spontaneously breathing patient, an extrathoracic obstruction is stented open by supra-atmospheric intraluminal pressure. In contrast, an intrathoracic obstruction is exacerbated during expiration, since the extraluminal intrathoracic pressure exceeds the intraluminal pressure. Choice A represents a normal flow–volume loop. Choice C represents a fixed obstruction, that is, one present during both inspiration and expiration. Choice D represents a dynamic intrathoracic obstruction, which would be expected in a patient with asthma or chronic obstructive pulmonary disease. Anesthesia Machine Paul Sikka"
