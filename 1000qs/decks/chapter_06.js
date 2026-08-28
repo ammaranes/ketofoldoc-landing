@@ -319,7 +319,7 @@ export const chapter06 = [
       "A": "Ropivacaine",
       "B": "Bupivacaine",
       "C": "Tetracaine",
-      "D": "Lidocaine The following three questions belong to this clinical situation: During placement of an interscalene block utilizing 0.5% bupivacaine, a 62-year- old patient suddenly starts experiencing seizures and loses consciousness."
+      "D": "Lidocaine"
     },
     "correctAnswer": "D",
     "explanation": "Use of many local anesthetics for spinal anesthesia is still evolving. Lidocaine was introduced into clinical practice in 1946. It was commonly used for spinal anesthesia until reports of transient neurologic symptoms (TNS) started appearing in the literature. Incidence of TNS is relatively high with up to one-third of patients complaining of pain and dysesthesia 12 to 24 hours after the surgery. Although symptoms are transient, pain sometimes is so severe that it may exceed the pain of surgery and may necessitate readmission into the hospital. This issue has raised questions regarding the advisability of continued use of lidocaine for spinal anesthesia."
@@ -328,7 +328,7 @@ export const chapter06 = [
     "id": 24,
     "chapter": 6,
     "chapterTitle": "Anesthetic Pharmacology",
-    "stem": "Which of the following statements regarding local anesthetic toxicity is correct?",
+    "stem": "During placement of an interscalene block utilizing 0.5% bupivacaine, a 62-year- old patient suddenly starts experiencing seizures and loses consciousness. Which of the following statements regarding local anesthetic toxicity is correct?",
     "options": {
       "A": "Seizure is a sign of neurotoxicity from high dose of local anesthetic",
       "B": "Loss of consciousness is a sign of low-dose local anesthetic neurotoxicity",
@@ -342,7 +342,7 @@ export const chapter06 = [
     "id": 25,
     "chapter": 6,
     "chapterTitle": "Anesthetic Pharmacology",
-    "stem": "Which of the following statements is false?",
+    "stem": "During placement of an interscalene block utilizing 0.5% bupivacaine, a 62-year- old patient suddenly starts experiencing seizures and loses consciousness. Which of the following statements is false?",
     "options": {
       "A": "Seizure may have happened secondary to the injection of local anesthetic into vertebral artery",
       "B": "Loss of consciousness may be secondary to high epidural anesthesia",
@@ -356,7 +356,7 @@ export const chapter06 = [
     "id": 26,
     "chapter": 6,
     "chapterTitle": "Anesthetic Pharmacology",
-    "stem": "Which of the following statements is false?",
+    "stem": "During placement of an interscalene block utilizing 0.5% bupivacaine, a 62-year- old patient suddenly starts experiencing seizures and loses consciousness. Which of the following statements is false?",
     "options": {
       "A": "Repeated attempts at aspiration would have prevented this complication",
       "B": "Addition of epinephrine to the local anesthetic may have helped to prevent this complication",
@@ -1411,7 +1411,7 @@ export const chapter06 = [
       "A": "Neuromuscular-blocking drugs",
       "B": "Opioids",
       "C": "Antibiotics",
-      "D": "Radio contrast dyes CHAPTER 6 ANSWERS"
+      "D": "Radio contrast dyes"
     },
     "correctAnswer": "A",
     "explanation": "Anaphylactic reaction during anesthesia is estimated to occur between 1 in 5,000 and 1 in 25,000 cases. Neuromuscular-blocking drugs seem to be the most common agents causing this reaction. Incidence is far too low to determine the relative frequency of occurrence with individual neuromuscular blocker. Latex, antibiotics, and induction agents are much less common etiologic agents in anesthesia. Opioids extremely rarely cause anaphylactic reactions. Spinal and Epidural Anesthesia Thomas Halaszynski"
