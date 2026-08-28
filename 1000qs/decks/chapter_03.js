@@ -329,7 +329,7 @@ export const chapter03 = [
     "chapter": 3,
     "chapterTitle": "Anesthesia Machine",
     "stem": "Different semi closed anesthetic ventilation/breathing systems (classically referred to as Mapleson systems and designated A to F) are pictured below. While setting up for anesthesia delivery in an “off-floor” location and planning for controlled ventilation of an asthmatic patient, which of the Mapleson systems provides for the best efficacy? Figure 3-1.",
-    "image": "/images/ch03/fig_3_1.png",
+    "image": "/1000qs/images/ch03/fig_3_1.png",
     "options": {
       "A": "D > B > C > A",
       "B": "A > B > C > D",
