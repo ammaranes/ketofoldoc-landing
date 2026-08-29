@@ -1452,8 +1452,10 @@
 
         document.getElementById('banner-book-badge').textContent = book.title;
         document.getElementById('banner-chapter-number').textContent = `Chapter ${ch.chapterNumber || ''}`;
-        document.getElementById('chapter-headline').textContent = ch.title;
-        document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
+const headlineEl = document.getElementById('chapter-headline');
+        headlineEl.className = "text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4 highlightable-content";
+        headlineEl.setAttribute('data-highlight-context', chapterContextId);
+        headlineEl.innerHTML = highlighter.renderHighlights(ch.title || '', chapterContextId);        document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
         document.getElementById('chapter-sections-count-val').textContent = `${(ch.sections || []).length} Sections`;
 
         const isRead = Boolean(summariesState.readChapters[ch.id]);
@@ -1482,28 +1484,29 @@
         const container = document.getElementById('sections-container');
         container.innerHTML = '';
 
-        (ch.sections || []).forEach((sec, idx) => {
-          const secDiv = document.createElement('section');
-          secDiv.id = `section-${idx}`;
-          secDiv.className = 'scroll-mt-24 highlightable-content';
-          secDiv.setAttribute('data-highlight-context', chapterContextId);
+        // Highlight both Section Titles and Section Paragraphs with Isolated Anchoring
+(ch.sections || []).forEach((sec, idx) => {
+  const secDiv = document.createElement('section');
+  secDiv.id = `section-${idx}`;
+  secDiv.className = 'scroll-mt-24';
 
-          const rawHtml = formatMarkdown(sec.content);
-          const highlightedHtml = highlighter.renderHighlights(rawHtml, chapterContextId);
+  const highlightedTitle = highlighter.renderHighlights(sec.title || '', chapterContextId);
+  const rawContent = formatMarkdown(sec.content);
+  const highlightedContent = highlighter.renderHighlights(rawContent, chapterContextId);
 
-          let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10 select-none"></div>` : '';
+  let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10 select-none"></div>` : '';
 
-          secDiv.innerHTML = `
-            ${dividerHtml}
-            <div class="mb-5">
-              <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-3 tracking-tight">${sec.title}</h2>
-            </div>
-            <div>
-              ${highlightedHtml}
-            </div>
-          `;
-          container.appendChild(secDiv);
-        });
+  secDiv.innerHTML = `
+    ${dividerHtml}
+    <div class="mb-5 highlightable-content" data-highlight-context="${chapterContextId}">
+      <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-3 tracking-tight">${highlightedTitle}</h2>
+    </div>
+    <div class="highlightable-content" data-highlight-context="${chapterContextId}">
+      ${highlightedContent}
+    </div>
+  `;
+  container.appendChild(secDiv);
+});
 
         renderInteractiveQuestions(ch.chapterNumber || 1);
 
