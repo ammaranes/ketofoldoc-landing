@@ -1,12 +1,13 @@
 /**
  * KetofolDoc Universal Study Highlighter Engine
- * Supports Desktop & Mobile (iOS / Android), LocalStorage, and Firestore Real-time Sync
+ * Features: Mobile Touch Support, HTML Tag-Safe Regex, Reactive Callbacks, Cloud Sync
  */
 
 export class StudyHighlighter {
   constructor(options = {}) {
     this.storageKey = options.storageKey || 'kd_user_highlights';
-    this.onSave = options.onSave || null; // Callback for Firebase Sync
+    this.onSave = options.onSave || null;
+    this.onChange = options.onChange || null;
     this.highlights = this.loadHighlights();
     this.currentContextId = null;
     this.toolbar = null;
@@ -36,6 +37,9 @@ export class StudyHighlighter {
       if (typeof this.onSave === 'function') {
         this.onSave(this.highlights);
       }
+      if (typeof this.onChange === 'function') {
+        this.onChange();
+      }
     } catch (e) {
       console.warn('Highlighter storage error:', e);
     }
@@ -47,10 +51,14 @@ export class StudyHighlighter {
   }
 
   initDOM() {
-    // Create floating action toolbar
+    if (document.getElementById('kd-highlight-toolbar')) {
+      this.toolbar = document.getElementById('kd-highlight-toolbar');
+      return;
+    }
+
     const bar = document.createElement('div');
     bar.id = 'kd-highlight-toolbar';
-    bar.className = 'fixed hidden z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center space-x-1.5 transition-opacity duration-150';
+    bar.className = 'fixed hidden z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center space-x-1.5 transition-opacity duration-150 select-none';
     bar.innerHTML = `
       <button type="button" data-color="yellow" class="w-6 h-6 rounded-full bg-amber-400 hover:scale-110 active:scale-95 transition shadow-sm border border-amber-300" title="Highlight Yellow"></button>
       <button type="button" data-color="green" class="w-6 h-6 rounded-full bg-emerald-400 hover:scale-110 active:scale-95 transition shadow-sm border border-emerald-300" title="Highlight Green"></button>
@@ -63,9 +71,8 @@ export class StudyHighlighter {
     document.body.appendChild(bar);
     this.toolbar = bar;
 
-    // Handle Toolbar Actions
     this.toolbar.querySelectorAll('button[data-color]').forEach(btn => {
-      btn.onmousedown = (e) => e.preventDefault(); // Prevent focus loss
+      btn.onmousedown = (e) => e.preventDefault();
       btn.onclick = (e) => {
         e.preventDefault();
         this.applySelectedHighlight(btn.dataset.color);
@@ -94,7 +101,6 @@ export class StudyHighlighter {
         return;
       }
 
-      // Verify selection is within a highlightable container
       const anchorNode = selection.anchorNode;
       const container = anchorNode?.nodeType === 3 ? anchorNode.parentElement : anchorNode;
       if (!container || !container.closest('.highlightable-content')) {
@@ -107,7 +113,7 @@ export class StudyHighlighter {
     };
 
     document.addEventListener('mouseup', handleSelection);
-    document.addEventListener('touchend', () => setTimeout(handleSelection, 100));
+    document.addEventListener('touchend', () => setTimeout(handleSelection, 120));
 
     document.addEventListener('mousedown', (e) => {
       if (this.toolbar && !this.toolbar.contains(e.target)) {
@@ -117,7 +123,7 @@ export class StudyHighlighter {
   }
 
   showToolbar(range) {
-    if (!range) return;
+    if (!range || !this.toolbar) return;
     const rect = range.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
 
@@ -149,18 +155,12 @@ export class StudyHighlighter {
     if (!text || !this.currentContextId) return;
 
     this.highlights[this.currentContextId] = this.highlights[this.currentContextId] || [];
-    
-    // Remove duplicate entry if it exists
     this.highlights[this.currentContextId] = this.highlights[this.currentContextId].filter(h => h.text !== text);
-    
-    // Add new highlight
     this.highlights[this.currentContextId].push({ text, color: colorKey });
+
     this.saveHighlights();
     this.hideToolbar();
     window.getSelection()?.removeAllRanges();
-
-    // Trigger re-render of current active container
-    this.refreshCurrentView();
   }
 
   removeSelectedHighlight() {
@@ -175,39 +175,24 @@ export class StudyHighlighter {
     this.saveHighlights();
     this.hideToolbar();
     window.getSelection()?.removeAllRanges();
-    this.refreshCurrentView();
   }
 
-  /**
-   * Applies all saved highlights to an HTML string
-   */
   renderHighlights(rawHtml, contextId = this.currentContextId) {
     if (!rawHtml || !contextId) return rawHtml || '';
     const list = this.highlights[contextId] || [];
     if (list.length === 0) return rawHtml;
 
     let highlightedHtml = String(rawHtml);
-
-    // Sort by longest text first to prevent substring collision
     const sortedList = [...list].sort((a, b) => b.text.length - a.text.length);
 
     sortedList.forEach(item => {
       const escaped = item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(${escaped})`, 'gi');
+      // Matches text only when outside HTML tags and attributes
+      const regex = new RegExp(`(?![^<]*>)(${escaped})`, 'gi');
       const colorClass = this.colors[item.color] || this.colors.yellow;
       highlightedHtml = highlightedHtml.replace(regex, `<mark class="${colorClass}">$1</mark>`);
     });
 
     return highlightedHtml;
-  }
-
-  refreshCurrentView() {
-    document.querySelectorAll('[data-highlight-context]').forEach(el => {
-      const raw = el.getAttribute('data-raw-text');
-      const ctx = el.getAttribute('data-highlight-context');
-      if (raw && ctx) {
-        el.innerHTML = this.renderHighlights(raw, ctx);
-      }
-    });
   }
 }
