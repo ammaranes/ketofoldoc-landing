@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="google-site-verification" content="L71BP_UGbg23lQZGPyrZpDiFDsw3YYz1DLyMtqruiWw" />
-  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Saudi Anesthesia Board QB Practice</title>
   
@@ -28,10 +28,10 @@
     .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:text-slate-950">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600/40 selection:text-slate-100">
 
   <!-- Top Navigation Bar -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top">
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
     <div class="max-w-4xl mx-auto px-4 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
       
       <!-- Left: Menu, Clickable Logo, Dual-Line Title -->
@@ -41,7 +41,7 @@
         </button>
         
         <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
-          <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
+          <img src="/logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
         </a>
 
         <div class="min-w-0 flex-1 flex flex-col justify-center">
@@ -98,7 +98,7 @@
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-36 flex flex-col justify-between">
     
     <!-- Empty & Completed State Screen -->
-    <div id="view-empty" class="hidden my-auto text-center py-12 px-4">
+    <div id="view-empty" class="hidden my-auto text-center py-12 px-4 select-none">
       <div class="w-16 h-16 bg-emerald-950/80 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-800/60">
         <i data-lucide="check-circle-2" class="w-8 h-8"></i>
       </div>
@@ -117,7 +117,7 @@
 
     <!-- Active Question View -->
     <div id="view-quiz" class="flex-1 flex flex-col">
-      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2 select-none">
         <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
           <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
           <span id="question-source-badge" class="px-2.5 py-1 bg-blue-950/80 border border-blue-700/60 text-blue-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0"></span>
@@ -129,26 +129,26 @@
 
       <!-- Question Stem & Optional Stem Image -->
       <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
-        <p id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed"></p>
-        <div id="stem-image-container" class="mt-4 hidden">
+        <p id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></p>
+        <div id="stem-image-container" class="mt-4 hidden select-none">
           <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
         </div>
       </div>
 
       <!-- Options Container -->
-      <div id="options-container" class="space-y-3 mb-6"></div>
+      <div id="options-container" class="space-y-3 mb-6 select-none"></div>
 
       <!-- Explanation & Rationale Box -->
       <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300">
-        <div class="flex items-center text-emerald-400 font-bold mb-2">
+        <div class="flex items-center text-emerald-400 font-bold mb-2 select-none">
           <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
         </div>
         
-        <div id="explanation-content" class="leading-relaxed space-y-2"></div>
-        <div id="explanation-images-container" class="mt-4 space-y-3 hidden"></div>
+        <div id="explanation-content" class="leading-relaxed space-y-2 highlightable-content"></div>
+        <div id="explanation-images-container" class="mt-4 space-y-3 hidden select-none"></div>
 
         <!-- Anki Spaced Repetition Bar -->
-        <div class="mt-5 pt-4 border-t border-slate-800">
+        <div class="mt-5 pt-4 border-t border-slate-800 select-none">
           <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
             <span>Rate Recall (Spaced Repetition):</span>
             <span id="srs-status-tag" class="text-[10px] text-slate-500">Not rated yet</span>
@@ -176,7 +176,7 @@
     </div>
 
     <!-- Navigation Footer -->
-    <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl">
+    <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl select-none">
       <div class="max-w-3xl mx-auto px-4">
         <div class="flex items-center justify-between space-x-3 mb-2">
           <button id="btn-prev" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 border border-slate-800 rounded-xl font-semibold text-sm flex items-center justify-center text-slate-300 transition">
@@ -200,7 +200,7 @@
   </main>
 
   <!-- Global Full-Text Search Modal -->
-  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20">
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
       
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
@@ -221,7 +221,7 @@
         </button>
       </div>
 
-      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40">
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text">
         <div class="text-xs text-slate-500 text-center py-8">
           Type at least 2 characters to search across all modules...
         </div>
@@ -236,7 +236,7 @@
   </div>
 
   <!-- Multi-Select Deck Switcher & Ecosystem Hub Modal -->
-  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       
       <!-- Modal Header -->
@@ -328,7 +328,7 @@
   </div>
 
   <!-- Clean Google Auth Modal -->
-  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 sm:p-8 shadow-2xl relative">
       <button id="btn-close-auth-modal" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg active:bg-slate-800 transition">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -374,13 +374,13 @@
   </div>
 
   <!-- Floating Feedback Trigger Button -->
-  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
+  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-blue-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
   <!-- Context-Aware Feedback Modal -->
-  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
       <!-- Modal Header -->
@@ -400,7 +400,7 @@
       </div>
 
       <!-- Scrollable Body -->
-      <div class="overflow-y-auto py-4 space-y-4 flex-1">
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 select-text">
         
         <!-- Auto-Detected Context Card -->
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
@@ -463,13 +463,36 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
+    import { StudyHighlighter } from '/js/highlighter.js';
+
     async function initApp() {
       let allDecks = [];
       try {
-        const module = await import('./decks/index.js');
-        allDecks = module.allDecks;
+        const module = await import('/saudi/decks/index.js');
+        allDecks = module.allDecks || module.allChapters || module.default || [];
       } catch (err) {
-        console.error("Failed to load module ./decks/index.js", err);
+        console.error("Failed to load module /saudi/decks/index.js", err);
+        try {
+          const fallbackMod = await import('./decks/index.js');
+          allDecks = fallbackMod.allDecks || fallbackMod.allChapters || fallbackMod.default || [];
+        } catch (e) {
+          console.error("Fallback import also failed", e);
+        }
+      }
+
+      if (!allDecks || allDecks.length === 0) {
+        const listEl = document.getElementById('deck-list');
+        if (listEl) {
+          listEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-center text-xs text-rose-300 space-y-2">
+              <p class="font-bold">⚠️ Modules could not be loaded</p>
+              <p class="text-[11px] text-slate-400">Please verify your internet connection or reload the page.</p>
+              <button onclick="window.location.reload(true)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold text-xs transition">
+                Force Reload
+              </button>
+            </div>
+          `;
+        }
       }
 
       // Formatting Helper with DOMPurify XSS Prevention
@@ -584,6 +607,20 @@
         console.warn("Firebase Init:", e);
       }
 
+      // Initialize Universal Study Highlighter
+      const highlighter = new StudyHighlighter({
+        storageKey: 'kd_saudi_highlights',
+        onChange: () => render(),
+        onSave: (allHighlights) => {
+          if (db && currentUser) {
+            db.collection('users').doc(currentUser.uid).set({
+              saudi_board_highlights: allHighlights
+            }, { merge: true });
+          }
+        }
+      });
+      window.highlighterInstance = highlighter;
+
       const LOCAL_STORAGE_KEY = 'anesthesia_user_progress';
       const FIRESTORE_COLLECTION = 'users';
 
@@ -602,7 +639,6 @@
         }
       };
 
-      // Strict Data Purge: Eliminates ghost copies where no answer was submitted
       function purgeGhostProgress(prog) {
         if (!prog || typeof prog !== 'object') return;
         Object.entries(prog).forEach(([deckId, deckProg]) => {
@@ -625,7 +661,6 @@
         } catch (e) {}
       }
 
-      // --- Fixed Virtual Composite Deck Generator ---
       function getActiveCompositeDeck() {
         const keys = Array.from(state.selectedDeckKeys);
         if (keys.length === 0) return null;
@@ -674,7 +709,6 @@
         };
       }
 
-      // Unanswered indices extractor
       function getUnansweredIndices(activeDeck) {
         if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
         const indices = [];
@@ -689,7 +723,6 @@
         return indices;
       }
 
-      // Calculate Active Due Question Indices (Strict: genuine attempts only)
       function getDueIndices(activeDeck) {
         if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
         const now = new Date();
@@ -710,7 +743,6 @@
         return dueIndices;
       }
 
-      // Compile Card States with Namespace (${deckId}_${idx})
       function compileCardStates() {
         const cardStates = {};
         Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
@@ -736,7 +768,6 @@
         return cardStates;
       }
 
-      // Reset Function for Modules
       function resetChapters(keysToReset) {
         if (!keysToReset || keysToReset.length === 0) return;
 
@@ -763,7 +794,6 @@
         }
       }
 
-      // Apply Namespaced SRS Updates from Cloud
       function applyCloudCardStates(cloudCardStates) {
         if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
         Object.entries(state.decks).forEach(([deckId, deck]) => {
@@ -787,7 +817,6 @@
         });
       }
 
-      // Deep merge progress objects
       function mergeUserProgress(localProg, remoteProg) {
         if (!remoteProg) return localProg || {};
         const merged = { ...(localProg || {}) };
@@ -807,7 +836,7 @@
         return merged;
       }
 
-      // --- Cloud Authentication & Sync ---
+      // Cloud Auth & Sync
       if (auth) {
         auth.onAuthStateChanged((user) => {
           currentUser = user;
@@ -863,6 +892,11 @@
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
               render();
             }
+            if (cloudData.saudi_board_highlights) {
+              highlighter.highlights = { ...highlighter.highlights, ...cloudData.saudi_board_highlights };
+              localStorage.setItem('kd_saudi_highlights', JSON.stringify(highlighter.highlights));
+              render();
+            }
           } else {
             pushStateToCloud();
           }
@@ -877,7 +911,8 @@
             userProgress: state.userProgress,
             card_states: compileCardStates(),
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }
+          },
+          saudi_board_highlights: highlighter.highlights
         }, { merge: true });
       }
 
@@ -888,9 +923,7 @@
         pushStateToCloud();
       }
 
-      // ==========================================
-      // GLOBAL FULL-TEXT SEARCH ENGINE
-      // ==========================================
+      // Global Search
       const searchModal = document.getElementById('modal-search');
       const searchInput = document.getElementById('search-input');
       const searchResults = document.getElementById('search-results-list');
@@ -1010,7 +1043,6 @@
         });
       }
 
-      // Search Listeners
       document.getElementById('btn-search').onclick = openSearchModal;
       document.getElementById('btn-close-search').onclick = closeSearchModal;
 
@@ -1043,7 +1075,7 @@
         }
       });
 
-      // --- Shuffle & SRS Modes ---
+      // Modes & Navigation Handlers
       function generateShuffledIndices(length) {
         const arr = Array.from({ length }, (_, i) => i);
         for (let i = arr.length - 1; i > 0; i--) {
@@ -1097,7 +1129,6 @@
         saveState();
       }
 
-      // Advance Navigation Handler
       function handleNextNavigation() {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || !activeDeck.questions.length) return;
@@ -1151,7 +1182,7 @@
         return true;
       }
 
-      // --- Main UI Rendering (UNCUT AND FULLY FUNCTIONAL) ---
+      // Main UI Rendering
       function render() {
         lucide.createIcons();
         const activeDeck = getActiveCompositeDeck();
@@ -1179,7 +1210,7 @@
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
         const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
 
-        // Display Completed Screen if all questions answered in current selection
+        // Display Completed Screen
         if (activeTotal === 0 && !state.sessionState.isSRSMode) {
           document.getElementById('view-empty').classList.remove('hidden');
           document.getElementById('view-quiz').classList.add('hidden');
@@ -1218,14 +1249,12 @@
         const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
-        // Display the origin module name
         const sourceDeck = state.decks[parentDeckId];
         const sourceBadge = document.getElementById('question-source-badge');
         if (sourceBadge) {
           sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
         }
 
-        // Update Header & Linear Progress
         document.getElementById('deck-title').textContent = activeDeck.title;
         
         const totalOriginal = activeDeck.totalOriginal || activeDeck.questions.length;
@@ -1260,7 +1289,6 @@
         const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
         document.getElementById('score-badge').textContent = `Accuracy: ${acc}%`;
 
-        // Shuffle & SRS Buttons / Tags
         const shuffleBtn = document.getElementById('btn-shuffle');
         const shuffleTag = document.getElementById('shuffle-mode-tag');
         const srsBtn = document.getElementById('btn-srs-filter');
@@ -1286,20 +1314,32 @@
           document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         }
 
-        // Stem Text & Optional Stem Image
-        document.getElementById('question-stem').textContent = q.stem || q.question || q.text || '';
+        // Render Question Stem with Safe Highlighter Fallback
+        const questionContextId = `${parentDeckId}_${parentIdx}`;
+        highlighter.setContext(questionContextId);
+
+        const rawStem = q.stem || q.question || q.text || '';
+        const stemEl = document.getElementById('question-stem');
+        stemEl.className = "text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content";
+        stemEl.setAttribute('data-highlight-context', questionContextId);
+        stemEl.setAttribute('data-raw-text', rawStem);
+        stemEl.innerHTML = highlighter.renderHighlights(rawStem, questionContextId);
+
+        // Render Stem Image with absolute path resolution
         const stemImgContainer = document.getElementById('stem-image-container');
         const stemImg = document.getElementById('stem-image');
-        const rawImg = q.image || q.figure || q.stemImage;
+        const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
         if (rawImg) {
-          const cleanPath = String(rawImg).startsWith('/') ? String(rawImg).slice(1) : rawImg;
-          stemImg.src = cleanPath;
+          let imgPath = String(rawImg);
+          if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+            imgPath = '/' + imgPath;
+          }
+          stemImg.src = imgPath;
           stemImgContainer.classList.remove('hidden');
         } else {
           stemImgContainer.classList.add('hidden');
         }
 
-        // Flag state
         const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         const isFlagged = (parentProgress.flags || []).includes(parentIdx);
         const flagBtn = document.getElementById('btn-flag');
@@ -1307,12 +1347,10 @@
           ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
           : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-        // Selected Answer Handling
         const selectedAnswer = state.sessionState.isSRSMode 
           ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
           : ((parentProgress.answers || {})[parentIdx]);
 
-        // Render Options safely
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = '';
         const normalizedOpts = getNormalizedOptions(q);
@@ -1342,19 +1380,24 @@
           optionsContainer.appendChild(btn);
         });
 
-        // Explanation & Reference Box
         const expBox = document.getElementById('explanation-box');
         const expImgContainer = document.getElementById('explanation-images-container');
         const expText = q.explanation || q.rationale || '';
 
         if (selectedAnswer && (expText || q.correctAnswer)) {
           expBox.classList.remove('hidden');
-          document.getElementById('explanation-content').innerHTML = `
+
+          const formattedExp = formatMarkdown(expText) || 'No rationale provided.';
+          const expContentEl = document.getElementById('explanation-content');
+          expContentEl.className = "leading-relaxed space-y-2 highlightable-content";
+          expContentEl.setAttribute('data-highlight-context', questionContextId);
+          expContentEl.setAttribute('data-raw-text', formattedExp);
+
+          expContentEl.innerHTML = `
             <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
-            <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
+            <div class="mt-1 text-slate-300">${highlighter.renderHighlights(formattedExp, questionContextId)}</div>
           `;
 
-          // Update SRS Status Tag
           const srsData = (parentProgress.srs || {})[parentIdx];
           const srsTagStatus = document.getElementById('srs-status-tag');
           if (srsTagStatus) {
@@ -1368,13 +1411,15 @@
             }
           }
 
-          // Render explanation figures if present
           const expImages = q.explanationImages || q.explanation_images || [];
           if (Array.isArray(expImages) && expImages.length > 0) {
             expImgContainer.innerHTML = '';
             expImages.forEach(src => {
               if (src) {
-                const cleanSrc = String(src).startsWith('/') ? String(src).slice(1) : src;
+                let cleanSrc = String(src);
+                if (!cleanSrc.startsWith('/') && !cleanSrc.startsWith('http')) {
+                  cleanSrc = '/' + cleanSrc;
+                }
                 const img = document.createElement('img');
                 img.src = cleanSrc;
                 img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
@@ -1389,7 +1434,6 @@
           expBox.classList.add('hidden');
         }
 
-        // Update Navigation Buttons (Next / Prev States)
         const prevBtn = document.getElementById('btn-prev');
         const nextBtn = document.getElementById('btn-next');
         if (prevBtn) {
@@ -1422,7 +1466,6 @@
         saveState();
       }
 
-      // Handle SRS Recall Ratings with Auto-Progression
       window.rateRecall = (rating) => {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || !activeDeck.questions.length) return;
@@ -1438,7 +1481,6 @@
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId].srs || {};
         
-        // Prevent Ghost Purge bug by placing placeholder answer if user didn't pick A, B, C, D
         if (!state.userProgress[parentDeckId].answers[parentIdx]) {
           state.userProgress[parentDeckId].answers[parentIdx] = 'REVIEWED';
         }
@@ -1446,7 +1488,6 @@
         const updatedSRS = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
         state.userProgress[parentDeckId].srs[parentIdx] = updatedSRS;
         
-        // Immediate Badge update
         const srsTagStatus = document.getElementById('srs-status-tag');
         if (srsTagStatus) {
           srsTagStatus.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
@@ -1460,7 +1501,6 @@
         }
       };
 
-      // Render the Module List with Solo-Select and Multi-Select Support
       function renderDeckList() {
         const list = document.getElementById('deck-list');
         list.innerHTML = '';
@@ -1490,12 +1530,10 @@
               : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
           }`;
           
-          // 🔒 Safely sanitize the title before injecting it into the DOM
           const safeTitle = window.DOMPurify ? window.DOMPurify.sanitize(deck.title) : deck.title;
           
           item.innerHTML = `
             <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
-              <!-- Dedicated Checkbox for Multi-Select -->
               <div class="checkbox-tap-target p-1.5 -m-1.5 hover:bg-slate-700/50 rounded-lg transition flex items-center justify-center shrink-0" title="Toggle Multi-Select">
                 <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 focus:ring-offset-0 pointer-events-none" />
               </div>
@@ -1512,16 +1550,14 @@
             </span>
           `;
 
-          // 1. Row Click: Solo Select (Deselect all others and pick only this module)
           item.onclick = () => {
             state.selectedDeckKeys = new Set([id]);
             renderDeckList();
           };
 
-          // 2. Checkbox Click: Toggle Multi-Select (Adds/Removes without clearing others)
           const checkboxBtn = item.querySelector('.checkbox-tap-target');
           checkboxBtn.onclick = (e) => {
-            e.stopPropagation(); // Prevents row click from firing
+            e.stopPropagation();
             if (state.selectedDeckKeys.has(id)) {
               state.selectedDeckKeys.delete(id);
             } else {
@@ -1543,7 +1579,6 @@
         lucide.createIcons();
       }
 
-      // Multi-Select Button Handlers
       document.getElementById('btn-select-all').onclick = () => {
         Object.keys(state.decks).forEach(k => state.selectedDeckKeys.add(k));
         renderDeckList();
@@ -1580,7 +1615,6 @@
         document.getElementById('modal-decks').classList.add('hidden');
       };
 
-      // Navigation Events
       document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
       document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
       document.getElementById('btn-next').onclick = handleNextNavigation;
@@ -1624,13 +1658,11 @@
         saveState();
       };
 
-      // Modal Events
       document.getElementById('btn-menu').onclick = () => { renderDeckList(); document.getElementById('modal-decks').classList.remove('hidden'); };
       document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
       document.getElementById('btn-auth-modal').onclick = () => document.getElementById('modal-auth').classList.remove('hidden');
       document.getElementById('btn-close-auth-modal').onclick = () => document.getElementById('modal-auth').classList.add('hidden');
 
-      // Google Sign-In / Sign-Out Handlers
       document.getElementById('btn-google-login').onclick = () => {
         if (!auth) return;
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -1648,7 +1680,6 @@
         auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
       };
 
-      // Automatic Feedback Engine with Web3Forms + Firestore
       function captureCurrentContext() {
         const activeDeck = getActiveCompositeDeck();
         const qPointer = state.sessionState.currentIndex || 0;
