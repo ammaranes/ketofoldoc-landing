@@ -538,49 +538,72 @@
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
     import { StudyHighlighter } from '/js/highlighter.js';
 
-    // Formatting Helper with DOMPurify XSS Prevention
+    // Formatting Helper with Robust KaTeX LaTeX Math & DOMPurify Sanitization
     function formatMarkdown(text) {
-  if (!text) return '';
-  let processedText = String(text);
+      if (!text) return '';
+      let processed = String(text);
 
-  // Render LaTeX math formulas if KaTeX is loaded
-  if (window.katex) {
-    // 1. Display Block Math: $$...$$
-    processedText = processedText.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-      try {
-        return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false });
-      } catch (e) {
-        return math;
+      if (window.katex) {
+        // 1. Explicit Block Math: $$...$$ or \[...\]
+        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+
+        // 2. Explicit Inline Math: $...$ or \(...\)
+        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+
+        // 3. Standalone Raw LaTeX Equation Lines (Handles \frac, \left, \right, \text, nested braces, \%)
+        const lines = processed.split('\n');
+        processed = lines.map(line => {
+          const trimmed = line.trim();
+          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
+          const isMathLine = hasLatexCommands && (trimmed.includes('=') || trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\times'));
+          const notHtmlOrHeader = !trimmed.startsWith('<') && !trimmed.startsWith('#');
+
+          if (isMathLine && notHtmlOrHeader) {
+            try {
+              return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false });
+            } catch (e) {
+              return line;
+            }
+          }
+          return line;
+        }).join('\n');
+
+        // 4. Inline Un-delimited Math Expressions (e.g., "... gas component: P_{\text{total}} = P_1 + P_2 + \dots")
+        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+)/g, (match) => {
+          if (match.includes('<') || match.includes('>')) return match;
+          if (!/\\[a-zA-Z]+|_[A-Za-z0-9{]|\^[A-Za-z0-9{]/.test(match)) return match;
+          try {
+            return window.katex.renderToString(match.trim(), { displayMode: false, throwOnError: false });
+          } catch (e) {
+            return match;
+          }
+        });
       }
-    });
 
-    // 2. Inline Math: $...$
-    processedText = processedText.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
-      try {
-        return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
-      } catch (e) {
-        return math;
-      }
-    });
+      const rawHtml = marked.parse(processed);
+      const tableWrapped = rawHtml
+        .replace(/<table/g, '<div class="table-wrapper"><table')
+        .replace(/<\/table>/g, '</table></div>');
 
-    // 3. Auto-detect raw un-delimited LaTeX expressions containing \text{}, \frac, \dots, etc.
-    processedText = processedText.replace(/(?:[A-Za-z0-9_\\{}]+(?:\s*[=+\-*\/]\s*|\s+))+[A-Za-z0-9_\\{}]+(?:\\text\{[^}]+\}|\\dots|\\frac\{[^}]+\}\{[^}]+\}|_[0-9A-Za-z{}]+)/g, (math) => {
-      if (math.includes('<') || math.includes('>')) return math;
-      try {
-        return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
-      } catch (e) {
-        return math;
-      }
-    });
-  }
-
-  const rawHtml = marked.parse(processedText);
-  const tableWrapped = rawHtml
-    .replace(/<table/g, '<div class="table-wrapper"><table')
-    .replace(/<\/table>/g, '</table></div>');
-
-  return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped) : tableWrapped;
-}
+      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
+        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics'],
+        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
+      }) : tableWrapped;
+    }
 
     // Debounce Helper for Performance
     function debounce(func, timeout = 300) {
@@ -1033,7 +1056,20 @@
         renderDirectory();
       }
 
-      // Section Normalization Engine (Cleans redundant Overview labels and Promotes Headings)
+      // Helper to strip markdown hashes and bold/italic asterisks from titles
+      function cleanText(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/^#+\s*/g, '')          // Remove leading #, ##, ###
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
+          .replace(/__(.*?)__/g, '$1')     // Remove bold __text__
+          .replace(/\*(.*?)\*/g, '$1')     // Remove italic *text*
+          .replace(/_(.*?)_/g, '$1')       // Remove italic _text_
+          .replace(/^[📄\s]+/, '')         // Remove decorative document emojis
+          .trim();
+      }
+
+      // Section Normalization Engine (Strips Markdown Syntax & Promotes Headings)
       function processChapterSections(rawSections) {
         const processed = [];
         let companionSubtitle = '';
@@ -1041,20 +1077,28 @@
         (rawSections || []).forEach((sec, idx) => {
           const rawTitle = (sec.title || '').trim();
           const rawContent = (sec.content || '').trim();
-          const isOverviewTitle = /^overview\s*\d*$/i.test(rawTitle);
+          const cleanTitleStr = cleanText(rawTitle);
+          const cleanContentStr = cleanText(rawContent);
+          const isOverviewTitle = /^overview\s*\d*$/i.test(cleanTitleStr);
 
-          // 1. Detect Companion Subtitle Intro Line
-          if (idx === 0 && (/Comprehensive Learning Companion/i.test(rawContent) || isOverviewTitle && rawContent.length < 140 && !rawContent.includes('\n'))) {
-            companionSubtitle = rawContent.replace(/^Comprehensive Learning Companion:\s*/i, '').trim();
+          // 1. Detect Companion Subtitle / Manual Banner (e.g., "COMPREHENSIVE BOARD REVIEW MANUAL • VERSION 2.0")
+          if (idx === 0 && (
+            /COMPREHENSIVE.*(?:MANUAL|COMPANION|REVIEW)/i.test(cleanContentStr) ||
+            /VERSION\s*\d+/i.test(cleanContentStr) ||
+            (isOverviewTitle && cleanContentStr.length < 140 && !cleanContentStr.includes('\n'))
+          )) {
+            companionSubtitle = cleanContentStr.replace(/^Comprehensive Learning Companion:\s*/i, '').trim();
             return;
           }
 
-          // 2. Detect Major Section Markers (e.g., "SECTION 1: CORE CEREBRAL PHYSIOLOGY & METABOLISM")
-          const sectionHeaderMatch = rawContent.match(/^(?:📄\s*)?SECTION\s*\d+\s*:\s*(.+)$/im);
-          if (sectionHeaderMatch) {
+          // 2. Detect Major Section Markers (e.g., "## **SECTION 1: WORKSTATION CORE KEY POINTS**")
+          const sectionMatch = cleanContentStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i) || 
+                               cleanTitleStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i);
+          
+          if (sectionMatch) {
             processed.push({
               type: 'major_section_header',
-              title: sectionHeaderMatch[1].trim(),
+              title: `SECTION ${sectionMatch[1]}: ${sectionMatch[2].trim()}`,
               content: ''
             });
             return;
@@ -1063,10 +1107,10 @@
           // 3. Handle Overview X titles
           if (isOverviewTitle) {
             // Case A: Standalone single-line subtopic title
-            if (rawContent.length < 90 && !rawContent.includes('\n') && !rawContent.includes('.')) {
+            if (cleanContentStr.length < 90 && !cleanContentStr.includes('\n') && !cleanContentStr.includes('.')) {
               processed.push({
                 type: 'sub_heading',
-                title: rawContent,
+                title: cleanContentStr,
                 content: ''
               });
               return;
@@ -1077,13 +1121,13 @@
             if (mdHeaderMatch) {
               processed.push({
                 type: 'normal',
-                title: mdHeaderMatch[1].trim(),
+                title: cleanText(mdHeaderMatch[1]),
                 content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim()
               });
               return;
             }
 
-            // Case C: Standard content with generic title
+            // Case C: Standard content with generic fallback title
             processed.push({
               type: 'normal',
               title: `Topic ${processed.length + 1}`,
@@ -1095,7 +1139,7 @@
           // 4. Standard content section
           processed.push({
             type: 'normal',
-            title: rawTitle,
+            title: cleanTitleStr,
             content: rawContent
           });
         });
