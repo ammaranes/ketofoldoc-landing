@@ -560,10 +560,10 @@
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
-      const mathBlocks = []; // 🛡️ Storage array for the Placeholder System
+      const mathBlocks = []; // 🛡️ Safe Placeholder Array
 
       if (window.katex) {
-        // Safe rendering wrapper
+        // Safe rendering wrapper to avoid KaTeX crashes
         function renderAndSave(math, displayMode) {
           try {
             const html = window.katex.renderToString(math.trim(), { displayMode, throwOnError: false });
@@ -571,74 +571,83 @@
             mathBlocks.push(html);
             return id;
           } catch (e) {
-            return math;
+            return math; 
           }
         }
 
-        // 1. Explicit Delimiters
+        // 1. Markdown Bug Fixes (Strikethrough & Spaced Bolds)
+        // Replaces isolated ~ with HTML entity to prevent accidental strikethrough (e.g. ~60%)
+        processed = processed.replace(/(?<!~)~(?!~)/g, '&#126;');
+        processed = processed.replace(/\*\*\s+(.*?)\s+\*\*/g, '**$1**');
+
+        // 2. Explicit Math Delimiters
         processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderAndSave(m, true));
         processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderAndSave(m, true));
         processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderAndSave(m, false));
         processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderAndSave(m, false));
 
-        // 2. Line-by-Line Heuristics
+        // 3. Safe Standalone Equations
         const lines = processed.split('\n');
         processed = lines.map(line => {
-          if (line.includes('@@MATH_')) return line; // Skip already safely processed blocks
-
+          if (line.includes('@@MATH_')) return line;
           let trimmed = line.trim();
           if (!trimmed) return line;
 
           const isBullet = /^[*-]\s+/.test(trimmed);
-          const content = isBullet ? trimmed.replace(/^[*-]\s+/, '') : trimmed;
+          let content = isBullet ? trimmed.replace(/^[*-]\s+/, '') : trimmed;
 
-          // Strip \text{...} to evaluate if the remaining line is just prose
-          const strippedContent = content.replace(/\\text\{[^}]*\}/g, '');
-          const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(strippedContent);
+          // Temporarily strip formatting to accurately evaluate the math
+          let pureContent = content.replace(/^([*_]+|<[^>]+>)\s*/, '').replace(/\s*([*_]+|<\/[^>]+>)$/, '');
 
-          const hasMathIndicators = /\\frac|\\rightarrow|\\rightleftharpoons|\\to|\\cdot|\\times|\\text\{|_[a-zA-Z0-9]|_\{|\^[a-zA-Z0-9]|\^\{/.test(content);
-          const hasEqualsOrArrow = /(=|\\rightarrow|\\rightleftharpoons|\\to)/.test(content);
-
-          // Rule A: Standalone Equation Line
-          if (hasMathIndicators && hasEqualsOrArrow && !content.startsWith('<') && !content.startsWith('#') && !isProseParagraph) {
-             const rendered = renderAndSave(content, true);
-             return isBullet ? line.replace(content, rendered) : rendered;
+          const hasMathIndicators = /\\frac|\\rightarrow|\\rightleftharpoons|\\to/.test(pureContent);
+          const hasEqualsOrArrow = /(=|\\rightarrow|\\rightleftharpoons|\\to)/.test(pureContent);
+          
+          if (hasMathIndicators && hasEqualsOrArrow) {
+              const strippedMath = pureContent.replace(/\\text\{[^}]*\}/g, '').replace(/[=+\-*\/><]/g, ' ');
+              const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(strippedMath);
+              
+              if (!isProseParagraph && pureContent.length > 3) {
+                  const rendered = renderAndSave(pureContent, true);
+                  const finalLine = content.replace(pureContent, rendered);
+                  return isBullet ? line.replace(content, finalLine) : finalLine;
+              }
           }
-
-          // Rule B: Prose line ending with an equation (e.g. "... component: P_total = P_1 + P_2")
-          if (isProseParagraph && content.includes(': ')) {
-             const parts = line.split(': ');
-             const potentialMath = parts[parts.length - 1].trim();
-             if (potentialMath.includes('=') && /_|\^|\\/.test(potentialMath)) {
-                const rendered = renderAndSave(potentialMath, false);
-                parts[parts.length - 1] = ' ' + rendered;
-                return isBullet ? `- ${parts.join(':')}` : parts.join(':');
-             }
-          }
-
-          // Rule C: Safe global replacement of known chemical formulas
-          const chemRegex = /(?<![A-Za-z])(CO_2|H_2O|N_2O|O_2|CaCO_3|Ca\(OH\)_2|Li_2CO_3|H_2CO_3)(?![A-Za-z])/g;
-          if (chemRegex.test(line)) {
-             return line.replace(chemRegex, (m) => renderAndSave(m, false));
-          }
-
           return line;
         }).join('\n');
+
+        // 4. Magic Medical Subscript Wrapper
+        // Matches medical variables (CO_2, P_A_O_2) safely and evaluates them individually
+        processed = processed.replace(/(?<![\w\\])([A-Za-z0-9()]+(?:_[A-Za-z0-9()]+)+)(?![\w\\])/g, (match) => {
+            return renderAndSave(match, false);
+        });
+
+        // 5. Fallback Inline Symbols
+        // Keeps standard text clean without invoking the KaTeX engine on full sentences
+        processed = processed.replace(/\\times/g, '&times;');
+        processed = processed.replace(/\\rightarrow/g, '&rarr;');
+        processed = processed.replace(/\\leftarrow/g, '&larr;');
+        processed = processed.replace(/\\rightleftharpoons/g, '&#8652;');
+        processed = processed.replace(/\\cdot/g, '&middot;');
+        processed = processed.replace(/\\Delta/g, '&Delta;');
+        processed = processed.replace(/\\alpha/g, '&alpha;');
+        processed = processed.replace(/\\beta/g, '&beta;');
+        processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
       }
 
-      // Format markdown (placeholders safely pass through as text)
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
         .replace(/<\/table>/g, '</table></div>');
 
-      // Purify HTML (placeholders remain completely untouched by the aggressive sanitizer)
+      // 6. Upgraded DOMPurify Security Config 
+      // Allows highlighting, styling, and math elements safely
       let sanitized = window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
-        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics'],
-        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
+        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics', 'mark', 'font', 'u', 's', 'sub', 'sup'],
+        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'color', 'bgcolor']
       }) : tableWrapped;
 
-      // 🛡️ RE-INJECTION: Swap the pristine KaTeX HTML back into the secure document
+      // 7. Pristine Re-Injection 
+      // Safely swap the KaTeX HTML back in, entirely bypassing Markdown and DOMPurify corruption
       mathBlocks.forEach((html, i) => {
         sanitized = sanitized.replace(`@@MATH_${i}@@`, html);
       });
