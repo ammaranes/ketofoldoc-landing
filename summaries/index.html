@@ -21,6 +21,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
+  <!-- Firebase SDKs (v9 Compat Mode - Aligned with Sub-Platforms) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     .safe-top { padding-top: env(safe-area-inset-top); }
@@ -538,10 +543,6 @@
 
   <!-- ES6 Application Logic + Namespaced Cross-Platform SM-2 Engine -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
     // Helper: Dynamic Module Fallback Loader
     async function loadModuleWithFallbacks(paths) {
       for (const p of paths) {
@@ -760,14 +761,25 @@
     function loadLocalProgress() {
       try {
         const sumSaved = localStorage.getItem(LOCAL_SUMMARIES_KEY);
-        if (sumSaved) summariesState = JSON.parse(sumSaved);
+        if (sumSaved) {
+          const p = JSON.parse(sumSaved);
+          summariesState = p || { readChapters: {}, quizAnswers: {} };
+        }
 
         const saudiSaved = localStorage.getItem(LOCAL_SAUDI_KEY);
-        if (saudiSaved) saudiBoardCardStates = JSON.parse(saudiSaved).card_states || {};
+        if (saudiSaved) {
+          const p = JSON.parse(saudiSaved);
+          saudiBoardCardStates = (p && p.card_states) ? p.card_states : {};
+        }
 
         const thSaved = localStorage.getItem(LOCAL_1000_KEY);
-        if (thSaved) thousandQsCardStates = JSON.parse(thSaved).card_states || {};
-      } catch (e) {}
+        if (thSaved) {
+          const p = JSON.parse(thSaved);
+          thousandQsCardStates = (p && p.card_states) ? p.card_states : {};
+        }
+      } catch (e) {
+        console.warn("Local cache read error", e);
+      }
     }
 
     // App Initialization Function
@@ -781,7 +793,7 @@
         ? currentPath 
         : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-      // 1. Resilient Books Module Loader
+      // 1. Resilient Books Module Loader (Detects Raw Arrays of Chapters vs Objects)
       const booksMod = await loadModuleWithFallbacks([
         `${basePath}books/index.js`,
         '/summaries/books/index.js',
@@ -790,9 +802,20 @@
       ]);
 
       if (booksMod) {
-        allBooks = booksMod.allBooks || booksMod.books || booksMod.default || [];
-        if (!Array.isArray(allBooks) && typeof booksMod === 'object') {
-          allBooks = Object.values(booksMod).find(Array.isArray) || [];
+        let rawData = booksMod.allBooks || booksMod.books || booksMod.allChapters || booksMod.default || [];
+        if (!Array.isArray(rawData) && typeof booksMod === 'object') {
+          rawData = Object.values(booksMod).find(Array.isArray) || [];
+        }
+        
+        // Wrap raw chapters into a standard "Book" format if the module exports raw chapters
+        if (rawData.length > 0 && !rawData[0].chapters) {
+           allBooks = [{
+             id: 'default_book',
+             title: 'Textbook Library',
+             chapters: rawData
+           }];
+        } else {
+           allBooks = rawData;
         }
       }
 
@@ -851,7 +874,7 @@
 
       loadLocalProgress();
 
-      let activeBookId = allBooks[0]?.id || 'miller';
+      let activeBookId = allBooks[0]?.id || 'default_book';
       let activeChapterId = null;
 
       function getActiveBook() {
@@ -865,7 +888,7 @@
         return book.chapters.find(c => c.id === activeChapterId) || null;
       }
 
-      // Unified Firebase Configuration
+      // Unified Firebase Configuration (v9 Compat to align with global ecosystem scripts)
       const firebaseConfig = {
         apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
         authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -880,9 +903,9 @@
       let currentUser = null;
 
       try {
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
       } catch (e) {
         console.warn("Firebase Init:", e);
       }
@@ -898,8 +921,7 @@
         onSave: (allHighlights) => {
           if (currentUser && db) {
             try {
-              const userDocRef = doc(db, 'users', currentUser.uid);
-              setDoc(userDocRef, {
+              db.collection('users').doc(currentUser.uid).set({
                 summaries_highlights: allHighlights
               }, { merge: true });
             } catch (e) {
@@ -932,8 +954,7 @@
 
         if (currentUser && db) {
           try {
-            const userDocRef = doc(db, 'users', currentUser.uid);
-            await setDoc(userDocRef, {
+            await db.collection('users').doc(currentUser.uid).set({
               [targetFirestoreField]: { card_states: targetStates, lastUpdated: new Date().toISOString() },
               summaries_progress: summariesState
             }, { merge: true });
@@ -945,7 +966,7 @@
 
       // Auth State Observer
       if (auth) {
-        onAuthStateChanged(auth, async (user) => {
+        auth.onAuthStateChanged(async (user) => {
           currentUser = user;
           const authBtnLabel = document.getElementById('auth-label');
           
@@ -954,8 +975,8 @@
             
             if (db) {
               try {
-                const snap = await getDoc(doc(db, 'users', user.uid));
-                if (snap.exists()) {
+                const snap = await db.collection('users').doc(user.uid).get();
+                if (snap.exists) {
                   const data = snap.data();
                   if (data.summaries_progress) {
                     summariesState.readChapters = { ...summariesState.readChapters, ...(data.summaries_progress.readChapters || {}) };
@@ -995,12 +1016,12 @@
         if (!auth) return;
         if (currentUser) {
           if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
-            await signOut(auth);
+            await auth.signOut();
           }
         } else {
-          const provider = new GoogleAuthProvider();
+          const provider = new firebase.auth.GoogleAuthProvider();
           try {
-            await signInWithPopup(auth, provider);
+            await auth.signInWithPopup(provider);
           } catch (err) {
             console.error("Google sign-in error:", err);
           }
@@ -1068,7 +1089,7 @@
 
         if (currentUser && db) {
           try {
-            await setDoc(doc(db, 'users', currentUser.uid), {
+            await db.collection('users').doc(currentUser.uid).set({
               summaries_progress: {
                 ...summariesState,
                 lastUpdated: new Date().toISOString()
@@ -1085,7 +1106,7 @@
       function cleanText(str) {
         if (!str) return '';
         return String(str)
-          .replace(/^#+\s*/g, '')          // Remove leading #, ##, ###
+          .replace(/^#+\s*/g, '')         // Remove leading #, ##, ###
           .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
           .replace(/__(.*?)__/g, '$1')     // Remove bold __text__
           .replace(/\*(.*?)\*/g, '$1')     // Remove italic *text*
@@ -1979,7 +2000,7 @@
             })
           });
 
-          const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
+          const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
 
           await Promise.all([emailPromise, firestorePromise]);
 
@@ -2010,6 +2031,20 @@
       } else {
         showDirectory();
       }
+      
+      // Safari bfcache & Tab Switch UI update freeze fix
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted && auth && currentUser) {
+          if (activeChapterId) renderReader();
+          else renderDirectory();
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && auth && currentUser) {
+          if (activeChapterId) renderReader();
+          else renderDirectory();
+        }
+      });
     }
 
     // Initialize the Application
