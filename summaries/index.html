@@ -560,71 +560,81 @@
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
+      const mathBlocks = []; // 🛡️ NEW: Storage array for the Placeholder System
 
       if (window.katex) {
+        // Safe rendering wrapper
+        function renderAndSave(math, displayMode) {
+          try {
+            const html = window.katex.renderToString(math.trim(), { displayMode, throwOnError: false });
+            const id = `__MATH_${mathBlocks.length}__`;
+            mathBlocks.push(html);
+            return id;
+          } catch (e) {
+            return math;
+          }
+        }
+
         // 1. Explicit Block Math: $$...$$ or \[...\]
-        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
-          catch (e) { return math; }
-        });
-        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
-          catch (e) { return math; }
-        });
+        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderAndSave(m, true));
+        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderAndSave(m, true));
 
         // 2. Explicit Inline Math: $...$ or \(...\)
-        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
-          catch (e) { return math; }
-        });
-        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
-          catch (e) { return math; }
-        });
+        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderAndSave(m, false));
+        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderAndSave(m, false));
 
         // 3. Standalone Raw LaTeX Equation Lines
         const lines = processed.split('\n');
         processed = lines.map(line => {
           const trimmed = line.trim();
-          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
-          const isMathLine = hasLatexCommands && (trimmed.includes('=') || trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\times'));
-          const notHtmlOrHeader = !trimmed.startsWith('<') && !trimmed.startsWith('#');
+          if (trimmed.includes('__MATH_')) return line; // Skip already safely processed blocks
 
-          // 🛡️ FIX: Prevent KaTeX from swallowing entire prose paragraphs!
-          // If the line contains at least three consecutive 4-letter English words, treat it as prose, not a standalone math block.
+          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
+          const isMathLine = hasLatexCommands && (
+            trimmed.includes('=') || 
+            trimmed.includes('\\frac') || 
+            trimmed.includes('\\left') || 
+            trimmed.includes('\\times') || 
+            trimmed.includes('\\right') || 
+            trimmed.includes('\\to') || 
+            trimmed.includes('\\cdot')
+          );
+          
+          // Failsafe: Do not trigger if the line looks like a standard prose paragraph
           const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(trimmed);
 
-          if (isMathLine && notHtmlOrHeader && !isProseParagraph) {
-            try {
-              return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false });
-            } catch (e) {
-              return line;
-            }
+          if (isMathLine && !trimmed.startsWith('<') && !trimmed.startsWith('#') && !isProseParagraph) {
+            return renderAndSave(trimmed, true);
           }
           return line;
         }).join('\n');
 
-        // 4. Inline Un-delimited Math Expressions
-        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+))/g, (match) => {
-          if (match.includes('<') || match.includes('>')) return match;
+        // 4. Inline Un-delimited Math Expressions (Now detects chemical arrows!)
+        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times|\\rightarrow|\\leftarrow|\\Rightarrow|\\rightleftharpoons|\\cdot)+))/g, (match) => {
+          if (match.includes('<') || match.includes('>') || match.includes('__MATH_')) return match;
           if (!/\\[a-zA-Z]+|_[A-Za-z0-9{]|\^[A-Za-z0-9{]/.test(match)) return match;
-          try {
-            return window.katex.renderToString(match.trim(), { displayMode: false, throwOnError: false });
-          } catch (e) {
-            return match;
-          }
+          return renderAndSave(match, false);
         });
       }
 
+      // Format markdown (placeholders safely pass through as text)
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
         .replace(/<\/table>/g, '</table></div>');
 
-      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
+      // Purify HTML (placeholders remain completely untouched by the aggressive sanitizer)
+      let sanitized = window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
         ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics'],
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
       }) : tableWrapped;
+
+      // 🛡️ RE-INJECTION: Swap the pristine KaTeX HTML back into the secure document
+      mathBlocks.forEach((html, i) => {
+        sanitized = sanitized.replace(`__MATH_${i}__`, html);
+      });
+
+      return sanitized;
     }
 
     // Debounce Helper for Performance
