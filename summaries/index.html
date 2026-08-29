@@ -590,7 +590,11 @@
           const isMathLine = hasLatexCommands && (trimmed.includes('=') || trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\times'));
           const notHtmlOrHeader = !trimmed.startsWith('<') && !trimmed.startsWith('#');
 
-          if (isMathLine && notHtmlOrHeader) {
+          // 🛡️ FIX: Prevent KaTeX from swallowing entire prose paragraphs!
+          // If the line contains at least three consecutive 4-letter English words, treat it as prose, not a standalone math block.
+          const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(trimmed);
+
+          if (isMathLine && notHtmlOrHeader && !isProseParagraph) {
             try {
               return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false });
             } catch (e) {
@@ -601,7 +605,6 @@
         }).join('\n');
 
         // 4. Inline Un-delimited Math Expressions
-        // 🐛 FIXED SYNTAX ERROR: Added the missing closing parenthesis to the regex capture group before the /g flag
         processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+))/g, (match) => {
           if (match.includes('<') || match.includes('>')) return match;
           if (!/\\[a-zA-Z]+|_[A-Za-z0-9{]|\^[A-Za-z0-9{]/.test(match)) return match;
