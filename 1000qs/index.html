@@ -30,7 +30,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-400 selection:text-slate-950">
 
   <!-- Top Navigation Bar -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top">
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
     <div class="max-w-4xl mx-auto px-4 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
       
       <!-- Left Section: Menu, Clickable Logo, and Dual-Line Title -->
@@ -97,7 +97,7 @@
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-36 flex flex-col justify-between">
     
     <!-- Empty & Completed State Screen -->
-    <div id="view-empty" class="hidden my-auto text-center py-12 px-4">
+    <div id="view-empty" class="hidden my-auto text-center py-12 px-4 select-none">
       <div class="w-16 h-16 bg-emerald-950/80 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-800/60">
         <i data-lucide="check-circle-2" class="w-8 h-8"></i>
       </div>
@@ -116,7 +116,7 @@
 
     <!-- Active Question View -->
     <div id="view-quiz" class="flex-1 flex flex-col">
-      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2 select-none">
         <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
           <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
           <span id="question-source-badge" class="px-2.5 py-1 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0"></span>
@@ -128,26 +128,26 @@
 
       <!-- Question Stem & Optional Stem Image -->
       <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
-        <p id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed"></p>
-        <div id="stem-image-container" class="mt-4 hidden">
+        <p id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></p>
+        <div id="stem-image-container" class="mt-4 hidden select-none">
           <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
         </div>
       </div>
 
       <!-- Options Container -->
-      <div id="options-container" class="space-y-3 mb-6"></div>
+      <div id="options-container" class="space-y-3 mb-6 select-none"></div>
 
       <!-- Explanation & Rationale Box -->
       <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300">
-        <div class="flex items-center text-emerald-400 font-bold mb-2">
+        <div class="flex items-center text-emerald-400 font-bold mb-2 select-none">
           <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
         </div>
         
-        <div id="explanation-content" class="leading-relaxed space-y-2"></div>
-        <div id="explanation-images-container" class="mt-4 space-y-3 hidden"></div>
+        <div id="explanation-content" class="leading-relaxed space-y-2 highlightable-content"></div>
+        <div id="explanation-images-container" class="mt-4 space-y-3 hidden select-none"></div>
 
         <!-- Anki Spaced Repetition Bar -->
-        <div class="mt-5 pt-4 border-t border-slate-800">
+        <div class="mt-5 pt-4 border-t border-slate-800 select-none">
           <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
             <span>Rate Recall (Spaced Repetition):</span>
             <span id="srs-status-tag" class="text-[10px] text-slate-500">Not rated yet</span>
@@ -175,7 +175,7 @@
     </div>
 
     <!-- Navigation Footer -->
-    <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl">
+    <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl select-none">
       <div class="max-w-3xl mx-auto px-4">
         <div class="flex items-center justify-between space-x-3 mb-2">
           <button id="btn-prev" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 border border-slate-800 rounded-xl font-semibold text-sm flex items-center justify-center text-slate-300 transition">
@@ -199,7 +199,7 @@
   </main>
 
   <!-- Global Search Modal -->
-  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20">
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
       
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
@@ -220,7 +220,7 @@
         </button>
       </div>
 
-      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40">
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text">
         <div class="text-xs text-slate-500 text-center py-8">
           Type at least 2 characters to search across all chapters...
         </div>
@@ -235,7 +235,7 @@
   </div>
 
   <!-- Multi-Select Chapter Switcher & Ecosystem Hub Modal -->
-  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       
       <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
@@ -323,7 +323,7 @@
   </div>
 
   <!-- Clean Google Auth Modal -->
-  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 sm:p-8 shadow-2xl relative">
       <button id="btn-close-auth-modal" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg active:bg-slate-800 transition">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -369,13 +369,13 @@
   </div>
 
   <!-- Floating Feedback Trigger Button -->
-  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
+  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
   <!-- Context-Aware Feedback Modal -->
-  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
       <!-- Modal Header -->
@@ -395,7 +395,7 @@
       </div>
 
       <!-- Scrollable Body -->
-      <div class="overflow-y-auto py-4 space-y-4 flex-1">
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 select-text">
         
         <!-- Auto-Detected Context Card -->
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
@@ -458,6 +458,8 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
+    import { StudyHighlighter } from '/js/highlighter.js';
+
     // Cached DOM Elements
     const DOM = {
       viewEmpty: document.getElementById('view-empty'),
@@ -643,6 +645,20 @@
       } catch (e) {
         console.warn("Firebase Init:", e);
       }
+
+      // Initialize Universal Study Highlighter with reactive render callback
+      const highlighter = new StudyHighlighter({
+        storageKey: 'kd_1000qs_highlights',
+        onChange: () => render(),
+        onSave: (allHighlights) => {
+          if (db && currentUser) {
+            db.collection('users').doc(currentUser.uid).set({
+              thousand_qs_highlights: allHighlights
+            }, { merge: true });
+          }
+        }
+      });
+      window.highlighterInstance = highlighter;
 
       const LOCAL_STORAGE_KEY = 'anes_1000q_progress';
       const FIRESTORE_COLLECTION = 'users';
@@ -937,6 +953,11 @@
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
               render();
             }
+            if (cloudData.thousand_qs_highlights) {
+              highlighter.highlights = { ...highlighter.highlights, ...cloudData.thousand_qs_highlights };
+              localStorage.setItem('kd_1000qs_highlights', JSON.stringify(highlighter.highlights));
+              render();
+            }
           } else {
             pushStateToCloud();
           }
@@ -951,7 +972,8 @@
             userProgress: state.userProgress,
             card_states: compileCardStates(),
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }
+          },
+          thousand_qs_highlights: highlighter.highlights
         }, { merge: true });
       }
 
@@ -1350,7 +1372,16 @@
           DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         }
 
-        DOM.qStem.textContent = q.stem || q.question || q.text || '';
+        // Render Question Stem with Safe Highlighter Fallback
+        const questionContextId = `${parentDeckId}_${parentIdx}`;
+        highlighter.setContext(questionContextId);
+
+        const rawStem = q.stem || q.question || q.text || '';
+        DOM.qStem.className = "text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content";
+        DOM.qStem.setAttribute('data-highlight-context', questionContextId);
+        DOM.qStem.setAttribute('data-raw-text', rawStem);
+        DOM.qStem.innerHTML = highlighter.renderHighlights(rawStem, questionContextId);
+        
         const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
 
         if (rawImg) {
@@ -1406,9 +1437,15 @@
 
         if (selectedAnswer && (expText || q.correctAnswer)) {
           DOM.expBox.classList.remove('hidden');
+
+          const formattedExp = formatMarkdown(expText) || 'No rationale provided.';
+          DOM.expContent.className = "leading-relaxed space-y-2 highlightable-content";
+          DOM.expContent.setAttribute('data-highlight-context', questionContextId);
+          DOM.expContent.setAttribute('data-raw-text', formattedExp);
+
           DOM.expContent.innerHTML = `
             <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
-            <div class="mt-1 text-slate-300">${formatMarkdown(expText) || 'No rationale provided.'}</div>
+            <div class="mt-1 text-slate-300">${highlighter.renderHighlights(formattedExp, questionContextId)}</div>
           `;
 
           const srsData = (parentProgress.srs || {})[parentIdx];
