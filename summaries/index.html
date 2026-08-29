@@ -8,7 +8,7 @@
   <title>KetofolDoc | Anesthesia Chapter Summaries</title>
   
   <!-- Favicon & Touch Icon -->
-  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   
   <!-- Tailwind CSS, Marked.js, DOMPurify & Lucide Icons -->
@@ -131,10 +131,10 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600/40 selection:text-slate-100">
 
   <!-- Top Navigation Header -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top">
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
       
       <!-- Left: Navigation Controls & Brand -->
@@ -149,7 +149,7 @@
         </button>
         
         <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
-          <img src="logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
+          <img src="/logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
         </a>
 
         <div class="min-w-0 flex-1 flex flex-col justify-center">
@@ -198,7 +198,7 @@
   </header>
 
   <!-- 📚 VIEW 1: CHAPTERS DIRECTORY / LANDING -->
-  <section id="view-directory" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-10 pb-36">
+  <section id="view-directory" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-10 pb-36 select-none">
     <div class="text-center max-w-3xl mx-auto mb-10">
       <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-800/60 text-purple-300 text-xs font-semibold mb-4">
         <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
@@ -225,7 +225,6 @@
 
       <div class="mt-6 max-w-md mx-auto relative">
         <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-        <!-- FIXED: iOS Safari Zoom resolved by using text-base -->
         <input 
           type="search" 
           id="directory-filter-input" 
@@ -245,7 +244,7 @@
 
   <!-- 📖 VIEW 2: CONTINUOUS CHAPTER READER -->
   <main id="view-reader" class="hidden flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8 pb-36">
-    <div id="chapter-banner" class="mb-10 pb-8 border-b border-slate-800/80">
+    <div id="chapter-banner" class="mb-10 pb-8 border-b border-slate-800/80 select-none">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
         <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-purple-400">
           <span id="banner-book-badge" class="px-3 py-0.5 rounded-full bg-purple-950/70 border border-purple-800/60">Miller's Anesthesia</span>
@@ -259,7 +258,7 @@
         </button>
       </div>
 
-      <h1 id="chapter-headline" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4"></h1>
+      <h1 id="chapter-headline" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4 select-text"></h1>
       
       <div class="flex items-center space-x-5 text-xs sm:text-sm text-slate-400">
         <span class="inline-flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-1.5 text-emerald-400"></i> <span id="chapter-read-time-val">10 min read</span></span>
@@ -273,7 +272,7 @@
     </article>
 
     <!-- Interactive Recall Questions Section -->
-    <section id="chapter-quiz-section" class="mt-16 pt-12 border-t-2 border-slate-800">
+    <section id="chapter-quiz-section" class="mt-16 pt-12 border-t-2 border-slate-800 select-none">
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center space-x-3">
           <div class="w-9 h-9 rounded-xl bg-purple-950/70 border border-purple-800/60 text-purple-400 flex items-center justify-center">
@@ -293,7 +292,7 @@
     </section>
 
     <!-- Bottom Navigation -->
-    <div class="mt-16 pt-8 border-t border-slate-800/80 flex flex-col gap-4">
+    <div class="mt-16 pt-8 border-t border-slate-800/80 flex flex-col gap-4 select-none">
       <div class="flex justify-center">
         <button id="btn-toggle-read-bottom" class="w-full sm:w-auto px-6 py-3 rounded-2xl border text-sm font-bold transition flex items-center justify-center space-x-2 shadow-lg">
           <i data-lucide="check-circle-2" class="w-5 h-5"></i>
@@ -318,11 +317,10 @@
   </main>
 
   <!-- Global Full-Text Search Modal -->
-  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20">
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
       <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
         <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
-        <!-- FIXED: iOS Safari Zoom resolved by using text-base -->
         <input 
           type="search" 
           id="search-input" 
@@ -339,7 +337,7 @@
         </button>
       </div>
 
-      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40">
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text">
         <div class="text-xs text-slate-500 text-center py-8">
           Type at least 2 characters to search across all summary chapters...
         </div>
@@ -353,7 +351,7 @@
   </div>
 
   <!-- Book & Chapter Drawer + Ecosystem Hub Modal -->
-  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
         <div class="flex items-center space-x-2">
@@ -426,7 +424,7 @@
   </div>
 
   <!-- In-Chapter Table of Contents Drawer Modal -->
-  <div id="modal-toc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="modal-toc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center space-x-2">
@@ -441,14 +439,14 @@
     </div>
   </div>
 
-  <!-- 💬 Floating Feedback Trigger Button -->
-  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
+  <!-- Floating Feedback Trigger Button -->
+  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-purple-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
-  <!-- 📝 Context-Aware Feedback Modal -->
-  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <!-- Context-Aware Feedback Modal -->
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
       
       <!-- Modal Header -->
@@ -468,7 +466,7 @@
       </div>
 
       <!-- Scrollable Body -->
-      <div class="overflow-y-auto py-4 space-y-4 flex-1">
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 select-text">
         
         <!-- Auto-Detected Context Card -->
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
@@ -534,8 +532,9 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { StudyHighlighter } from '/js/highlighter.js';
 
-    // 🛠️ Formatting Helper with DOMPurify XSS Prevention
+    // Formatting Helper with DOMPurify XSS Prevention
     function formatMarkdown(text) {
       if (!text) return '';
       const rawHtml = marked.parse(text);
@@ -543,7 +542,7 @@
       return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped) : tableWrapped;
     }
 
-    // 🕒 Debounce Helper for Performance
+    // Debounce Helper for Performance
     function debounce(func, timeout = 300) {
       let timer;
       return (...args) => {
@@ -552,7 +551,7 @@
       };
     }
 
-    // 🧩 Options Normalization Helper (Supports Array & Object schemas)
+    // Options Normalization Helper (Supports Array & Object schemas)
     function getNormalizedOptions(q) {
       if (!q || !q.options) return [];
       if (Array.isArray(q.options)) {
@@ -579,7 +578,7 @@
       return [];
     }
 
-    // 🧠 Spaced Repetition (SM-2) Engine
+    // Spaced Repetition (SM-2) Engine
     function calculateSM2(cardState, quality) {
       let { reps = 0, interval = 1, easeFactor = 2.5 } = cardState || {};
       
@@ -697,14 +696,20 @@
       let questionChapters = [];
 
       try {
-        const booksModule = await import('./books/index.js');
+        const booksModule = await import('/summaries/books/index.js');
         allBooks = booksModule.allBooks || [];
       } catch (err) {
-        console.error("Failed to load ./books/index.js", err);
+        console.error("Failed to load /summaries/books/index.js", err);
+        try {
+          const fallbackBooks = await import('./books/index.js');
+          allBooks = fallbackBooks.allBooks || [];
+        } catch (e) {
+          console.error("Fallback books import also failed", e);
+        }
       }
 
       try {
-        const imported = await import('./decks/index.js');
+        const imported = await import('/summaries/decks/index.js');
         if (imported.allQuestionDecks) {
           questionChapters = imported.allQuestionDecks;
         } else {
@@ -731,7 +736,30 @@
           questionChapters = [...saudi, ...thousand];
         }
       } catch (e) {
-        console.info("Question decks not found or optional; running in summary mode.");
+        try {
+          const fallbackDecks = await import('./decks/index.js');
+          const saudi = (fallbackDecks.allDecks || []).map(d => ({
+            ...d,
+            sourceName: 'Saudi Board QB',
+            sourceKey: 'saudi_board_progress',
+            sourceBadgeColor: 'blue'
+          }));
+          const thousand = (fallbackDecks.allChapters || []).map((ch, idx) => {
+            const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
+            const numOnly = rawId.replace(/\D/g, '');
+            const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
+            return {
+              ...ch,
+              id: key,
+              sourceName: '1000 Questions',
+              sourceKey: 'thousand_qs_progress',
+              sourceBadgeColor: 'emerald'
+            };
+          });
+          questionChapters = [...saudi, ...thousand];
+        } catch (err) {
+          console.info("Question decks not found or optional; running in summary mode.");
+        }
       }
 
       loadLocalProgress();
@@ -770,6 +798,29 @@
       } catch (e) {
         console.warn("Firebase Init:", e);
       }
+
+      // Initialize Universal Study Highlighter
+      const highlighter = new StudyHighlighter({
+        storageKey: 'kd_summaries_highlights',
+        onChange: () => {
+          if (activeChapterId) {
+            renderReader();
+          }
+        },
+        onSave: (allHighlights) => {
+          if (currentUser && db) {
+            try {
+              const userDocRef = doc(db, 'users', currentUser.uid);
+              setDoc(userDocRef, {
+                summaries_highlights: allHighlights
+              }, { merge: true });
+            } catch (e) {
+              console.error("Highlighter cloud sync error:", e);
+            }
+          }
+        }
+      });
+      window.highlighterInstance = highlighter;
 
       // Cross-Platform Firestore & LocalStorage Sync with Namespaced IDs
       async function syncCardSRS(question, quality) {
@@ -830,6 +881,10 @@
                   if (data.thousand_qs_progress?.card_states) {
                     thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
                     localStorage.setItem(LOCAL_1000_KEY, JSON.stringify({ card_states: thousandQsCardStates }));
+                  }
+                  if (data.summaries_highlights) {
+                    highlighter.highlights = { ...highlighter.highlights, ...data.summaries_highlights };
+                    localStorage.setItem('kd_summaries_highlights', JSON.stringify(highlighter.highlights));
                   }
                 }
               } catch (e) {
@@ -1262,8 +1317,11 @@
             `;
           }
 
+          const rawStem = q.stem || q.question || '';
+          const highlightedStem = highlighter.renderHighlights(rawStem, qId);
+
           let cardHtml = `
-            <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 select-none">
               <div class="flex items-center space-x-2">
                 <span class="px-2.5 py-0.5 rounded bg-slate-800 text-purple-300 border border-slate-700/60 font-bold">Question ${qIndex + 1}</span>
                 <span class="px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${badgeStyle}">${q._sourceName}</span>
@@ -1271,16 +1329,21 @@
               </div>
               <span class="text-[11px] text-slate-400 truncate max-w-[200px]">${q._deckTitle}</span>
             </div>
-            <p class="text-sm sm:text-base font-medium text-slate-100 leading-relaxed mb-4">${q.stem || q.question || ''}</p>
+            <div class="highlightable-content" data-highlight-context="${qId}">
+              <p class="text-sm sm:text-base font-medium text-slate-100 leading-relaxed mb-4">${highlightedStem}</p>
+            </div>
           `;
 
-          const rawImg = q.image || q.figure || q.stemImage;
+          const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
           if (rawImg) {
-            const cleanPath = String(rawImg).startsWith('/') ? String(rawImg).slice(1) : rawImg;
-            cardHtml += `<img src="${cleanPath}" class="max-h-64 mx-auto rounded-xl border border-slate-700 bg-white/5 p-1 mb-4" />`;
+            let cleanPath = String(rawImg);
+            if (!cleanPath.startsWith('/') && !cleanPath.startsWith('http')) {
+              cleanPath = '/' + cleanPath;
+            }
+            cardHtml += `<img src="${cleanPath}" class="max-h-64 mx-auto rounded-xl border border-slate-700 bg-white/5 p-1 mb-4 select-none" />`;
           }
 
-          cardHtml += `<div class="space-y-3 options-wrapper">`;
+          cardHtml += `<div class="space-y-3 options-wrapper select-none">`;
           const normalizedOpts = getNormalizedOptions(q);
 
           normalizedOpts.forEach(({ key: letter, text }) => {
@@ -1303,14 +1366,17 @@
           cardHtml += `</div>`;
 
           if (isRevealed) {
+            const rawExp = formatMarkdown(q.explanation || q.rationale || '') || 'No rationale provided.';
+            const highlightedExp = highlighter.renderHighlights(rawExp, qId);
+
             cardHtml += `
               <div class="mt-5 pt-4 border-t border-slate-800 text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-4 sm:p-5 rounded-xl">
-                <div class="font-bold text-emerald-400 mb-1.5 flex items-center">
+                <div class="font-bold text-emerald-400 mb-1.5 flex items-center select-none">
                   <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Correct Answer: Option ${q.correctAnswer || 'A'}
                 </div>
-                <div class="text-slate-300 prose-reading mb-5">${formatMarkdown(q.explanation || q.rationale || '') || 'No rationale provided.'}</div>
+                <div class="text-slate-300 prose-reading mb-5 highlightable-content" data-highlight-context="${qId}">${highlightedExp}</div>
                 
-                <div class="pt-4 border-t border-slate-800/80">
+                <div class="pt-4 border-t border-slate-800/80 select-none">
                   <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
                     Update Spaced Repetition Memory State
                   </span>
@@ -1377,6 +1443,9 @@
           return;
         }
 
+        const chapterContextId = String(ch.id);
+        highlighter.setContext(chapterContextId);
+
         document.getElementById('header-book-title').textContent = `${book.title} Summaries`;
         document.getElementById('header-chapter-title').textContent = ch.title;
         document.getElementById('header-read-time').textContent = `${ch.readTimeMinutes || 8} min read`;
@@ -1416,9 +1485,13 @@
         (ch.sections || []).forEach((sec, idx) => {
           const secDiv = document.createElement('section');
           secDiv.id = `section-${idx}`;
-          secDiv.className = 'scroll-mt-24';
+          secDiv.className = 'scroll-mt-24 highlightable-content';
+          secDiv.setAttribute('data-highlight-context', chapterContextId);
 
-          let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10"></div>` : '';
+          const rawHtml = formatMarkdown(sec.content);
+          const highlightedHtml = highlighter.renderHighlights(rawHtml, chapterContextId);
+
+          let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10 select-none"></div>` : '';
 
           secDiv.innerHTML = `
             ${dividerHtml}
@@ -1426,7 +1499,7 @@
               <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-3 tracking-tight">${sec.title}</h2>
             </div>
             <div>
-              ${formatMarkdown(sec.content)}
+              ${highlightedHtml}
             </div>
           `;
           container.appendChild(secDiv);
@@ -1566,7 +1639,7 @@
       };
       document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
 
-      // --- 💬 Automatic Feedback Engine with Web3Forms + Firestore ---
+      // Feedback Engine
       function captureSummaryContext() {
         const book = getActiveBook();
         const ch = getActiveChapter();
@@ -1641,7 +1714,6 @@
         };
 
         try {
-          // 1. Direct Web3Forms Email Submission
           const emailPromise = fetch("https://api.web3forms.com/submit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1660,7 +1732,6 @@
             })
           });
 
-          // 2. Firestore Document Backup
           const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
 
           await Promise.all([emailPromise, firestorePromise]);
