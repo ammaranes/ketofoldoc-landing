@@ -16,9 +16,10 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  
   <!-- KaTeX Math Typesetting Engine (Fast & Lightweight) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -242,7 +243,11 @@
       </div>
     </div>
 
-    <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="col-span-full py-16 text-center text-slate-500 text-sm">
+        Loading chapters...
+      </div>
+    </div>
   </section>
 
   <!-- 📖 VIEW 2: CONTINUOUS CHAPTER READER -->
@@ -536,7 +541,17 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-    import { StudyHighlighter } from '/js/highlighter.js';
+
+    // Helper: Dynamic Module Fallback Loader
+    async function loadModuleWithFallbacks(paths) {
+      for (const p of paths) {
+        try {
+          const mod = await import(p);
+          if (mod) return mod;
+        } catch (e) {}
+      }
+      return null;
+    }
 
     // Formatting Helper with Robust KaTeX LaTeX Math & DOMPurify Sanitization
     function formatMarkdown(text) {
@@ -582,7 +597,7 @@
           return line;
         }).join('\n');
 
-        // 4. Inline Un-delimited Math Expressions (e.g., "... gas component: P_{\text{total}} = P_1 + P_2 + \dots")
+        // 4. Inline Un-delimited Math Expressions
         processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+)/g, (match) => {
           if (match.includes('<') || match.includes('>')) return match;
           if (!/\\[a-zA-Z]+|_[A-Za-z0-9{]|\^[A-Za-z0-9{]/.test(match)) return match;
@@ -758,56 +773,46 @@
       let allBooks = [];
       let questionChapters = [];
 
-      try {
-        const booksModule = await import('/summaries/books/index.js');
-        allBooks = booksModule.allBooks || [];
-      } catch (err) {
-        console.error("Failed to load /summaries/books/index.js", err);
-        try {
-          const fallbackBooks = await import('./books/index.js');
-          allBooks = fallbackBooks.allBooks || [];
-        } catch (e) {
-          console.error("Fallback books import also failed", e);
+      // Determine Base Path dynamically for subpath/subdomain resilience
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.endsWith('/') 
+        ? currentPath 
+        : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+
+      // 1. Resilient Books Module Loader
+      const booksMod = await loadModuleWithFallbacks([
+        `${basePath}books/index.js`,
+        '/summaries/books/index.js',
+        '/books/index.js',
+        './books/index.js'
+      ]);
+
+      if (booksMod) {
+        allBooks = booksMod.allBooks || booksMod.books || booksMod.default || [];
+        if (!Array.isArray(allBooks) && typeof booksMod === 'object') {
+          allBooks = Object.values(booksMod).find(Array.isArray) || [];
         }
       }
 
-      try {
-        const imported = await import('/summaries/decks/index.js');
-        if (imported.allQuestionDecks) {
-          questionChapters = imported.allQuestionDecks;
-        } else {
-          const saudi = (imported.allDecks || []).map(d => ({
-            ...d,
-            sourceName: 'Saudi Board QB',
-            sourceKey: 'saudi_board_progress',
-            sourceBadgeColor: 'blue'
-          }));
-          
-          const thousand = (imported.allChapters || []).map((ch, idx) => {
-            const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
-            const numOnly = rawId.replace(/\D/g, '');
-            const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
-            return {
-              ...ch,
-              id: key,
-              sourceName: '1000 Questions',
-              sourceKey: 'thousand_qs_progress',
-              sourceBadgeColor: 'emerald'
-            };
-          });
+      // 2. Resilient Question Decks Loader
+      const decksMod = await loadModuleWithFallbacks([
+        `${basePath}decks/index.js`,
+        '/summaries/decks/index.js',
+        '/decks/index.js',
+        './decks/index.js'
+      ]);
 
-          questionChapters = [...saudi, ...thousand];
-        }
-      } catch (e) {
-        try {
-          const fallbackDecks = await import('./decks/index.js');
-          const saudi = (fallbackDecks.allDecks || []).map(d => ({
+      if (decksMod) {
+        if (decksMod.allQuestionDecks) {
+          questionChapters = decksMod.allQuestionDecks;
+        } else {
+          const saudi = (decksMod.allDecks || []).map(d => ({
             ...d,
             sourceName: 'Saudi Board QB',
             sourceKey: 'saudi_board_progress',
             sourceBadgeColor: 'blue'
           }));
-          const thousand = (fallbackDecks.allChapters || []).map((ch, idx) => {
+          const thousand = (decksMod.allChapters || []).map((ch, idx) => {
             const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
             const numOnly = rawId.replace(/\D/g, '');
             const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
@@ -820,9 +825,26 @@
             };
           });
           questionChapters = [...saudi, ...thousand];
-        } catch (err) {
-          console.info("Question decks not found or optional; running in summary mode.");
         }
+      }
+
+      // 3. Resilient Highlighter Loader with Mock Fallback
+      let StudyHighlighterClass = null;
+      const hlMod = await loadModuleWithFallbacks([
+        '/js/highlighter.js',
+        `${basePath}js/highlighter.js`,
+        '../js/highlighter.js',
+        './js/highlighter.js'
+      ]);
+
+      if (hlMod && hlMod.StudyHighlighter) {
+        StudyHighlighterClass = hlMod.StudyHighlighter;
+      } else {
+        StudyHighlighterClass = class {
+          constructor() { this.highlights = {}; }
+          setContext() {}
+          renderHighlights(html) { return html; }
+        };
       }
 
       loadLocalProgress();
@@ -831,12 +853,13 @@
       let activeChapterId = null;
 
       function getActiveBook() {
-        return allBooks.find(b => b.id === activeBookId) || allBooks[0];
+        if (!allBooks || allBooks.length === 0) return null;
+        return allBooks.find(b => b.id === activeBookId) || allBooks[0] || null;
       }
 
       function getActiveChapter() {
         const book = getActiveBook();
-        if (!book || !activeChapterId) return null;
+        if (!book || !book.chapters || !activeChapterId) return null;
         return book.chapters.find(c => c.id === activeChapterId) || null;
       }
 
@@ -863,7 +886,7 @@
       }
 
       // Initialize Universal Study Highlighter
-      const highlighter = new StudyHighlighter({
+      const highlighter = new StudyHighlighterClass({
         storageKey: 'kd_summaries_highlights',
         onChange: () => {
           if (activeChapterId) {
@@ -945,7 +968,7 @@
                     thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
                     localStorage.setItem(LOCAL_1000_KEY, JSON.stringify({ card_states: thousandQsCardStates }));
                   }
-                  if (data.summaries_highlights) {
+                  if (data.summaries_highlights && highlighter.highlights) {
                     highlighter.highlights = { ...highlighter.highlights, ...data.summaries_highlights };
                     localStorage.setItem('kd_summaries_highlights', JSON.stringify(highlighter.highlights));
                   }
@@ -1081,7 +1104,7 @@
           const cleanContentStr = cleanText(rawContent);
           const isOverviewTitle = /^overview\s*\d*$/i.test(cleanTitleStr);
 
-          // 1. Detect Companion Subtitle / Manual Banner (e.g., "COMPREHENSIVE BOARD REVIEW MANUAL • VERSION 2.0")
+          // 1. Detect Companion Subtitle / Manual Banner
           if (idx === 0 && (
             /COMPREHENSIVE.*(?:MANUAL|COMPANION|REVIEW)/i.test(cleanContentStr) ||
             /VERSION\s*\d+/i.test(cleanContentStr) ||
@@ -1091,7 +1114,7 @@
             return;
           }
 
-          // 2. Detect Major Section Markers (e.g., "## **SECTION 1: WORKSTATION CORE KEY POINTS**")
+          // 2. Detect Major Section Markers
           const sectionMatch = cleanContentStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i) || 
                                cleanTitleStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i);
           
@@ -1106,7 +1129,6 @@
 
           // 3. Handle Overview X titles
           if (isOverviewTitle) {
-            // Case A: Standalone single-line subtopic title
             if (cleanContentStr.length < 90 && !cleanContentStr.includes('\n') && !cleanContentStr.includes('.')) {
               processed.push({
                 type: 'sub_heading',
@@ -1116,7 +1138,6 @@
               return;
             }
 
-            // Case B: Markdown header embedded inside content
             const mdHeaderMatch = rawContent.match(/^#{1,4}\s+(.+)$/m);
             if (mdHeaderMatch) {
               processed.push({
@@ -1127,7 +1148,6 @@
               return;
             }
 
-            // Case C: Standard content with generic fallback title
             processed.push({
               type: 'normal',
               title: `Topic ${processed.length + 1}`,
@@ -1154,7 +1174,18 @@
         const badge = document.getElementById('directory-badge-count');
         grid.innerHTML = '';
 
-        if (!book) return;
+        if (!book || !Array.isArray(book.chapters) || book.chapters.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full py-16 text-center text-slate-400 text-sm space-y-3">
+              <p class="font-bold text-slate-200">⚠️ No chapters found in library</p>
+              <p class="text-xs text-slate-500">Verify your connection or reload to retry module sync.</p>
+              <button onclick="window.location.reload(true)" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold transition">
+                Reload Library
+              </button>
+            </div>
+          `;
+          return;
+        }
 
         badge.textContent = `${book.chapters.length} Chapters Available`;
 
@@ -1169,7 +1200,7 @@
         const filtered = book.chapters.filter(ch => {
           if (!cleanQuery) return true;
           const numMatch = String(ch.chapterNumber).includes(cleanQuery);
-          const titleMatch = ch.title.toLowerCase().includes(cleanQuery);
+          const titleMatch = (ch.title || '').toLowerCase().includes(cleanQuery);
           return numMatch || titleMatch;
         });
 
@@ -1244,7 +1275,7 @@
 
         const results = [];
         allBooks.forEach(book => {
-          book.chapters.forEach(ch => {
+          (book.chapters || []).forEach(ch => {
             (ch.sections || []).forEach((sec, idx) => {
               let score = 0;
               let matchText = '';
@@ -1358,7 +1389,7 @@
         }
       });
 
-      // Dual-Bank Question Matching Engine with Namespaced Cross-Platform SM-2
+      // Dual-Bank Question Matching Engine
       function renderInteractiveQuestions(chapterNumber) {
         const container = document.getElementById('quiz-cards-container');
         const badge = document.getElementById('quiz-count-badge');
@@ -1604,11 +1635,12 @@
         highlighter.setContext(chapterContextId);
 
         document.getElementById('header-book-title').textContent = `${book.title} Summaries`;
+        
         const chNum = ch.chapterNumber !== undefined && ch.chapterNumber !== null ? ch.chapterNumber : '';
-const titleHasCh = (ch.title || '').toLowerCase().startsWith('ch');
-const displayTitle = (chNum && !titleHasCh) ? `Ch ${chNum}: ${ch.title}` : ch.title;
+        const titleHasCh = (ch.title || '').toLowerCase().startsWith('ch');
+        const displayTitle = (chNum && !titleHasCh) ? `Ch ${chNum}: ${ch.title}` : ch.title;
 
-document.getElementById('header-chapter-title').textContent = displayTitle;
+        document.getElementById('header-chapter-title').textContent = displayTitle;
         document.getElementById('header-read-time').textContent = `${ch.readTimeMinutes || 8} min read`;
 
         document.getElementById('banner-book-badge').textContent = book.title;
@@ -1621,7 +1653,6 @@ document.getElementById('header-chapter-title').textContent = displayTitle;
 
         document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
 
-        // Process sections through cleaner
         const { sections: cleanSections, companionSubtitle } = processChapterSections(ch.sections);
 
         const subtitleLeadEl = document.getElementById('chapter-subtitle-lead');
@@ -1970,7 +2001,7 @@ document.getElementById('header-chapter-title').textContent = displayTitle;
       // Handle Hash Routing
       const initialHash = window.location.hash.replace('#', '').trim();
       const book = getActiveBook();
-      const initialChapter = book?.chapters.find(c => c.id === initialHash);
+      const initialChapter = book?.chapters?.find(c => c.id === initialHash);
 
       if (initialChapter) {
         openChapter(initialChapter.id);
