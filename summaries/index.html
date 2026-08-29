@@ -548,7 +548,9 @@
         try {
           const mod = await import(p);
           if (mod) return mod;
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`Fallback loader: failed to import ${p}`);
+        }
       }
       return null;
     }
@@ -579,7 +581,7 @@
           catch (e) { return math; }
         });
 
-        // 3. Standalone Raw LaTeX Equation Lines (Handles \frac, \left, \right, \text, nested braces, \%)
+        // 3. Standalone Raw LaTeX Equation Lines
         const lines = processed.split('\n');
         processed = lines.map(line => {
           const trimmed = line.trim();
@@ -629,7 +631,7 @@
       };
     }
 
-    // Options Normalization Helper (Supports Array & Object schemas)
+    // Options Normalization Helper
     function getNormalizedOptions(q) {
       if (!q || !q.options) return [];
       if (Array.isArray(q.options)) {
