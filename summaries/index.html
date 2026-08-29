@@ -16,6 +16,9 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- KaTeX Math Typesetting Engine (Fast & Lightweight) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -258,17 +261,18 @@
         </button>
       </div>
 
-      <h1 id="chapter-headline" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4 select-text"></h1>
+      <h1 id="chapter-headline" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-3 select-text"></h1>
+      <p id="chapter-subtitle-lead" class="hidden text-sm sm:text-base text-purple-300 font-medium italic mb-4 leading-relaxed"></p>
       
       <div class="flex items-center space-x-5 text-xs sm:text-sm text-slate-400">
         <span class="inline-flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-1.5 text-emerald-400"></i> <span id="chapter-read-time-val">10 min read</span></span>
-        <span class="inline-flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-1.5 text-purple-400"></i> <span id="chapter-sections-count-val">5 Sections</span></span>
+        <span class="inline-flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-1.5 text-purple-400"></i> <span id="chapter-sections-count-val">0 Topics</span></span>
       </div>
     </div>
 
     <!-- Document Body -->
     <article id="single-document-surface" class="bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 sm:p-12 lg:p-16 shadow-2xl backdrop-blur-sm prose-reading">
-      <div id="sections-container" class="space-y-12"></div>
+      <div id="sections-container" class="space-y-10"></div>
     </article>
 
     <!-- Interactive Recall Questions Section -->
@@ -536,11 +540,47 @@
 
     // Formatting Helper with DOMPurify XSS Prevention
     function formatMarkdown(text) {
-      if (!text) return '';
-      const rawHtml = marked.parse(text);
-      const tableWrapped = rawHtml.replace(/<table/g, '<div class="table-wrapper"><table').replace(/<\/table>/g, '</table></div>');
-      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped) : tableWrapped;
-    }
+  if (!text) return '';
+  let processedText = String(text);
+
+  // Render LaTeX math formulas if KaTeX is loaded
+  if (window.katex) {
+    // 1. Display Block Math: $$...$$
+    processedText = processedText.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+      try {
+        return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false });
+      } catch (e) {
+        return math;
+      }
+    });
+
+    // 2. Inline Math: $...$
+    processedText = processedText.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+      try {
+        return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+      } catch (e) {
+        return math;
+      }
+    });
+
+    // 3. Auto-detect raw un-delimited LaTeX expressions containing \text{}, \frac, \dots, etc.
+    processedText = processedText.replace(/(?:[A-Za-z0-9_\\{}]+(?:\s*[=+\-*\/]\s*|\s+))+[A-Za-z0-9_\\{}]+(?:\\text\{[^}]+\}|\\dots|\\frac\{[^}]+\}\{[^}]+\}|_[0-9A-Za-z{}]+)/g, (math) => {
+      if (math.includes('<') || math.includes('>')) return math;
+      try {
+        return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+      } catch (e) {
+        return math;
+      }
+    });
+  }
+
+  const rawHtml = marked.parse(processedText);
+  const tableWrapped = rawHtml
+    .replace(/<table/g, '<div class="table-wrapper"><table')
+    .replace(/<\/table>/g, '</table></div>');
+
+  return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped) : tableWrapped;
+}
 
     // Debounce Helper for Performance
     function debounce(func, timeout = 300) {
@@ -993,6 +1033,76 @@
         renderDirectory();
       }
 
+      // Section Normalization Engine (Cleans redundant Overview labels and Promotes Headings)
+      function processChapterSections(rawSections) {
+        const processed = [];
+        let companionSubtitle = '';
+
+        (rawSections || []).forEach((sec, idx) => {
+          const rawTitle = (sec.title || '').trim();
+          const rawContent = (sec.content || '').trim();
+          const isOverviewTitle = /^overview\s*\d*$/i.test(rawTitle);
+
+          // 1. Detect Companion Subtitle Intro Line
+          if (idx === 0 && (/Comprehensive Learning Companion/i.test(rawContent) || isOverviewTitle && rawContent.length < 140 && !rawContent.includes('\n'))) {
+            companionSubtitle = rawContent.replace(/^Comprehensive Learning Companion:\s*/i, '').trim();
+            return;
+          }
+
+          // 2. Detect Major Section Markers (e.g., "SECTION 1: CORE CEREBRAL PHYSIOLOGY & METABOLISM")
+          const sectionHeaderMatch = rawContent.match(/^(?:📄\s*)?SECTION\s*\d+\s*:\s*(.+)$/im);
+          if (sectionHeaderMatch) {
+            processed.push({
+              type: 'major_section_header',
+              title: sectionHeaderMatch[1].trim(),
+              content: ''
+            });
+            return;
+          }
+
+          // 3. Handle Overview X titles
+          if (isOverviewTitle) {
+            // Case A: Standalone single-line subtopic title
+            if (rawContent.length < 90 && !rawContent.includes('\n') && !rawContent.includes('.')) {
+              processed.push({
+                type: 'sub_heading',
+                title: rawContent,
+                content: ''
+              });
+              return;
+            }
+
+            // Case B: Markdown header embedded inside content
+            const mdHeaderMatch = rawContent.match(/^#{1,4}\s+(.+)$/m);
+            if (mdHeaderMatch) {
+              processed.push({
+                type: 'normal',
+                title: mdHeaderMatch[1].trim(),
+                content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim()
+              });
+              return;
+            }
+
+            // Case C: Standard content with generic title
+            processed.push({
+              type: 'normal',
+              title: `Topic ${processed.length + 1}`,
+              content: rawContent
+            });
+            return;
+          }
+
+          // 4. Standard content section
+          processed.push({
+            type: 'normal',
+            title: rawTitle,
+            content: rawContent
+          });
+        });
+
+        return { sections: processed, companionSubtitle };
+      }
+
       // Render Directory Landing Grid
       function renderDirectory(filterQuery = '') {
         const book = getActiveBook();
@@ -1036,6 +1146,9 @@
             ? 'bg-slate-900/90 border border-emerald-500/40 hover:border-emerald-400/70 rounded-2xl p-6 flex flex-col justify-between group hover:shadow-xl hover:shadow-emerald-950/20 transition cursor-pointer'
             : 'bg-slate-900/80 border border-slate-800 hover:border-purple-500/60 rounded-2xl p-6 flex flex-col justify-between group hover:shadow-xl hover:shadow-purple-950/20 transition cursor-pointer';
 
+          const { sections: cleanSections } = processChapterSections(ch.sections);
+          const validTopicsCount = cleanSections.filter(s => s.type === 'normal').length;
+
           card.innerHTML = `
             <div>
               <div class="flex items-center justify-between mb-4">
@@ -1056,7 +1169,7 @@
 
               <p class="text-xs text-slate-400 mb-6 flex items-center space-x-2">
                 <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i>
-                <span>${(ch.sections || []).length} High-Yield Sections</span>
+                <span>${validTopicsCount || (ch.sections || []).length} High-Yield Topics</span>
               </p>
             </div>
 
@@ -1447,16 +1560,36 @@
         highlighter.setContext(chapterContextId);
 
         document.getElementById('header-book-title').textContent = `${book.title} Summaries`;
-        document.getElementById('header-chapter-title').textContent = ch.title;
+        const chNum = ch.chapterNumber !== undefined && ch.chapterNumber !== null ? ch.chapterNumber : '';
+const titleHasCh = (ch.title || '').toLowerCase().startsWith('ch');
+const displayTitle = (chNum && !titleHasCh) ? `Ch ${chNum}: ${ch.title}` : ch.title;
+
+document.getElementById('header-chapter-title').textContent = displayTitle;
         document.getElementById('header-read-time').textContent = `${ch.readTimeMinutes || 8} min read`;
 
         document.getElementById('banner-book-badge').textContent = book.title;
         document.getElementById('banner-chapter-number').textContent = `Chapter ${ch.chapterNumber || ''}`;
-const headlineEl = document.getElementById('chapter-headline');
-        headlineEl.className = "text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-4 highlightable-content";
+        
+        const headlineEl = document.getElementById('chapter-headline');
+        headlineEl.className = "text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 tracking-tight leading-tight mb-3 highlightable-content";
         headlineEl.setAttribute('data-highlight-context', chapterContextId);
-        headlineEl.innerHTML = highlighter.renderHighlights(ch.title || '', chapterContextId);        document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
-        document.getElementById('chapter-sections-count-val').textContent = `${(ch.sections || []).length} Sections`;
+        headlineEl.innerHTML = highlighter.renderHighlights(ch.title || '', chapterContextId);
+
+        document.getElementById('chapter-read-time-val').textContent = `${ch.readTimeMinutes || 8} min read`;
+
+        // Process sections through cleaner
+        const { sections: cleanSections, companionSubtitle } = processChapterSections(ch.sections);
+
+        const subtitleLeadEl = document.getElementById('chapter-subtitle-lead');
+        if (companionSubtitle) {
+          subtitleLeadEl.classList.remove('hidden');
+          subtitleLeadEl.textContent = companionSubtitle;
+        } else {
+          subtitleLeadEl.classList.add('hidden');
+        }
+
+        const validTopicsCount = cleanSections.filter(s => s.type === 'normal').length;
+        document.getElementById('chapter-sections-count-val').textContent = `${validTopicsCount || cleanSections.length} Topics`;
 
         const isRead = Boolean(summariesState.readChapters[ch.id]);
         const topBtn = document.getElementById('btn-toggle-read-top');
@@ -1484,29 +1617,51 @@ const headlineEl = document.getElementById('chapter-headline');
         const container = document.getElementById('sections-container');
         container.innerHTML = '';
 
-        // Highlight both Section Titles and Section Paragraphs with Isolated Anchoring
-(ch.sections || []).forEach((sec, idx) => {
-  const secDiv = document.createElement('section');
-  secDiv.id = `section-${idx}`;
-  secDiv.className = 'scroll-mt-24';
+        cleanSections.forEach((sec, idx) => {
+          const secDiv = document.createElement('section');
+          secDiv.id = `section-${idx}`;
+          secDiv.className = 'scroll-mt-24';
 
-  const highlightedTitle = highlighter.renderHighlights(sec.title || '', chapterContextId);
-  const rawContent = formatMarkdown(sec.content);
-  const highlightedContent = highlighter.renderHighlights(rawContent, chapterContextId);
+          if (sec.type === 'major_section_header') {
+            const highlightedTitle = highlighter.renderHighlights(sec.title || '', chapterContextId);
+            secDiv.innerHTML = `
+              <div class="pt-8 pb-3 border-b-2 border-purple-500/30 mb-6 flex items-center space-x-3 highlightable-content" data-highlight-context="${chapterContextId}">
+                <span class="px-2.5 py-1 rounded-lg bg-purple-950/80 border border-purple-700/60 text-purple-300 text-xs font-bold uppercase tracking-wider select-none shrink-0">
+                  Section
+                </span>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight">${highlightedTitle}</h2>
+              </div>
+            `;
+          } else if (sec.type === 'sub_heading') {
+            const highlightedTitle = highlighter.renderHighlights(sec.title || '', chapterContextId);
+            secDiv.innerHTML = `
+              <div class="mt-8 mb-4 highlightable-content" data-highlight-context="${chapterContextId}">
+                <h3 class="text-xl sm:text-2xl font-bold text-purple-200 tracking-tight">${highlightedTitle}</h3>
+              </div>
+            `;
+          } else {
+            const highlightedTitle = highlighter.renderHighlights(sec.title || '', chapterContextId);
+            const rawContent = formatMarkdown(sec.content);
+            const highlightedContent = highlighter.renderHighlights(rawContent, chapterContextId);
 
-  let dividerHtml = idx > 0 ? `<div class="w-full border-t border-slate-800/80 my-10 select-none"></div>` : '';
+            let dividerHtml = (idx > 0 && cleanSections[idx - 1]?.type !== 'major_section_header')
+              ? `<div class="w-full border-t border-slate-800/80 my-8 select-none"></div>` 
+              : '';
 
-  secDiv.innerHTML = `
-    ${dividerHtml}
-    <div class="mb-5 highlightable-content" data-highlight-context="${chapterContextId}">
-      <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-3 tracking-tight">${highlightedTitle}</h2>
-    </div>
-    <div class="highlightable-content" data-highlight-context="${chapterContextId}">
-      ${highlightedContent}
-    </div>
-  `;
-  container.appendChild(secDiv);
-});
+            secDiv.innerHTML = `
+              ${dividerHtml}
+              ${sec.title ? `
+              <div class="mb-4 highlightable-content" data-highlight-context="${chapterContextId}">
+                <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 mb-2 tracking-tight">${highlightedTitle}</h3>
+              </div>` : ''}
+              <div class="highlightable-content" data-highlight-context="${chapterContextId}">
+                ${highlightedContent}
+              </div>
+            `;
+          }
+
+          container.appendChild(secDiv);
+        });
 
         renderInteractiveQuestions(ch.chapterNumber || 1);
 
@@ -1542,12 +1697,24 @@ const headlineEl = document.getElementById('chapter-headline');
         list.innerHTML = '';
         if (!ch) return;
 
-        (ch.sections || []).forEach((sec, idx) => {
+        const { sections: cleanSections } = processChapterSections(ch.sections);
+
+        cleanSections.forEach((sec, idx) => {
+          if (!sec.title) return;
+          const isMajor = sec.type === 'major_section_header';
+
           const item = document.createElement('button');
-          item.className = 'w-full text-left p-3.5 rounded-xl hover:bg-slate-800/80 border border-transparent hover:border-slate-700/60 transition flex items-center justify-between text-xs sm:text-sm text-slate-300';
+          item.className = `w-full text-left p-3 rounded-xl transition flex items-center justify-between text-xs sm:text-sm ${
+            isMajor 
+              ? 'bg-purple-950/40 border border-purple-800/50 text-purple-300 font-bold mt-2' 
+              : 'hover:bg-slate-800/80 border border-transparent text-slate-300'
+          }`;
+
           item.innerHTML = `
             <div class="flex items-center space-x-3 min-w-0 pr-2">
-              <span class="font-bold text-slate-400 text-xs bg-slate-800 px-2 py-0.5 rounded">#${idx + 1}</span>
+              <span class="font-bold text-slate-400 text-[11px] ${isMajor ? 'bg-purple-900 text-purple-200' : 'bg-slate-800'} px-2 py-0.5 rounded shrink-0">
+                ${isMajor ? 'SEC' : `#${idx + 1}`}
+              </span>
               <span class="truncate font-medium">${sec.title}</span>
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 shrink-0"></i>
