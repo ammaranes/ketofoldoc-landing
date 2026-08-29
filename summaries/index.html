@@ -562,62 +562,103 @@
       let processed = String(text);
       const mathBlocks = [];
 
-      function renderAndSave(math, displayMode) {
-        try {
-          // Fix double subscripts before rendering: P_A_O_2 -> P_{A}O_{2}
-          let safeMath = math.replace(/_([a-zA-Z0-9]+)/g, '_{$1}');
-          const html = window.katex.renderToString(safeMath.trim(), { displayMode, throwOnError: true });
-          const id = `KATEXBLOCK${mathBlocks.length}KATEX`;
-          mathBlocks.push(html);
-          return id;
-        } catch (e) {
-          // Fallback to stylized text if KaTeX completely fails, avoiding the red error text
-          const id = `KATEXBLOCK${mathBlocks.length}KATEX`;
-          mathBlocks.push(`<span class="font-mono text-purple-300 font-bold">${math}</span>`);
-          return id;
+      function sanitizeMath(math) {
+        let s = math;
+        // Strict mapping for complex variables to protect them from KaTeX double-subscript crashes
+        const medicalVars = {
+          'P_A_O_2': 'P_{A}O_{2}', 'P_I_O_2': 'P_{I}O_{2}', 'P_A_CO_2': 'P_{A}CO_{2}', 'P_I_CO_2': 'P_{I}CO_{2}',
+          'P_a_O_2': 'P_{a}O_{2}', 'P_a_CO_2': 'P_{a}CO_{2}', 'V_CO_2': 'V_{CO_2}', 'V_O_2': 'V_{O_2}',
+          'V_A': 'V_{A}', 'V_D': 'V_{D}', 'V_T': 'V_{T}', 'V_E': 'V_{E}', 'FiO_2': 'FiO_{2}', 
+          'PCO_2': 'PCO_{2}', 'PaCO_2': 'PaCO_{2}', 'CO_2': 'CO_{2}', 'O_2': 'O_{2}', 'H_2O': 'H_{2}O',
+          'Ca(OH)_2': 'Ca(OH)_{2}', 'CaCO_3': 'CaCO_{3}', 'Li_2CO_3': 'Li_{2}CO_{3}'
+        };
+        for (const [raw, fixed] of Object.entries(medicalVars)) {
+          // Zero lookbehinds used here (safeguards Safari iOS execution)
+          s = s.split(raw).join(fixed);
         }
+        s = s.replace(/\\_/g, '_');
+        return s;
       }
 
-      // 1. Strip unwanted HTML artifacts (Yellow highlights, Red text) from extraction
-      processed = processed.replace(/<\/?(?:mark|font|span|color|bgcolor)[^>]*>/gi, '');
-
-      // 2. Extract Explicit Math Blocks FIRST (so their contents are not corrupted)
       if (window.katex) {
+        function renderAndSave(math, displayMode) {
+          try {
+            let cleanMath = sanitizeMath(math.trim());
+            const html = window.katex.renderToString(cleanMath, { displayMode, throwOnError: true });
+            const id = `@@MATH_${mathBlocks.length}@@`;
+            mathBlocks.push(html);
+            return id;
+          } catch (e) {
+            // Fallback: If KaTeX fails, render as clean text without underscores to prevent raw UI dumps
+            const id = `@@MATH_${mathBlocks.length}@@`;
+            const fallbackText = math.replace(/_/g, '').replace(/\^/g, ''); 
+            mathBlocks.push(`<span class="font-semibold text-purple-300">${fallbackText}</span>`);
+            return id;
+          }
+        }
+
+        // 1. Aggressively strip unwanted HTML artifacts (Yellow highlights, Red text) left by PDF extractor
+        processed = processed.replace(/<\/?(?:mark|font|span|color|bgcolor|div|section)[^>]*>/gi, '');
+        processed = processed.replace(/style="[^"]*"/gi, '');
+
+        // 2. Fix Tildes (Strikethrough bug) WITHOUT Lookbehinds for maximum browser compatibility
+        processed = processed.replace(/~/g, ' &sim; ').replace(/&sim;\s*&sim;/g, '~~');
+
+        // 3. Automated Spacing Repair (fixes "squished" PDF extraction like alveoli.Under -> alveoli. Under)
+        processed = processed.replace(/([a-z])([A-Z][a-z]{2,})/g, '$1 $2'); 
+        processed = processed.replace(/([a-zA-Z])\.([A-Z])/g, '$1. $2'); 
+        processed = processed.replace(/([a-zA-Z]):([A-Z])/g, '$1: $2'); 
+        processed = processed.replace(/([;\]\)])([A-Z])/g, '$1 $2');
+        processed = processed.replace(/Where([A-Z])/g, 'Where $1');
+        processed = processed.replace(/and([A-Z])/g, 'and $1');
+
+        // Clean up excessive asterisks and trailing underscores created by the PDF extractor
+        processed = processed.replace(/\*{3,}/g, '**'); 
+        processed = processed.replace(/([a-zA-Z])\*\*([a-zA-Z])/g, '$1 **$2'); 
+        processed = processed.replace(/_(\s|=)/g, '$1'); 
+
+        // 4. Surgical Auto-Detection of Specific Respiratory Equations (The "Magic" Fix)
+        processed = processed.replace(/(?:\*\*|__|\*|_)*\s*([A-Za-z0-9_()/'\s\-+\[\]x]+=[A-Za-z0-9_()/'\s\-+\[\]x.]+)\s*(?:\*\*|__|\*|_)*/g, (match, eq) => {
+            if ((eq.includes('P_A_') || eq.includes('V_CO_2') || eq.includes('P_I_') || eq.includes('F_A_') || eq.includes('V_A')) && eq.length > 10) {
+                let math = eq.replace(/ x /g, ' \\times ')
+                             .replace(/'V/g, '\\dot{V}')
+                             .replace(/\[/g, '\\left[')
+                             .replace(/\]/g, '\\right]')
+                             .replace(/\(/g, '\\left(')
+                             .replace(/\)/g, '\\right)');
+                return `\n\n${renderAndSave(math, true)}\n\n`;
+            }
+            return match;
+        });
+
+        // 5. Standard Explicit Math Delimiters
         processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderAndSave(m, true));
         processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderAndSave(m, true));
         processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderAndSave(m, false));
         processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderAndSave(m, false));
 
-        // 3. Auto-protect medical variables (e.g., CO_2, P_A_O_2, FiO_2) BEFORE marked processing
-        processed = processed.replace(/(?<![a-zA-Z])([A-Za-z]+_[A-Za-z0-9_]+)(?![a-zA-Z])/g, (match) => {
-           return renderAndSave(match, false);
+        // 6. Auto-Protect Medical Variables (Prevents variable fragmentation & markdown corruption)
+        const medicalVarsList = ['P_A_O_2', 'P_I_O_2', 'P_A_CO_2', 'P_I_CO_2', 'P_a_O_2', 'P_a_CO_2', 'V_CO_2', 'V_O_2', 'FiO_2', 'PCO_2', 'PaCO_2', 'CO_2', 'O_2', 'H_2O', 'Ca\\(OH\\)_2', 'CaCO_3', 'Li_2CO_3', 'V_A', 'V_D', 'V_T', 'V_E'];
+        medicalVarsList.forEach(v => {
+           const regex = new RegExp(`(^|[^a-zA-Z0-9_])(${v})(?![a-zA-Z0-9_])`, 'g');
+           processed = processed.replace(regex, (match, prefix, variable) => {
+              return prefix + renderAndSave(variable, false);
+           });
         });
+
+        // 7. Translate Remaining LaTeX Commands into Readable HTML Flow
+        processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
+        processed = processed.replace(/\\leftarrow/g, ' &larr; ');
+        processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
+        processed = processed.replace(/\\times/g, ' &times; ');
+        processed = processed.replace(/\\cdot/g, ' &middot; ');
+        processed = processed.replace(/\\Delta/g, ' &Delta; ');
+        processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
+        processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)');
+        processed = processed.replace(/\\left\(/g, '(').replace(/\\right\)/g, ')');
       }
 
-      // 4. Text & Formatting Repairs on the remaining prose
-      processed = processed.replace(/(?<!~)~(?!~)/g, ' &sim; '); // Fix approximate tildes
-      processed = processed.replace(/([a-z])([A-Z][a-z]{2,})/g, '$1 $2'); // EmbolismCOPD -> Embolism COPD
-      processed = processed.replace(/([a-zA-Z])\.([A-Z])/g, '$1. $2'); // alveoli.Under -> alveoli. Under
-      processed = processed.replace(/([a-zA-Z]):([A-Z])/g, '$1: $2'); // Embolism:Mechanical -> Embolism: Mechanical
-      
-      // Fix bold formatting spaces (e.g. ** CBF **)
-      processed = processed.replace(/\*\*\s+(.*?)\s+\*\*/g, '**$1**');
-      // Remove rogue bold-italic indicators generated by the PDF extractor
-      processed = processed.replace(/\*\*\_(.*?)\_\*\*/g, '**$1**');
-      processed = processed.replace(/\*\*\_|\_\*\*/g, '');
-
-      // 5. Translate orphaned LaTeX symbols into standard HTML characters for readability
-      processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
-      processed = processed.replace(/\\leftarrow/g, ' &larr; ');
-      processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
-      processed = processed.replace(/\\times/g, ' &times; ');
-      processed = processed.replace(/\\cdot/g, ' &middot; ');
-      processed = processed.replace(/\\Delta/g, ' &Delta; ');
-      processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
-      processed = processed.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)');
-      processed = processed.replace(/\\left\(/g, '(').replace(/\\right\)/g, ')');
-
-      // 6. Markdown & DOMPurify
+      // Markdown & DOMPurify
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
@@ -628,9 +669,9 @@
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
       }) : tableWrapped;
 
-      // 7. Re-inject KaTeX Blocks using strict replacement
+      // 🛡️ Final Re-Injection: Swap the pristine KaTeX HTML back in, completely bypassing the security shredder
       mathBlocks.forEach((html, i) => {
-        sanitized = sanitized.split(`KATEXBLOCK${i}KATEX`).join(html);
+        sanitized = sanitized.split(`@@MATH_${i}@@`).join(html);
       });
 
       return sanitized;
