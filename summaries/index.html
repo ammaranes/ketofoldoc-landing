@@ -560,14 +560,14 @@
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
-      const mathBlocks = []; // 🛡️ NEW: Storage array for the Placeholder System
+      const mathBlocks = []; // 🛡️ Storage array for the Placeholder System
 
       if (window.katex) {
         // Safe rendering wrapper
         function renderAndSave(math, displayMode) {
           try {
             const html = window.katex.renderToString(math.trim(), { displayMode, throwOnError: false });
-            const id = `__MATH_${mathBlocks.length}__`;
+            const id = `@@MATH_${mathBlocks.length}@@`;
             mathBlocks.push(html);
             return id;
           } catch (e) {
@@ -575,46 +575,55 @@
           }
         }
 
-        // 1. Explicit Block Math: $$...$$ or \[...\]
+        // 1. Explicit Delimiters
         processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderAndSave(m, true));
         processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderAndSave(m, true));
-
-        // 2. Explicit Inline Math: $...$ or \(...\)
         processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderAndSave(m, false));
         processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderAndSave(m, false));
 
-        // 3. Standalone Raw LaTeX Equation Lines
+        // 2. Line-by-Line Heuristics
         const lines = processed.split('\n');
         processed = lines.map(line => {
-          const trimmed = line.trim();
-          if (trimmed.includes('__MATH_')) return line; // Skip already safely processed blocks
+          if (line.includes('@@MATH_')) return line; // Skip already safely processed blocks
 
-          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
-          const isMathLine = hasLatexCommands && (
-            trimmed.includes('=') || 
-            trimmed.includes('\\frac') || 
-            trimmed.includes('\\left') || 
-            trimmed.includes('\\times') || 
-            trimmed.includes('\\right') || 
-            trimmed.includes('\\to') || 
-            trimmed.includes('\\cdot')
-          );
-          
-          // Failsafe: Do not trigger if the line looks like a standard prose paragraph
-          const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(trimmed);
+          let trimmed = line.trim();
+          if (!trimmed) return line;
 
-          if (isMathLine && !trimmed.startsWith('<') && !trimmed.startsWith('#') && !isProseParagraph) {
-            return renderAndSave(trimmed, true);
+          const isBullet = /^[*-]\s+/.test(trimmed);
+          const content = isBullet ? trimmed.replace(/^[*-]\s+/, '') : trimmed;
+
+          // Strip \text{...} to evaluate if the remaining line is just prose
+          const strippedContent = content.replace(/\\text\{[^}]*\}/g, '');
+          const isProseParagraph = /[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(strippedContent);
+
+          const hasMathIndicators = /\\frac|\\rightarrow|\\rightleftharpoons|\\to|\\cdot|\\times|\\text\{|_[a-zA-Z0-9]|_\{|\^[a-zA-Z0-9]|\^\{/.test(content);
+          const hasEqualsOrArrow = /(=|\\rightarrow|\\rightleftharpoons|\\to)/.test(content);
+
+          // Rule A: Standalone Equation Line
+          if (hasMathIndicators && hasEqualsOrArrow && !content.startsWith('<') && !content.startsWith('#') && !isProseParagraph) {
+             const rendered = renderAndSave(content, true);
+             return isBullet ? line.replace(content, rendered) : rendered;
           }
+
+          // Rule B: Prose line ending with an equation (e.g. "... component: P_total = P_1 + P_2")
+          if (isProseParagraph && content.includes(': ')) {
+             const parts = line.split(': ');
+             const potentialMath = parts[parts.length - 1].trim();
+             if (potentialMath.includes('=') && /_|\^|\\/.test(potentialMath)) {
+                const rendered = renderAndSave(potentialMath, false);
+                parts[parts.length - 1] = ' ' + rendered;
+                return isBullet ? `- ${parts.join(':')}` : parts.join(':');
+             }
+          }
+
+          // Rule C: Safe global replacement of known chemical formulas
+          const chemRegex = /(?<![A-Za-z])(CO_2|H_2O|N_2O|O_2|CaCO_3|Ca\(OH\)_2|Li_2CO_3|H_2CO_3)(?![A-Za-z])/g;
+          if (chemRegex.test(line)) {
+             return line.replace(chemRegex, (m) => renderAndSave(m, false));
+          }
+
           return line;
         }).join('\n');
-
-        // 4. Inline Un-delimited Math Expressions (Now detects chemical arrows!)
-        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times|\\rightarrow|\\leftarrow|\\Rightarrow|\\rightleftharpoons|\\cdot)+))/g, (match) => {
-          if (match.includes('<') || match.includes('>') || match.includes('__MATH_')) return match;
-          if (!/\\[a-zA-Z]+|_[A-Za-z0-9{]|\^[A-Za-z0-9{]/.test(match)) return match;
-          return renderAndSave(match, false);
-        });
       }
 
       // Format markdown (placeholders safely pass through as text)
@@ -631,7 +640,7 @@
 
       // 🛡️ RE-INJECTION: Swap the pristine KaTeX HTML back into the secure document
       mathBlocks.forEach((html, i) => {
-        sanitized = sanitized.replace(`__MATH_${i}__`, html);
+        sanitized = sanitized.replace(`@@MATH_${i}@@`, html);
       });
 
       return sanitized;
