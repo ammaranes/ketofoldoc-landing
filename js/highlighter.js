@@ -1,7 +1,25 @@
 /**
  * KetofolDoc Universal Study Highlighter Engine
- * Neutral System Theme Default + Custom Palette
+ * Precision Anchored Context Matching (Prefix + Exact + Suffix)
  */
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function makeTagTolerantRegex(str) {
+  if (!str) return '';
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(word => {
+      return word
+        .split('')
+        .map(char => escapeRegExp(char))
+        .join('(?:<[^>]+>)*');
+    })
+    .join('(?:\\s+|<[^>]+>)+');
+}
 
 export class StudyHighlighter {
   constructor(options = {}) {
@@ -13,7 +31,6 @@ export class StudyHighlighter {
     this.toolbar = null;
     this.activeRange = null;
 
-    // Palette with neutral brand blue as default
     this.colors = {
       blue: 'bg-blue-500/25 text-blue-100 rounded px-0.5 border-b border-blue-400/80',
       emerald: 'bg-emerald-500/25 text-emerald-100 rounded px-0.5 border-b border-emerald-400/80',
@@ -99,7 +116,7 @@ export class StudyHighlighter {
       }
 
       const text = selection.toString().trim();
-      if (text.length < 2) {
+      if (text.length < 1) {
         this.hideToolbar();
         return;
       }
@@ -154,12 +171,47 @@ export class StudyHighlighter {
 
   applySelectedHighlight(colorKey) {
     const selection = window.getSelection();
-    const text = selection ? selection.toString().trim() : '';
-    if (!text || !this.currentContextId) return;
+    if (!selection || selection.isCollapsed) return;
 
-    this.highlights[this.currentContextId] = this.highlights[this.currentContextId] || [];
-    this.highlights[this.currentContextId] = this.highlights[this.currentContextId].filter(h => h.text !== text);
-    this.highlights[this.currentContextId].push({ text, color: colorKey });
+    const exact = selection.toString().trim();
+    if (!exact || !this.currentContextId) return;
+
+    const anchorNode = selection.anchorNode;
+    const container = (anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode)?.closest('.highlightable-content');
+    
+    let prefix = '';
+    let suffix = '';
+
+    if (container) {
+      try {
+        const range = selection.getRangeAt(0);
+        
+        // Capture preceding context
+        const preRange = document.createRange();
+        preRange.selectNodeContents(container);
+        preRange.setEnd(range.startContainer, range.startOffset);
+        prefix = preRange.toString().slice(-30);
+
+        // Capture trailing context
+        const postRange = document.createRange();
+        postRange.selectNodeContents(container);
+        postRange.setStart(range.endContainer, range.endOffset);
+        suffix = postRange.toString().slice(0, 30);
+      } catch (e) {
+        console.warn('Could not extract surrounding context:', e);
+      }
+    }
+
+    const targetContextId = container?.getAttribute('data-highlight-context') || this.currentContextId;
+    this.highlights[targetContextId] = this.highlights[targetContextId] || [];
+
+    this.highlights[targetContextId].push({
+      id: 'hl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      text: exact,
+      prefix: prefix,
+      suffix: suffix,
+      color: colorKey
+    });
 
     this.saveHighlights();
     this.hideToolbar();
@@ -168,10 +220,16 @@ export class StudyHighlighter {
 
   removeSelectedHighlight() {
     const selection = window.getSelection();
-    const text = selection ? selection.toString().trim() : '';
-    if (!text || !this.currentContextId || !this.highlights[this.currentContextId]) return;
+    if (!selection || selection.isCollapsed) return;
+    const text = selection.toString().trim();
+    
+    const anchorNode = selection.anchorNode;
+    const container = (anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode)?.closest('.highlightable-content');
+    const targetContextId = container?.getAttribute('data-highlight-context') || this.currentContextId;
 
-    this.highlights[this.currentContextId] = this.highlights[this.currentContextId].filter(
+    if (!text || !targetContextId || !this.highlights[targetContextId]) return;
+
+    this.highlights[targetContextId] = this.highlights[targetContextId].filter(
       h => !h.text.includes(text) && !text.includes(h.text)
     );
 
@@ -186,13 +244,28 @@ export class StudyHighlighter {
     if (list.length === 0) return rawHtml;
 
     let highlightedHtml = String(rawHtml);
-    const sortedList = [...list].sort((a, b) => b.text.length - a.text.length);
 
-    sortedList.forEach(item => {
-      const escaped = item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?![^<]*>)(${escaped})`, 'gi');
+    list.forEach(item => {
+      const pRegex = item.prefix ? makeTagTolerantRegex(item.prefix) : '';
+      const tRegex = makeTagTolerantRegex(item.text);
+      const sRegex = item.suffix ? makeTagTolerantRegex(item.suffix) : '';
       const colorClass = this.colors[item.color] || this.colors.blue;
-      highlightedHtml = highlightedHtml.replace(regex, `<mark class="${colorClass}">$1</mark>`);
+
+      let regex;
+      // Precision non-global matching (replaces ONLY the single instance with this context)
+      if (pRegex && sRegex) {
+        regex = new RegExp(`(${pRegex}(?:\\s+|<[^>]+>)*)(${tRegex})((?:\\s+|<[^>]+>)*${sRegex})`, 'i');
+        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2, p3) => `${p1}<mark class="${colorClass}">${p2}</mark>${p3}`);
+      } else if (pRegex) {
+        regex = new RegExp(`(${pRegex}(?:\\s+|<[^>]+>)*)(${tRegex})`, 'i');
+        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2) => `${p1}<mark class="${colorClass}">${p2}</mark>`);
+      } else if (sRegex) {
+        regex = new RegExp(`(${tRegex})((?:\\s+|<[^>]+>)*${sRegex})`, 'i');
+        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2) => `<mark class="${colorClass}">${p1}</mark>${p2}`);
+      } else {
+        regex = new RegExp(`(?![^<]*>)(${tRegex})`, 'i');
+        highlightedHtml = highlightedHtml.replace(regex, `<mark class="${colorClass}">$1</mark>`);
+      }
     });
 
     return highlightedHtml;
