@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Comprehensive Anesthesia QB</title>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- DOMPurify & Marked.js for HTML Sanitization and Parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- KaTeX Math Typesetting Engine (Fast & Lightweight) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Firebase SDKs (v9 Compat Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    html { scroll-behavior: smooth; }
+
+    .prose-reading p { margin-top: 1.25rem; margin-bottom: 1.25rem; }
+    .prose-reading strong, .prose-reading b { color: #f8fafc; font-weight: 700; }
+    .prose-reading em, .prose-reading i { color: #e2e8f0; }
+    .table-wrapper { width: 100%; overflow-x: auto; margin: 2rem 0; border-radius: 1rem; border: 1px solid rgba(51, 65, 85, 0.8); background: rgba(15, 23, 42, 0.6); }
+    .prose-reading table { width: 100%; min-width: 650px; border-collapse: collapse; text-align: left; font-size: 0.95rem; line-height: 1.65; }
+    .prose-reading th { background-color: rgba(30, 41, 59, 0.95); color: #22d3ee; font-weight: 700; padding: 0.9rem 1.25rem; border-bottom: 1px solid rgba(51, 65, 85, 0.8); border-right: 1px solid rgba(51, 65, 85, 0.4); }
+    .prose-reading td { padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(51, 65, 85, 0.4); border-right: 1px solid rgba(51, 65, 85, 0.3); color: #e2e8f0; vertical-align: top; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-600/40 selection:text-slate-100">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
+    <div class="max-w-4xl mx-auto px-4 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
+      
+      <!-- Left Section: Menu, Clickable Logo, and Dual-Line Title -->
+      <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+        <button id="btn-menu" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0" title="Chapters & Custom Practice">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </button>
+
+        <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
+          <img src="/logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
+        </a>
+
+        <div class="min-w-0 flex-1 flex flex-col justify-center">
+          <a href="/" class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 hover:text-cyan-300 truncate leading-tight transition">
+            Comprehensive Anesthesia
+          </a>
+          <div class="flex items-center space-x-2 truncate">
+            <h1 id="deck-title" class="font-bold text-xs sm:text-sm text-slate-100 truncate leading-snug">
+              Loading Chapters...
+            </h1>
+            <span class="text-slate-600 text-xs">•</span>
+            <p id="deck-progress-text" class="text-[11px] font-medium text-cyan-400 truncate leading-snug">
+              0 / 0 Completed
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Section: Action Controls -->
+      <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+        <button id="btn-shuffle" class="p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Toggle Random Order">
+          <i data-lucide="shuffle" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-srs-filter" class="p-2 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 transition shrink-0" title="SRS Due Review Mode">
+          <i data-lucide="brain" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-search" class="p-2 text-slate-400 hover:text-blue-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Search (Ctrl + K)">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-flag" class="p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Bookmark Question">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
+        </button>
+        
+        <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
+          <div id="auth-avatar" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <span id="sync-dot" class="w-2 h-2 rounded-full bg-cyan-500 -ml-1.5 -mt-3 hidden"></span>
+        </button>
+      </div>
+
+    </div>
+    
+    <!-- Linear Progress Bar -->
+    <div class="w-full bg-slate-800 h-1">
+      <div id="progress-bar-fill" class="bg-cyan-500 h-1 w-0 transition-all duration-300"></div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-36 flex flex-col justify-between">
+    
+    <!-- Empty & Completed State Screen -->
+    <div id="view-empty" class="hidden my-auto text-center py-12 px-4 select-none">
+      <div class="w-16 h-16 bg-cyan-950/80 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-800/60">
+        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+      </div>
+      <h2 id="empty-title" class="text-xl font-bold text-slate-100 mb-2">All Questions Completed!</h2>
+      <p id="empty-desc" class="text-sm text-slate-400 max-w-md mx-auto mb-6">You have answered all questions in the selected chapter(s).</p>
+      <div class="flex items-center justify-center space-x-3">
+        <button id="btn-reset-current-deck" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-lg shadow-rose-600/20">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Reset & Practice Again</span>
+        </button>
+        <button onclick="document.getElementById('btn-menu').click()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
+          Choose Chapters
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Question View -->
+    <div id="view-quiz" class="flex-1 flex flex-col">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2 select-none">
+        <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
+          <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
+          <span id="question-source-badge" class="px-2.5 py-1 bg-cyan-950/80 border border-cyan-700/60 text-cyan-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0"></span>
+          <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">Shuffled</span>
+          <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-cyan-950/80 border border-cyan-700/50 text-cyan-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">SRS Due Mode</span>
+        </div>
+        <span id="score-badge" class="text-slate-400 shrink-0">Accuracy: 100%</span>
+      </div>
+
+      <!-- Question Stem & Optional Stem Image -->
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
+        <div id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></div>
+        <div id="stem-image-container" class="mt-4 hidden select-none">
+          <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
+        </div>
+      </div>
+
+      <!-- Options Container -->
+      <div id="options-container" class="space-y-3 mb-6 select-none"></div>
+
+      <!-- Explanation & Rationale Box -->
+      <div id="explanation-box" class="hidden bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300">
+        <div class="flex items-center text-cyan-400 font-bold mb-2 select-none">
+          <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
+        </div>
+        
+        <div id="explanation-content" class="leading-relaxed space-y-2 highlightable-content"></div>
+        <div id="explanation-images-container" class="mt-4 space-y-3 hidden select-none"></div>
+
+        <!-- Anki Spaced Repetition Bar -->
+        <div class="mt-5 pt-4 border-t border-slate-800 select-none">
+          <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
+            <span>Rate Recall (Spaced Repetition):</span>
+            <span id="srs-status-tag" class="text-[10px] text-slate-500">Not rated yet</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" onclick="window.rateRecall('again')" class="py-2 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Again</span>
+              <span class="text-[9px] font-normal text-rose-400/80">1 Day</span>
+            </button>
+            <button type="button" onclick="window.rateRecall('hard')" class="py-2 rounded-lg bg-amber-950/60 hover:bg-amber-900 border border-amber-800/60 text-amber-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Hard</span>
+              <span class="text-[9px] font-normal text-amber-400/80">Slower</span>
+            </button>
+            <button type="button" onclick="window.rateRecall('good')" class="py-2 rounded-lg bg-blue-950/60 hover:bg-blue-900 border border-blue-800/60 text-blue-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Good</span>
+              <span class="text-[9px] font-normal text-blue-400/80">Standard</span>
+            </button>
+            <button type="button" onclick="window.rateRecall('easy')" class="py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Easy</span>
+              <span class="text-[9px] font-normal text-emerald-400/80">4-7 Days</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <footer id="quiz-footer" class="fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 backdrop-blur-md pt-3 pb-3 safe-bottom border-t border-slate-800/90 shadow-2xl select-none">
+      <div class="max-w-3xl mx-auto px-4">
+        <div class="flex items-center justify-between space-x-3 mb-2">
+          <button id="btn-prev" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 border border-slate-800 rounded-xl font-semibold text-sm flex items-center justify-center text-slate-300 transition">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Prev
+          </button>
+          <button id="btn-reveal" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl font-semibold text-sm text-slate-200 transition">
+            Reveal
+          </button>
+          <button id="btn-next" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 rounded-xl font-semibold text-sm text-white flex items-center justify-center transition shadow-lg shadow-cyan-600/20">
+            Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-center space-x-3 text-[11px] text-slate-500">
+          <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
+          <span>•</span>
+          <a href="/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Global Search Modal -->
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
+        <input 
+          type="search" 
+          id="search-input" 
+          name="search-query"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Search keywords, drugs, clinical terms, or concepts..." 
+          class="w-full bg-transparent text-slate-100 placeholder-slate-500 text-base focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        />
+        <button id="btn-close-search" class="p-1 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text">
+        <div class="text-xs text-slate-500 text-center py-8">
+          Type at least 2 characters to search across all chapters...
+        </div>
+      </div>
+      
+      <div class="px-4 py-2 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+        <span id="search-count-badge">0 results found</span>
+        <span>Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">ESC</kbd> to close</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Multi-Select Chapter Switcher & Ecosystem Hub Modal -->
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="compass" class="w-5 h-5 text-cyan-400"></i>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm sm:text-base">Custom Practice & Chapters</h3>
+            <p class="text-[11px] text-slate-400">Select one or multiple chapters to study together</p>
+          </div>
+        </div>
+        <button id="btn-close-decks" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto p-4 space-y-4 flex-1">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+            KetofolDoc Platforms
+          </span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="award" class="w-4 h-4 text-blue-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-blue-300 transition truncate w-full">Saudi Board</span>
+            </a>
+
+            <a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-emerald-300 transition truncate w-full">1000 Qs</span>
+            </a>
+
+            <div class="p-2.5 rounded-xl bg-cyan-600/15 border border-cyan-500/50 flex flex-col items-center justify-center text-center space-y-1 relative">
+              <i data-lucide="stethoscope" class="w-4 h-4 text-cyan-400"></i>
+              <span class="text-[10px] font-bold text-cyan-200 truncate w-full">Comprehensive</span>
+              <span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            </div>
+
+            <a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-purple-300 transition truncate w-full">Summaries</span>
+            </a>
+          </div>
+
+          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-[11px] font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Return to KetofolDoc Home Portal</span>
+          </a>
+        </div>
+
+        <div class="border-t border-slate-800/80"></div>
+
+        <!-- Multi-Select Selection Controls -->
+        <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-xs">
+          <span id="selected-summary-text" class="font-semibold text-cyan-400">0 Chapters selected</span>
+          <div class="flex items-center space-x-1.5">
+            <button id="btn-select-all" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition font-medium text-[11px]">
+              Select All
+            </button>
+            <button id="btn-clear-all" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-lg transition font-medium text-[11px]">
+              Clear
+            </button>
+            <button id="btn-reset-selected" class="px-2.5 py-1 bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded-lg transition font-medium text-[11px] flex items-center space-x-1">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chapters List with Checkboxes -->
+        <div id="deck-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Launch Button Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-900/95 shrink-0">
+        <button id="btn-launch-multi" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-cyan-600/20">
+          <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+          <span id="btn-launch-text">Practice Selected Chapters</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Clean Google Auth Modal -->
+  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+      <button id="btn-close-auth-modal" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg active:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Logged Out State -->
+      <div id="auth-state-logged-out" class="flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-950/80 border border-cyan-800/60 text-cyan-400 flex items-center justify-center mx-auto mb-4 shadow-inner">
+          <i data-lucide="stethoscope" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-black text-slate-100 tracking-tight mb-1">Comprehensive QB Sync</h3>
+        <p class="text-xs text-slate-400 mb-6 leading-relaxed">Sign in with Google to sync your chapter reviews, image-based recall tests, and question mastery across all devices.</p>
+
+        <div id="auth-error-box" class="hidden mb-4 p-3 bg-rose-950/50 border border-rose-800/60 rounded-xl text-xs text-rose-300 leading-relaxed w-full text-left"></div>
+
+        <button id="btn-google-login" class="w-full py-3.5 px-4 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center space-x-3 transition shadow-lg shadow-cyan-600/20 active:scale-[0.99]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <!-- Logged In State -->
+      <div id="auth-state-logged-in" class="hidden flex flex-col items-center text-center">
+        <div id="user-display-avatar" class="w-14 h-14 rounded-full bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-lg font-bold mb-3"></div>
+        <h4 id="user-display-name" class="font-bold text-slate-100 text-base">Doctor</h4>
+        <p id="user-display-email" class="text-xs text-slate-400 mb-5">doctor@example.com</p>
+        
+        <div class="w-full bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 mb-5 flex items-center justify-center">
+          <i data-lucide="check" class="w-4 h-4 mr-1.5"></i> Live sync active across ecosystem
+        </div>
+
+        <button id="btn-logout" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold rounded-xl text-sm transition">
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Feedback Trigger Button -->
+  <button id="btn-feedback-trigger" class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
+    <i data-lucide="message-square-plus" class="w-4 h-4 text-cyan-400"></i>
+    <span class="hidden sm:inline">Feedback</span>
+  </button>
+
+  <!-- Context-Aware Feedback Modal -->
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-800/60 text-cyan-400 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-100">Feedback & Suggestions</h3>
+            <p class="text-[11px] text-slate-400">Help improve accuracy and platform features</p>
+          </div>
+        </div>
+        <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 select-text">
+        
+        <!-- Auto-Detected Context Card -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
+            <span class="flex items-center">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i> Auto-Detected Context
+            </span>
+            <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Page Context</span>
+          </div>
+          <div id="feedback-context-summary" class="text-xs text-slate-200 line-clamp-2 leading-relaxed font-mono">
+            Detecting current location...
+          </div>
+        </div>
+
+        <!-- Feedback Type Selector -->
+        <div>
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Content Error / Typo</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Answer / Rationale</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Suggestion</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Bug Report</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- User Comment Input -->
+        <div>
+          <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
+          <textarea id="feedback-comment" rows="4" placeholder="Describe the error, suggested change, or thought..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition resize-none"></textarea>
+        </div>
+
+        <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
+        <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+          Cancel
+        </button>
+        <button id="btn-submit-feedback" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-cyan-600/20">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Send Feedback</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ES6 Application Logic -->
+  <script type="module">
+    // Helper: Dynamic Module Fallback Loader
+    async function loadModuleWithFallbacks(paths) {
+      for (const p of paths) {
+        try {
+          const mod = await import(p);
+          if (mod) return mod;
+        } catch (e) {
+          console.warn(`Fallback loader: failed to import ${p}`);
+        }
+      }
+      return null;
+    }
+
+    // Formatting Helper with Robust KaTeX LaTeX Math & DOMPurify Sanitization
+    function formatMarkdown(text) {
+      if (!text) return '';
+      let processed = String(text);
+
+      if (window.katex) {
+        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+
+        const lines = processed.split('\n');
+        processed = lines.map(line => {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('<') || trimmed.startsWith('#')) return line;
+          const isPureMathLine = /^([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+)?\s*=\s*[\s\S]+)$/.test(trimmed) &&
+                                 (/\\[a-zA-Z]+|_[0-9A-Za-z{]/.test(trimmed)) &&
+                                 (!/^[A-Z][a-z]{3,}\s+[a-z]{3,}/.test(trimmed));
+          if (isPureMathLine) {
+            try { return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false }); }
+            catch (e) { return line; }
+          }
+          return line;
+        }).join('\n');
+
+        processed = processed.replace(/(?:(?<=:\s*)|(?<=\b))([A-Za-z0-9_\\]+(?:\{[^{}]*\}|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times|\d+)+)/g, (match) => {
+          if (match.includes('<') || match.includes('>')) return match;
+          if (!/\\[a-zA-Z]+|_[0-9A-Za-z{]|\^[0-9A-Za-z{]/.test(match)) return match;
+          try { return window.katex.renderToString(match.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return match; }
+        });
+      }
+
+      const rawHtml = marked.parse(processed);
+      const tableWrapped = rawHtml
+        .replace(/<table/g, '<div class="table-wrapper"><table')
+        .replace(/<\/table>/g, '</table></div>');
+
+      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
+        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics'],
+        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
+      }) : tableWrapped;
+    }
+
+    // Cached DOM Elements
+    const DOM = {
+      viewEmpty: document.getElementById('view-empty'),
+      viewQuiz: document.getElementById('view-quiz'),
+      quizFooter: document.getElementById('quiz-footer'),
+      deckTitle: document.getElementById('deck-title'),
+      deckProgressText: document.getElementById('deck-progress-text'),
+      progressBarFill: document.getElementById('progress-bar-fill'),
+      emptyTitle: document.getElementById('empty-title'),
+      emptyDesc: document.getElementById('empty-desc'),
+      btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
+      questionSourceBadge: document.getElementById('question-source-badge'),
+      qNumberBadge: document.getElementById('question-number-badge'),
+      scoreBadge: document.getElementById('score-badge'),
+      shuffleBtn: document.getElementById('btn-shuffle'),
+      shuffleTag: document.getElementById('shuffle-mode-tag'),
+      srsBtn: document.getElementById('btn-srs-filter'),
+      srsTag: document.getElementById('srs-mode-tag'),
+      qStem: document.getElementById('question-stem'),
+      stemImgContainer: document.getElementById('stem-image-container'),
+      stemImg: document.getElementById('stem-image'),
+      flagBtn: document.getElementById('btn-flag'),
+      optionsContainer: document.getElementById('options-container'),
+      expBox: document.getElementById('explanation-box'),
+      expContent: document.getElementById('explanation-content'),
+      expImgContainer: document.getElementById('explanation-images-container'),
+      srsStatusTag: document.getElementById('srs-status-tag'),
+      prevBtn: document.getElementById('btn-prev'),
+      nextBtn: document.getElementById('btn-next')
+    };
+
+    async function initApp() {
+      let allChapters = [];
+
+      // Determine Base Path dynamically
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.endsWith('/') 
+        ? currentPath 
+        : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+
+      // 1. Resilient Module Loader
+      const qbMod = await loadModuleWithFallbacks([
+        `${basePath}output_hall_js/index.js`,
+        '/hall/output_hall_js/index.js',
+        '../hall/output_hall_js/index.js',
+        './output_hall_js/index.js'
+      ]);
+
+      if (qbMod) {
+        let rawData = qbMod.allChapters || qbMod.allDecks || qbMod.default || qbMod;
+
+        // Auto-Grouping Normalizer for Flat Question Arrays
+        if (rawData && !Array.isArray(rawData) && typeof rawData === 'object') {
+          const arrays = Object.values(rawData).filter(Array.isArray);
+          if (arrays.length > 0) {
+            rawData = arrays.flat();
+          }
+        }
+
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          if (rawData[0].stem || rawData[0].question) {
+            // Group flat question list into Chapter Objects
+            const groups = {};
+            rawData.forEach(q => {
+              const chNum = q.chapter !== undefined ? q.chapter : 'Misc';
+              const chTitle = q.chapterTitle || `Chapter ${chNum}`;
+              const key = `ch_${String(chNum).padStart(2, '0')}`;
+              
+              if (!groups[key]) {
+                groups[key] = { id: key, title: chTitle, questions: [] };
+              }
+              groups[key].questions.push(q);
+            });
+            // Sort by Chapter ID safely
+            allChapters = Object.values(groups).sort((a, b) => {
+               const numA = parseInt(a.id.replace(/\D/g, '')) || 0;
+               const numB = parseInt(b.id.replace(/\D/g, '')) || 0;
+               return numA - numB;
+            });
+          } else if (rawData[0].questions) {
+            // Data is already correctly formatted
+            allChapters = rawData;
+          }
+        }
+      }
+
+      if (!allChapters || allChapters.length === 0) {
+        const listEl = document.getElementById('deck-list');
+        if (listEl) {
+          listEl.innerHTML = `
+            <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-center text-xs text-rose-300 space-y-2">
+              <p class="font-bold">⚠️ Chapters could not be loaded</p>
+              <p class="text-[11px] text-slate-400">Please verify your internet connection or reload the page.</p>
+              <button onclick="window.location.reload(true)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold text-xs transition">
+                Force Reload
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      // Debounce Helper for Performance
+      function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+      }
+
+      // Options Normalization Helper
+      function getNormalizedOptions(q) {
+        if (!q || !q.options) return [];
+        if (Array.isArray(q.options)) {
+          return q.options.map((opt, i) => {
+            const defaultLetter = String.fromCharCode(65 + i);
+            if (typeof opt === 'string') return { key: defaultLetter, text: opt };
+            if (opt && typeof opt === 'object') {
+              return {
+                key: opt.label || opt.key || opt.letter || defaultLetter,
+                text: opt.text || opt.value || opt.option || String(opt)
+              };
+            }
+            return { key: defaultLetter, text: String(opt) };
+          });
+        }
+        if (typeof q.options === 'object') {
+          return Object.entries(q.options).map(([key, val]) => {
+            if (val && typeof val === 'object') {
+              return { key, text: val.text || val.value || JSON.stringify(val) };
+            }
+            return { key, text: String(val) };
+          });
+        }
+        return [];
+      }
+
+      // Spaced Repetition (SM-2) Engine
+      function calculateNextSRS(currentSRS, rating) {
+        let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
+        const now = new Date();
+
+        if (rating === 'again') {
+          repetitions = 0;
+          interval = 1;
+          easeFactor = Math.max(1.3, easeFactor - 0.2);
+        } else if (rating === 'hard') {
+          interval = Math.max(1, Math.round(interval * 1.2)) || 1;
+          easeFactor = Math.max(1.3, easeFactor - 0.15);
+        } else if (rating === 'good') {
+          if (repetitions === 0) interval = 1;
+          else if (repetitions === 1) interval = 3;
+          else interval = Math.round(interval * easeFactor);
+          repetitions += 1;
+        } else if (rating === 'easy') {
+          if (repetitions === 0) interval = 4;
+          else if (repetitions === 1) interval = 7;
+          else interval = Math.round(interval * easeFactor * 1.3);
+          repetitions += 1;
+          easeFactor += 0.15;
+        }
+
+        const MAX_INTERVAL = 90;
+        if (interval > MAX_INTERVAL) interval = MAX_INTERVAL;
+
+        const nextDue = new Date();
+        nextDue.setDate(now.getDate() + interval);
+        nextDue.setHours(0, 0, 0, 0);
+
+        return {
+          interval,
+          repetitions,
+          easeFactor: parseFloat(easeFactor.toFixed(2)),
+          dueDate: nextDue.toISOString(),
+          lastReviewed: now.toISOString()
+        };
+      }
+
+      function normalizeChapterKey(rawKey) {
+        if (!rawKey) return 'ch_01';
+        const num = String(rawKey).replace(/\D/g, '');
+        return num ? `ch_${num.padStart(2, '0')}` : String(rawKey);
+      }
+
+      const DECKS = {};
+      (allChapters || []).forEach((ch, idx) => {
+        const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
+        const key = normalizeChapterKey(rawId);
+        const numOnly = rawId.replace(/\D/g, '') || String(idx + 1);
+        
+        DECKS[key] = {
+          id: key,
+          title: ch.title ? (ch.title.toLowerCase().startsWith('ch') ? ch.title : `Ch ${numOnly}: ${ch.title}`) : `Chapter ${numOnly}`,
+          questions: Array.isArray(ch.questions) ? ch.questions : []
+        };
+      });
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
+        authDomain: "qb-sync-e6294.firebaseapp.com",
+        projectId: "qb-sync-e6294",
+        storageBucket: "qb-sync-e6294.firebasestorage.app",
+        messagingSenderId: "94979024020",
+        appId: "1:94979024020:web:687bd4c064b87ff1180081"
+      };
+
+      let auth = null, db = null, syncUnsubscribe = null, currentUser = null;
+
+      try {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+      } catch (e) {
+        console.warn("Firebase Init:", e);
+      }
+
+      // 3. Resilient Highlighter Loader with Mock Fallback
+      let StudyHighlighterClass = null;
+      const hlMod = await loadModuleWithFallbacks([
+        '/js/highlighter.js',
+        `${basePath}js/highlighter.js`,
+        '../js/highlighter.js',
+        './js/highlighter.js'
+      ]);
+
+      if (hlMod && hlMod.StudyHighlighter) {
+        StudyHighlighterClass = hlMod.StudyHighlighter;
+      } else {
+        StudyHighlighterClass = class {
+          constructor() { this.highlights = {}; }
+          setContext() {}
+          renderHighlights(html) { return html; }
+        };
+      }
+
+      const highlighter = new StudyHighlighterClass({
+        storageKey: 'kd_hall_highlights',
+        onChange: () => render(),
+        onSave: (allHighlights) => {
+          if (db && currentUser) {
+            db.collection('users').doc(currentUser.uid).set({
+              hall_highlights: allHighlights
+            }, { merge: true });
+          }
+        }
+      });
+      window.highlighterInstance = highlighter;
+
+      const LOCAL_STORAGE_KEY = 'hall_qb_progress';
+      const FIRESTORE_COLLECTION = 'users';
+      const firstDeckKey = Object.keys(DECKS)[0] || 'ch_01';
+
+      let state = {
+        decks: DECKS,
+        selectedDeckKeys: new Set([firstDeckKey]),
+        userProgress: {},
+        sessionState: {
+          currentIndex: 0,
+          order: [],
+          isShuffled: false,
+          isSRSMode: false,
+          srsSessionAnswers: {}
+        }
+      };
+
+      function purgeGhostProgress(prog) {
+        if (!prog || typeof prog !== 'object') return {};
+        const normalized = {};
+
+        Object.entries(prog).forEach(([deckId, deckProg]) => {
+          if (!deckProg || typeof deckProg !== 'object') return;
+          const canonicalKey = normalizeChapterKey(deckId);
+          
+          normalized[canonicalKey] = normalized[canonicalKey] || { answers: {}, flags: [], srs: {} };
+          
+          const answers = deckProg.answers || {};
+          const srs = deckProg.srs || {};
+          const flags = Array.isArray(deckProg.flags) ? deckProg.flags : [];
+
+          Object.entries(answers).forEach(([idxStr, ans]) => {
+            if (ans !== undefined) {
+              normalized[canonicalKey].answers[idxStr] = ans;
+            }
+          });
+
+          Object.entries(srs).forEach(([idxStr, srsObj]) => {
+            if (normalized[canonicalKey].answers[idxStr] !== undefined && srsObj) {
+              normalized[canonicalKey].srs[idxStr] = srsObj;
+            }
+          });
+
+          normalized[canonicalKey].flags = Array.from(new Set([...normalized[canonicalKey].flags, ...flags]));
+        });
+
+        return normalized;
+      }
+
+      const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedProgress) {
+        try { 
+          const parsed = JSON.parse(savedProgress);
+          state.userProgress = purgeGhostProgress(parsed);
+        } catch (e) {}
+      }
+
+      function getActiveCompositeDeck() {
+        const keys = Array.from(state.selectedDeckKeys);
+        if (keys.length === 0) return null;
+
+        const combinedQuestions = [];
+        let totalAvailableInDecks = 0;
+        let totalAnsweredInDecks = 0;
+
+        keys.forEach(key => {
+          const deck = state.decks[key];
+          if (deck && Array.isArray(deck.questions)) {
+            totalAvailableInDecks += deck.questions.length;
+            const answeredMap = state.userProgress[key]?.answers || {};
+
+            deck.questions.forEach((q, idx) => {
+              const isAnswered = answeredMap[idx] !== undefined;
+              if (isAnswered) totalAnsweredInDecks++;
+
+              combinedQuestions.push({
+                ...q,
+                _parentDeckId: key,
+                _parentIndex: idx,
+                _isAnswered: isAnswered
+              });
+            });
+          }
+        });
+
+        const remainingCount = totalAvailableInDecks - totalAnsweredInDecks;
+        let title = "Custom Practice";
+        if (keys.length === 1) {
+          title = state.decks[keys[0]]?.title || "Practice";
+        } else if (keys.length === Object.keys(state.decks).length) {
+          title = `All Chapters (${remainingCount} Left)`;
+        } else {
+          title = `${keys.length} Chapters (${remainingCount} Left)`;
+        }
+
+        return {
+          id: "composite_session",
+          title: title,
+          questions: combinedQuestions,
+          totalOriginal: totalAvailableInDecks,
+          totalAnswered: totalAnsweredInDecks,
+          isCompleted: totalAvailableInDecks > 0 && remainingCount === 0
+        };
+      }
+
+      function getUnansweredIndices(activeDeck) {
+        if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+        const indices = [];
+        activeDeck.questions.forEach((q, idx) => {
+          const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+          const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+          const answers = state.userProgress[parentDeckId]?.answers || {};
+          if (answers[parentIdx] === undefined) {
+            indices.push(idx);
+          }
+        });
+        return indices;
+      }
+
+      function getDueIndices(activeDeck) {
+        if (!activeDeck || !Array.isArray(activeDeck.questions)) return [];
+        const now = new Date();
+        const dueIndices = [];
+
+        activeDeck.questions.forEach((q, idx) => {
+          const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+          const parentIdx = q._parentIndex !== undefined ? q._parentIndex : idx;
+          const parentProgress = state.userProgress[parentDeckId] || {};
+          const answers = parentProgress.answers || {};
+          const srs = (parentProgress.srs || {})[parentIdx];
+
+          if (answers[parentIdx] !== undefined && srs && srs.dueDate && new Date(srs.dueDate) <= now) {
+            dueIndices.push(idx);
+          }
+        });
+
+        return dueIndices;
+      }
+
+      function compileCardStates() {
+        const cardStates = {};
+        Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
+          if (!deckProg) return;
+          const srsMap = deckProg.srs || {};
+          const answers = deckProg.answers || {};
+
+          Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
+            if (!srsObj || typeof srsObj !== 'object') return;
+            const idx = parseInt(idxStr, 10);
+            
+            if (answers[idx] === undefined) return;
+
+            const namespacedId = `${deckId}_${idx}`;
+            cardStates[namespacedId] = {
+              reps: srsObj.repetitions || srsObj.reps || 0,
+              interval: srsObj.interval || 0,
+              easeFactor: srsObj.easeFactor || 2.5,
+              dueDate: typeof srsObj.dueDate === 'string' ? new Date(srsObj.dueDate).getTime() : (srsObj.dueDate || 0),
+              lastReviewed: typeof srsObj.lastReviewed === 'string' ? new Date(srsObj.lastReviewed).getTime() : (srsObj.lastReviewed || 0)
+            };
+          });
+        });
+        return cardStates;
+      }
+
+      function resetChapters(keysToReset) {
+        if (!keysToReset || keysToReset.length === 0) return;
+
+        const count = keysToReset.length;
+        const msg = count === 1 
+          ? `Reset progress for ${state.decks[keysToReset[0]]?.title || 'this chapter'}? All answered questions will be restored.`
+          : `Reset progress for all ${count} selected chapters? All answered questions will be restored.`;
+
+        if (confirm(msg)) {
+          keysToReset.forEach(key => {
+            const canonicalKey = normalizeChapterKey(key);
+            if (state.userProgress[canonicalKey]) {
+              state.userProgress[canonicalKey].answers = {};
+              state.userProgress[canonicalKey].srs = {};
+              state.userProgress[canonicalKey].flags = [];
+            }
+          });
+
+          state.sessionState.currentIndex = 0;
+          state.sessionState.order = [];
+          state.sessionState.isSRSMode = false;
+          state.sessionState.srsSessionAnswers = {};
+          saveState();
+          renderDeckList();
+        }
+      }
+
+      function applyCloudCardStates(cloudCardStates) {
+        if (!cloudCardStates || typeof cloudCardStates !== 'object') return;
+        Object.entries(state.decks).forEach(([deckId, deck]) => {
+          if (!deck.questions) return;
+          deck.questions.forEach((q, idx) => {
+            const namespacedId = `${deckId}_${idx}`;
+            const c = cloudCardStates[namespacedId];
+
+            if (c) {
+              state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
+              state.userProgress[deckId].srs = state.userProgress[deckId] || {};
+              state.userProgress[deckId].srs[idx] = {
+                repetitions: c.reps || c.repetitions || 0,
+                interval: c.interval || 0,
+                easeFactor: c.easeFactor || 2.5,
+                dueDate: typeof c.dueDate === 'number' ? new Date(c.dueDate).toISOString() : c.dueDate,
+                lastReviewed: typeof c.lastReviewed === 'number' ? new Date(c.lastReviewed).toISOString() : c.lastReviewed
+              };
+            }
+          });
+        });
+      }
+
+      function mergeUserProgress(localProg, remoteProg) {
+        if (!remoteProg) return localProg || {};
+        const merged = { ...(localProg || {}) };
+        
+        Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
+          if (!remoteDeck) return;
+          const canonicalKey = normalizeChapterKey(deckId);
+          
+          if (!merged[canonicalKey]) {
+            merged[canonicalKey] = remoteDeck;
+          } else {
+            merged[canonicalKey] = {
+              answers: { ...(merged[canonicalKey].answers || {}), ...(remoteDeck.answers || {}) },
+              flags: Array.from(new Set([...(merged[canonicalKey].flags || []), ...(remoteDeck.flags || [])])),
+              srs: { ...(merged[canonicalKey].srs || {}), ...(remoteDeck.srs || {}) }
+            };
+          }
+        });
+        
+        return purgeGhostProgress(merged);
+      }
+
+      // Cloud Auth & Sync
+      if (auth) {
+        auth.onAuthStateChanged((user) => {
+          currentUser = user;
+          updateAuthUI(user);
+          if (user) initUserCloudSync(user.uid);
+          else {
+            if (syncUnsubscribe) syncUnsubscribe();
+            document.getElementById('sync-dot').classList.add('hidden');
+          }
+        });
+      }
+
+      function updateAuthUI(user) {
+        const loggedInView = document.getElementById('auth-state-logged-in');
+        const loggedOutView = document.getElementById('auth-state-logged-out');
+        const avatar = document.getElementById('auth-avatar');
+
+        if (user) {
+          loggedInView.classList.remove('hidden');
+          loggedOutView.classList.add('hidden');
+          document.getElementById('user-display-name').textContent = user.displayName || 'Doctor / Candidate';
+          document.getElementById('user-display-email').textContent = user.email;
+          const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+          document.getElementById('user-display-avatar').textContent = initial;
+          avatar.innerHTML = `<span class="text-cyan-400 font-bold">${initial}</span>`;
+        } else {
+          loggedInView.classList.add('hidden');
+          loggedOutView.classList.remove('hidden');
+          avatar.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i>`;
+        }
+        lucide.createIcons();
+      }
+
+      async function initUserCloudSync(userId) {
+        if (!db) return;
+        document.getElementById('sync-dot').classList.remove('hidden');
+        if (syncUnsubscribe) syncUnsubscribe();
+
+        const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
+
+        syncUnsubscribe = userDocRef.onSnapshot((doc) => {
+          if (doc.exists) {
+            const cloudData = doc.data();
+            const qbData = cloudData.hall_qb_progress;
+            if (qbData) {
+              if (qbData.userProgress) {
+                state.userProgress = mergeUserProgress(state.userProgress, qbData.userProgress);
+              }
+              if (qbData.card_states) {
+                applyCloudCardStates(qbData.card_states);
+              }
+              state.userProgress = purgeGhostProgress(state.userProgress);
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
+              render();
+            }
+            if (cloudData.hall_highlights) {
+              highlighter.highlights = { ...highlighter.highlights, ...cloudData.hall_highlights };
+              localStorage.setItem('kd_hall_highlights', JSON.stringify(highlighter.highlights));
+              render();
+            }
+          } else {
+            pushStateToCloud();
+          }
+        });
+      }
+
+      function pushStateToCloud() {
+        if (!db || !currentUser) return;
+        state.userProgress = purgeGhostProgress(state.userProgress);
+        db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
+          hall_qb_progress: {
+            userProgress: state.userProgress,
+            card_states: compileCardStates(),
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+          },
+          hall_highlights: highlighter.highlights
+        }, { merge: true });
+      }
+
+      function saveState() {
+        state.userProgress = purgeGhostProgress(state.userProgress);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
+        render();
+        pushStateToCloud();
+      }
+
+      // Global Search
+      const searchModal = document.getElementById('modal-search');
+      const searchInput = document.getElementById('search-input');
+      const searchResults = document.getElementById('search-results-list');
+      const searchCountBadge = document.getElementById('search-count-badge');
+
+      function openSearchModal() {
+        searchModal.classList.remove('hidden');
+        searchInput.value = '';
+        searchInput.focus();
+        renderSearchResults('');
+        lucide.createIcons();
+      }
+
+      function closeSearchModal() {
+        searchModal.classList.add('hidden');
+      }
+
+      function highlightKeyword(text, query) {
+        if (!query || !text) return text || '';
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
+        const sanitized = window.DOMPurify ? window.DOMPurify.sanitize(text) : text;
+        return String(sanitized).replace(regex, '<span class="bg-cyan-500/30 text-cyan-200 font-semibold px-0.5 rounded">$1</span>');
+      }
+
+      function searchAllQuestions(query) {
+        const cleanQuery = query.trim().toLowerCase();
+        if (cleanQuery.length < 2) return [];
+
+        const results = [];
+
+        Object.entries(state.decks).forEach(([deckId, deck]) => {
+          if (!deck.questions) return;
+
+          deck.questions.forEach((q, idx) => {
+            let matchScore = 0;
+            let matchSource = '';
+
+            const stemText = q.stem || q.question || q.text || '';
+            const expText = q.explanation || q.rationale || '';
+            const optionsList = getNormalizedOptions(q);
+            const optionValues = optionsList.map(o => o.text).join(' ');
+
+            if (stemText.toLowerCase().includes(cleanQuery)) {
+              matchScore += 10;
+              matchSource = stemText;
+            } else if (expText.toLowerCase().includes(cleanQuery)) {
+              matchScore += 5;
+              matchSource = expText;
+            } else if (optionValues.toLowerCase().includes(cleanQuery)) {
+              matchScore += 3;
+              matchSource = optionValues;
+            }
+
+            if (matchScore > 0) {
+              results.push({
+                deckId,
+                deckTitle: deck.title,
+                questionIndex: idx,
+                questionNumber: idx + 1,
+                stem: stemText,
+                previewSnippet: matchSource,
+                score: matchScore
+              });
+            }
+          });
+        });
+
+        return results.sort((a, b) => b.score - a.score);
+      }
+
+      function renderSearchResults(query) {
+        const results = searchAllQuestions(query);
+        searchResults.innerHTML = '';
+
+        if (query.trim().length < 2) {
+          searchResults.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">Type at least 2 characters to search across all chapters...</div>`;
+          searchCountBadge.textContent = '0 results found';
+          return;
+        }
+
+        if (results.length === 0) {
+          searchResults.innerHTML = `<div class="text-xs text-amber-400/80 text-center py-8">No matching terms found for "<b>${window.DOMPurify ? window.DOMPurify.sanitize(query) : query}</b>".</div>`;
+          searchCountBadge.textContent = '0 results found';
+          return;
+        }
+
+        searchCountBadge.textContent = `${results.length} result${results.length > 1 ? 's' : ''} found`;
+
+        results.forEach(res => {
+          const item = document.createElement('div');
+          item.className = 'pt-2.5 pb-2.5 px-3 rounded-xl hover:bg-slate-800/60 cursor-pointer transition flex flex-col space-y-1';
+          
+          item.innerHTML = `
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-cyan-400 truncate">${res.deckTitle}</span>
+              <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/60 shrink-0">Q# ${res.questionNumber}</span>
+            </div>
+            <p class="text-xs text-slate-200 line-clamp-2 leading-relaxed">
+              ${highlightKeyword(res.stem, query)}
+            </p>
+          `;
+
+          item.onclick = () => {
+            state.selectedDeckKeys = new Set([res.deckId]);
+            state.sessionState.currentIndex = res.questionIndex;
+            state.sessionState.order = [];
+            state.sessionState.isShuffled = false;
+            state.sessionState.isSRSMode = false;
+            state.sessionState.srsSessionAnswers = {};
+
+            saveState();
+            closeSearchModal();
+          };
+
+          searchResults.appendChild(item);
+        });
+      }
+
+      document.getElementById('btn-search').onclick = openSearchModal;
+      document.getElementById('btn-close-search').onclick = closeSearchModal;
+
+      searchInput.addEventListener('input', debounce((e) => {
+        renderSearchResults(e.target.value);
+      }));
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          openSearchModal();
+        }
+        if (e.key === 'Escape') {
+          if (!searchModal.classList.contains('hidden')) closeSearchModal();
+          if (!document.getElementById('modal-feedback').classList.contains('hidden')) document.getElementById('modal-feedback').classList.add('hidden');
+        }
+        
+        const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+        if (!isTyping && searchModal.classList.contains('hidden') && document.getElementById('modal-feedback').classList.contains('hidden')) {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            DOM.nextBtn.click();
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            DOM.prevBtn.click();
+          } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
+            e.preventDefault();
+            document.getElementById('btn-reveal').click();
+          }
+        }
+      });
+
+      // Modes & Navigation Handlers
+      function generateShuffledIndices(length) {
+        const arr = Array.from({ length }, (_, i) => i);
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function toggleShuffleMode() {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || activeDeck.questions.length === 0) return;
+        
+        state.sessionState.isSRSMode = false;
+        state.sessionState.isShuffled = !state.sessionState.isShuffled;
+        state.sessionState.srsSessionAnswers = {};
+
+        const basePool = getUnansweredIndices(activeDeck);
+        if (state.sessionState.isShuffled) {
+          state.sessionState.order = generateShuffledIndices(basePool.length).map(i => basePool[i]);
+        } else {
+          state.sessionState.order = basePool;
+        }
+        state.sessionState.currentIndex = 0;
+        saveState();
+      }
+
+      function toggleSRSMode() {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || activeDeck.questions.length === 0) return;
+
+        state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
+        state.sessionState.isShuffled = false;
+        state.sessionState.srsSessionAnswers = {};
+
+        if (state.sessionState.isSRSMode) {
+          const dueIndices = getDueIndices(activeDeck);
+
+          if (dueIndices.length === 0) {
+            alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
+            state.sessionState.isSRSMode = false;
+            state.sessionState.order = getUnansweredIndices(activeDeck);
+            state.sessionState.currentIndex = 0;
+          } else {
+            state.sessionState.order = [...dueIndices];
+            state.sessionState.currentIndex = 0;
+          }
+        } else {
+          state.sessionState.order = getUnansweredIndices(activeDeck);
+          state.sessionState.currentIndex = 0;
+        }
+
+        saveState();
+      }
+
+      function handleNextNavigation() {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || !activeDeck.questions.length) return;
+
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const maxLen = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
+
+        if (state.sessionState.currentIndex < maxLen - 1) {
+          state.sessionState.currentIndex++;
+          saveState();
+        } else {
+          if (state.sessionState.isSRSMode) {
+            const stillDue = getDueIndices(activeDeck);
+            if (stillDue.length > 0 && !arraysEqual(stillDue, state.sessionState.order)) {
+              state.sessionState.order = [...stillDue];
+              state.sessionState.currentIndex = 0;
+              saveState();
+            } else {
+              alert("🎉 Outstanding! You have reviewed all SRS due cards for this session.");
+              state.sessionState.isSRSMode = false;
+              state.sessionState.order = getUnansweredIndices(activeDeck);
+              state.sessionState.currentIndex = 0;
+              state.sessionState.srsSessionAnswers = {};
+              saveState();
+            }
+          } else {
+            const remainingUnanswered = getUnansweredIndices(activeDeck);
+            if (remainingUnanswered.length === 0) {
+              saveState();
+            } else {
+              if (confirm("You've reached the end of the current practice queue. Continue with remaining unanswered questions?")) {
+                if (state.sessionState.isShuffled) {
+                  state.sessionState.order = generateShuffledIndices(remainingUnanswered.length).map(i => remainingUnanswered[i]);
+                } else {
+                  state.sessionState.order = remainingUnanswered;
+                }
+                state.sessionState.currentIndex = 0;
+                saveState();
+              }
+            }
+          }
+        }
+      }
+
+      function arraysEqual(a, b) {
+        if (a === b) return true;
+        if (a == null || b == null || a.length !== b.length) return false;
+        for (let i = 0; i < a.length; ++i) {
+          if (a[i] !== b[i]) return false;
+        }
+        return true;
+      }
+
+      // Main UI Rendering
+      function render() {
+        lucide.createIcons();
+        const activeDeck = getActiveCompositeDeck();
+
+        if (!activeDeck || activeDeck.questions.length === 0) {
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
+          DOM.deckTitle.textContent = 'Comprehensive Anesthesia';
+          DOM.deckProgressText.textContent = '0 / 0 Completed';
+          DOM.progressBarFill.style.width = '0%';
+          return;
+        }
+
+        // Initialize unanswered queue if empty and not in SRS mode
+        if (!state.sessionState.isSRSMode && (!state.sessionState.order || state.sessionState.order.length === 0)) {
+          const unans = getUnansweredIndices(activeDeck);
+          if (state.sessionState.isShuffled) {
+            state.sessionState.order = generateShuffledIndices(unans.length).map(i => unans[i]);
+          } else {
+            state.sessionState.order = unans;
+          }
+        }
+
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
+
+        // Display Completed Screen
+        if (activeTotal === 0 && !state.sessionState.isSRSMode) {
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
+
+          if (activeDeck.isCompleted) {
+            DOM.emptyTitle.textContent = "Chapter Completed!";
+            DOM.emptyDesc.textContent = "You have answered every question in the selected chapter(s). Click below to reset and practice again.";
+            DOM.btnResetCurrentDeck.classList.remove('hidden');
+          } else {
+            DOM.emptyTitle.textContent = "No Chapters Selected";
+            DOM.emptyDesc.textContent = "Select one or more chapters from the menu to start practicing.";
+            DOM.btnResetCurrentDeck.classList.add('hidden');
+          }
+
+          DOM.deckTitle.textContent = activeDeck.title;
+          DOM.deckProgressText.textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
+          DOM.progressBarFill.style.width = '100%';
+          lucide.createIcons();
+          return;
+        }
+
+        DOM.viewEmpty.classList.add('hidden');
+        DOM.viewQuiz.classList.remove('hidden');
+        DOM.quizFooter.classList.remove('hidden');
+
+        if (state.sessionState.currentIndex >= activeTotal) {
+          state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
+        }
+        const qPointer = state.sessionState.currentIndex || 0;
+        const actualIndex = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+
+        const q = activeDeck.questions[actualIndex] || activeDeck.questions[0];
+        if (!q) return;
+
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
+        
+        // Display origin chapter name
+        const sourceDeck = state.decks[parentDeckId];
+        if (DOM.questionSourceBadge) {
+          DOM.questionSourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
+        }
+        
+        DOM.deckTitle.textContent = activeDeck.title;
+        
+        const totalOriginal = activeDeck.totalOriginal || activeDeck.questions.length;
+        const completedCount = activeDeck.totalAnswered || 0;
+        const remainingCount = Math.max(0, totalOriginal - completedCount);
+
+        DOM.deckProgressText.textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
+        const pct = totalOriginal > 0 ? (completedCount / totalOriginal) * 100 : 0;
+        DOM.progressBarFill.style.width = `${pct}%`;
+
+        // Calculate Accuracy
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        state.selectedDeckKeys.forEach(deckId => {
+          const deck = state.decks[deckId];
+          const deckProg = state.userProgress[deckId] || {};
+          const answers = deckProg.answers || {};
+
+          if (deck && Array.isArray(deck.questions)) {
+            Object.entries(answers).forEach(([idxStr, ans]) => {
+              const idx = parseInt(idxStr, 10);
+              const questionItem = deck.questions[idx];
+              if (questionItem && ans !== 'REVIEWED') {
+                answeredCount++;
+                if (questionItem.correctAnswer === ans) correctCount++;
+              }
+            });
+          }
+        });
+
+        const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
+        DOM.scoreBadge.textContent = `Accuracy: ${acc}%`;
+
+        if (state.sessionState.isShuffled) {
+          DOM.shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.remove('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+        } else if (state.sessionState.isSRSMode) {
+          DOM.srsBtn.className = 'p-2 text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsTag.classList.remove('hidden');
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
+        } else {
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+        }
+
+        const questionContextId = `${parentDeckId}_${parentIdx}`;
+        highlighter.setContext(questionContextId);
+
+        const rawStem = q.stem || q.question || q.text || '';
+        DOM.qStem.className = "text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content";
+        DOM.qStem.setAttribute('data-highlight-context', questionContextId);
+        DOM.qStem.setAttribute('data-raw-text', rawStem);
+        DOM.qStem.innerHTML = highlighter.renderHighlights(rawStem, questionContextId);
+        
+        const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
+
+        if (rawImg) {
+          let imgPath = String(rawImg);
+          if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+            imgPath = '/' + imgPath;
+          }
+          DOM.stemImg.src = imgPath;
+          DOM.stemImgContainer.classList.remove('hidden');
+        } else {
+          DOM.stemImgContainer.classList.add('hidden');
+        }
+
+        const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
+        const isFlagged = (parentProgress.flags || []).includes(parentIdx);
+        DOM.flagBtn.className = isFlagged 
+          ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
+          : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
+
+        const selectedAnswer = state.sessionState.isSRSMode 
+          ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
+          : ((parentProgress.answers || {})[parentIdx]);
+
+        DOM.optionsContainer.innerHTML = '';
+        const normalizedOpts = getNormalizedOptions(q);
+
+        normalizedOpts.forEach(({ key: letter, text }) => {
+          const btn = document.createElement('button');
+          btn.className = `w-full text-left p-4 rounded-xl border font-medium text-sm transition flex items-start space-x-3 `;
+          if (selectedAnswer) {
+            if (letter === q.correctAnswer) btn.className += 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200';
+            else if (letter === selectedAnswer) btn.className += 'bg-rose-950/40 border-rose-500/80 text-rose-200';
+            else btn.className += 'bg-slate-900/50 border-slate-800/50 text-slate-500';
+          } else {
+            btn.className += 'bg-slate-900 border-slate-800 hover:border-slate-700 active:bg-slate-800 text-slate-200';
+          }
+          
+          const letterSpan = document.createElement('span');
+          letterSpan.className = "font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 shrink-0";
+          letterSpan.textContent = letter;
+          
+          const textSpan = document.createElement('span');
+          textSpan.textContent = text;
+          
+          btn.appendChild(letterSpan);
+          btn.appendChild(textSpan);
+          btn.onclick = () => handleSelectOption(q, letter);
+          
+          DOM.optionsContainer.appendChild(btn);
+        });
+
+        const expText = q.explanation || q.rationale || '';
+
+        if (selectedAnswer && (expText || q.correctAnswer)) {
+          DOM.expBox.classList.remove('hidden');
+
+          const formattedExp = formatMarkdown(expText) || 'No rationale provided.';
+          DOM.expContent.className = "leading-relaxed space-y-2 highlightable-content";
+          DOM.expContent.setAttribute('data-highlight-context', questionContextId);
+          DOM.expContent.setAttribute('data-raw-text', formattedExp);
+
+          DOM.expContent.innerHTML = `
+            <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
+            <div class="mt-1 text-slate-300">${highlighter.renderHighlights(formattedExp, questionContextId)}</div>
+          `;
+
+          const srsData = (parentProgress.srs || {})[parentIdx];
+          if (DOM.srsStatusTag) {
+            if (srsData && srsData.dueDate) {
+              const daysLeft = Math.ceil((new Date(srsData.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+              DOM.srsStatusTag.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srsData.interval}d)`;
+              DOM.srsStatusTag.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-cyan-400 font-medium';
+            } else {
+              DOM.srsStatusTag.textContent = 'Not rated yet';
+              DOM.srsStatusTag.className = 'text-[10px] text-slate-500';
+            }
+          }
+
+          const expImages = q.explanationImages || q.explanation_images || [];
+          if (Array.isArray(expImages) && expImages.length > 0) {
+            DOM.expImgContainer.innerHTML = '';
+            expImages.forEach(src => {
+              if (src) {
+                let cleanSrc = String(src);
+                if (!cleanSrc.startsWith('/') && !cleanSrc.startsWith('http')) {
+                  cleanSrc = '/' + cleanSrc;
+                }
+                const img = document.createElement('img');
+                img.src = cleanSrc;
+                img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
+                DOM.expImgContainer.appendChild(img);
+              }
+            });
+            DOM.expImgContainer.classList.remove('hidden');
+          } else if (DOM.expImgContainer) {
+            DOM.expImgContainer.classList.add('hidden');
+          }
+        } else {
+          DOM.expBox.classList.add('hidden');
+        }
+
+        if (DOM.prevBtn) {
+          DOM.prevBtn.disabled = qPointer <= 0;
+          DOM.prevBtn.classList.toggle('opacity-50', qPointer <= 0);
+          DOM.prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
+        }
+        if (DOM.nextBtn) {
+          const isLast = qPointer >= activeTotal - 1;
+          DOM.nextBtn.innerHTML = isLast 
+            ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
+            : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
+        }
+
+        lucide.createIcons();
+      }
+
+      function handleSelectOption(q, letter) {
+        if (!q) return;
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
+        
+        if (state.sessionState.isSRSMode) {
+          state.sessionState.srsSessionAnswers = state.sessionState.srsSessionAnswers || {};
+          state.sessionState.srsSessionAnswers[`${parentDeckId}_${parentIdx}`] = letter;
+        }
+
+        state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
+        state.userProgress[parentDeckId].answers[parentIdx] = letter;
+        saveState();
+      }
+
+      window.rateRecall = (rating) => {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || !activeDeck.questions.length) return;
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const qPointer = state.sessionState.currentIndex || 0;
+        const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+        const q = activeDeck.questions[idx];
+        if (!q) return;
+
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
+
+        state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
+        state.userProgress[parentDeckId].srs = state.userProgress[parentDeckId].srs || {};
+        
+        if (!state.userProgress[parentDeckId].answers[parentIdx]) {
+           state.userProgress[parentDeckId].answers[parentIdx] = 'REVIEWED'; 
+        }
+        
+        const updatedSRS = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
+        state.userProgress[parentDeckId].srs[parentIdx] = updatedSRS;
+
+        if (DOM.srsStatusTag) {
+          DOM.srsStatusTag.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
+          DOM.srsStatusTag.className = updatedSRS.interval <= 1 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-cyan-400 font-medium';
+        }
+
+        saveState();
+
+        if (state.sessionState.isSRSMode) {
+          handleNextNavigation();
+        }
+      };
+
+      // Render the Chapter List with Solo-Select and Multi-Select Support
+      function renderDeckList() {
+        const list = document.getElementById('deck-list');
+        list.innerHTML = '';
+        const deckKeys = Object.keys(state.decks);
+
+        let totalSelectedQuestions = 0;
+
+        deckKeys.forEach(id => {
+          const deck = state.decks[id];
+          const progress = state.userProgress[id] || { answers: {} };
+          const answered = Object.keys(progress.answers || {}).length;
+          const total = deck.questions.length;
+          const isChecked = state.selectedDeckKeys.has(id);
+
+          if (isChecked) totalSelectedQuestions += total;
+
+          let correct = 0;
+          Object.entries(progress.answers || {}).forEach(([idx, ans]) => {
+            if (deck.questions[idx] && deck.questions[idx].correctAnswer === ans) correct++;
+          });
+          const acc = answered > 0 ? Math.round((correct / answered) * 100) : null;
+
+          const item = document.createElement('div');
+          item.className = `p-3 rounded-xl border flex items-center justify-between transition cursor-pointer select-none ${
+            isChecked 
+              ? 'bg-cyan-600/15 border-cyan-500/60 text-cyan-200' 
+              : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
+          }`;
+          
+          item.innerHTML = `
+            <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+              <!-- Dedicated Checkbox for Multi-Select -->
+              <div class="checkbox-tap-target p-1.5 -m-1.5 hover:bg-slate-700/50 rounded-lg transition flex items-center justify-center shrink-0" title="Toggle Multi-Select">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-0 focus:ring-offset-0 pointer-events-none" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-xs sm:text-sm truncate text-slate-100">${deck.title}</div>
+                <div class="text-[11px] text-slate-400 mt-0.5 flex items-center space-x-2">
+                  <span>${answered}/${total} completed</span>
+                  ${acc !== null ? `<span>•</span><span class="${acc >= 75 ? 'text-emerald-400' : 'text-amber-400'}">${acc}% acc</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <span class="text-[11px] font-bold text-slate-400 bg-slate-900/60 px-2 py-1 rounded-lg border border-slate-800 shrink-0">
+              ${total} Qs
+            </span>
+          `;
+
+          // 1. Row Click: Solo Select
+          item.onclick = () => {
+            state.selectedDeckKeys = new Set([id]);
+            renderDeckList();
+          };
+
+          // 2. Checkbox Click: Toggle Multi-Select
+          const checkboxBtn = item.querySelector('.checkbox-tap-target');
+          checkboxBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (state.selectedDeckKeys.has(id)) {
+              state.selectedDeckKeys.delete(id);
+            } else {
+              state.selectedDeckKeys.add(id);
+            }
+            renderDeckList();
+          };
+
+          list.appendChild(item);
+        });
+
+        document.getElementById('selected-summary-text').textContent = `${state.selectedDeckKeys.size} Chapter${state.selectedDeckKeys.size !== 1 ? 's' : ''} selected (${totalSelectedQuestions} Qs)`;
+        const launchBtn = document.getElementById('btn-launch-multi');
+        launchBtn.disabled = state.selectedDeckKeys.size === 0;
+        document.getElementById('btn-launch-text').textContent = state.selectedDeckKeys.size === 0 
+          ? 'Select at least 1 Chapter' 
+          : `Start Practice (${totalSelectedQuestions} Questions)`;
+
+        lucide.createIcons();
+      }
+
+      document.getElementById('btn-select-all').onclick = () => {
+        Object.keys(state.decks).forEach(k => state.selectedDeckKeys.add(k));
+        renderDeckList();
+      };
+
+      document.getElementById('btn-clear-all').onclick = () => {
+        state.selectedDeckKeys.clear();
+        renderDeckList();
+      };
+
+      document.getElementById('btn-reset-selected').onclick = () => {
+        resetChapters(Array.from(state.selectedDeckKeys));
+      };
+
+      DOM.btnResetCurrentDeck.onclick = () => {
+        resetChapters(Array.from(state.selectedDeckKeys));
+      };
+
+      document.getElementById('btn-launch-multi').onclick = () => {
+        if (state.selectedDeckKeys.size === 0) return;
+        const activeDeck = getActiveCompositeDeck();
+        state.sessionState.currentIndex = 0;
+        state.sessionState.isSRSMode = false;
+        state.sessionState.srsSessionAnswers = {};
+
+        const unans = getUnansweredIndices(activeDeck);
+        if (state.sessionState.isShuffled) {
+          state.sessionState.order = generateShuffledIndices(unans.length).map(i => unans[i]);
+        } else {
+          state.sessionState.order = unans;
+        }
+
+        saveState();
+        document.getElementById('modal-decks').classList.add('hidden');
+      };
+
+      DOM.shuffleBtn.onclick = () => toggleShuffleMode();
+      DOM.srsBtn.onclick = () => toggleSRSMode();
+      DOM.nextBtn.onclick = handleNextNavigation;
+
+      DOM.prevBtn.onclick = () => {
+        if (state.sessionState.currentIndex > 0) { 
+          state.sessionState.currentIndex--; 
+          saveState(); 
+        }
+      };
+
+      document.getElementById('btn-reveal').onclick = () => {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || !activeDeck.questions.length) return;
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const qPointer = state.sessionState.currentIndex || 0;
+        const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+        const q = activeDeck.questions[idx];
+        if (q) {
+          handleSelectOption(q, q.correctAnswer || 'A');
+        }
+      };
+
+      DOM.flagBtn.onclick = () => {
+        const activeDeck = getActiveCompositeDeck();
+        if (!activeDeck || !activeDeck.questions.length) return;
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const qPointer = state.sessionState.currentIndex || 0;
+        const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+        const q = activeDeck.questions[idx];
+        if (!q) return;
+
+        const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
+        const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
+
+        state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
+        state.userProgress[parentDeckId].flags = state.userProgress[parentDeckId].flags || [];
+        const pos = state.userProgress[parentDeckId].flags.indexOf(parentIdx);
+        if (pos > -1) state.userProgress[parentDeckId].flags.splice(pos, 1); 
+        else state.userProgress[parentDeckId].flags.push(parentIdx);
+        saveState();
+      };
+
+      document.getElementById('btn-menu').onclick = () => { renderDeckList(); document.getElementById('modal-decks').classList.remove('hidden'); };
+      document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
+      document.getElementById('btn-auth-modal').onclick = () => document.getElementById('modal-auth').classList.remove('hidden');
+      document.getElementById('btn-close-auth-modal').onclick = () => document.getElementById('modal-auth').classList.add('hidden');
+
+      document.getElementById('btn-google-login').onclick = () => {
+        if (!auth) return;
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).then(() => {
+          document.getElementById('modal-auth').classList.add('hidden');
+        }).catch((err) => {
+          const box = document.getElementById('auth-error-box');
+          box.textContent = err.message;
+          box.classList.remove('hidden');
+        });
+      };
+
+      document.getElementById('btn-logout').onclick = () => {
+        if (!auth) return;
+        auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
+      };
+
+      function captureCurrentContext() {
+        const activeDeck = getActiveCompositeDeck();
+        const qPointer = state.sessionState.currentIndex || 0;
+        const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
+        const idx = hasCustomOrder ? state.sessionState.order[qPointer] : qPointer;
+        const q = activeDeck?.questions?.[idx];
+
+        if (!q) {
+          return {
+            pageType: "hall_qb",
+            deckTitle: activeDeck?.title || "Comprehensive Anesthesia",
+            questionNumber: null
+          };
+        }
+
+        const normalizedOpts = getNormalizedOptions(q);
+        const optionsDict = {};
+        normalizedOpts.forEach(o => { optionsDict[o.key] = o.text; });
+
+        return {
+          pageType: "hall_qb",
+          deckTitle: activeDeck.title,
+          questionNumber: qPointer + 1,
+          questionId: q._parentDeckId ? `${q._parentDeckId}_${q._parentIndex}` : (q.id || null),
+          stem: q.stem || q.question || "",
+          options: optionsDict,
+          correctAnswer: q.correctAnswer || "A",
+          explanation: q.explanation || ""
+        };
+      }
+
+      const feedbackModal = document.getElementById('modal-feedback');
+      const feedbackContextBadge = document.getElementById('feedback-context-badge');
+      const feedbackContextSummary = document.getElementById('feedback-context-summary');
+      const feedbackComment = document.getElementById('feedback-comment');
+      const feedbackStatusMsg = document.getElementById('feedback-status-msg');
+
+      document.getElementById('btn-feedback-trigger').onclick = () => {
+        const ctx = captureCurrentContext();
+        feedbackModal.classList.remove('hidden');
+        feedbackComment.value = '';
+        feedbackStatusMsg.classList.add('hidden');
+        
+        if (ctx.questionNumber) {
+          feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
+          feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
+        } else {
+          feedbackContextBadge.textContent = ctx.deckTitle;
+          feedbackContextSummary.textContent = "General chapter review selection";
+        }
+        lucide.createIcons();
+      };
+
+      document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
+      document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
+
+      document.getElementById('btn-submit-feedback').onclick = async () => {
+        const comment = feedbackComment.value.trim();
+        if (!comment) {
+          alert("Please write your comment or suggestion before submitting.");
+          return;
+        }
+
+        const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "Content Error / Typo";
+        const context = captureCurrentContext();
+        const submitBtn = document.getElementById('btn-submit-feedback');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        const feedbackData = {
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          userId: currentUser?.uid || "anonymous",
+          userEmail: currentUser?.email || "anonymous",
+          userName: currentUser?.displayName || "Guest Doctor",
+          url: window.location.href,
+          category,
+          message: comment,
+          context
+        };
+
+        try {
+          const emailPromise = fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              access_key: "12303c13-8e61-47cc-937a-86364a6b38d6",
+              subject: `[KetofolDoc Comprehensive QB] ${category} - ${context.deckTitle || 'Chapter'} (Q# ${context.questionNumber || 'N/A'})`,
+              from_name: "KetofolDoc Feedback Engine",
+              reply_to: currentUser?.email || "noreply@ketofoldoc.com",
+              "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
+              "Page URL": window.location.href,
+              "Chapter": context.deckTitle || "N/A",
+              "Question Number": context.questionNumber || "N/A",
+              "Question Stem": context.stem || "N/A",
+              "Correct Answer": `Option ${context.correctAnswer || 'N/A'}`,
+              "Options": context.options ? JSON.stringify(context.options, null, 2) : "N/A",
+              "Category": category,
+              "User Comment": comment
+            })
+          });
+
+          const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
+
+          await Promise.all([emailPromise, firestorePromise]);
+
+          feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-cyan-950/70 border border-cyan-500/60 text-cyan-300 block";
+          feedbackStatusMsg.textContent = "✓ Thank you! Your feedback and question details have been submitted.";
+          setTimeout(() => {
+            feedbackModal.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
+            lucide.createIcons();
+          }, 1500);
+        } catch (err) {
+          console.error("Feedback submit error:", err);
+          feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
+          feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Send Feedback</span>`;
+        }
+      };
+
+      // Initialize UI
+      render();
+    }
+
+    // Trigger App Initialization
+    initApp();
+  </script>
+</body>
+</html>
