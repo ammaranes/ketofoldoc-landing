@@ -79,7 +79,7 @@ Where **_P_I_O_2_** = inspired oxygen tension; **_P_A_CO_2_** = alveolar carbon 
     },
     {
       title: `Overview 9`,
-      content: `## **<mark>3. Dif</mark> f** **<mark>usive Gas Transport Across the Alveolar-Capillary Interface</mark>** 
+      content: `**Diffusive Gas Transport Across the Alveolar-Capillary Interface** 
 
 Gas movement down the structural tracheobronchial tree shifts from active convective bulk flow in the large and medium airways to pure passive molecular diffusion in the distal zones. Convective flow velocity drops rapidly as the collective cross-sectional area expands across successive airway generations. 
 
