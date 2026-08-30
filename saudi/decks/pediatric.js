@@ -15,15 +15,15 @@ export const pediatric = {
     },
     {
       id: 2,
-      stem: "36 years old for sleeve, Best way to avoid hypothermia is:",
+      stem: "3 years old for tonsillectomy. Best way to avoid hypothermia is:",
       options: {
         A: "Humidified airway",
         B: "Increase room temperature",
         C: "Intravenous warm IV fluid",
         D: "Force warming air around skin"
       },
-      correctAnswer: "D",
-      explanation: "**Forced-air warming blankets** are the most effective active modality to prevent redistribution and radiant heat loss in adults undergoing major abdominal/bariatric surgery. (In neonates and infants, increasing ambient OR temperature is the most effective single measure)."
+      correctAnswer: "B",
+      explanation: "**Forced-air warming blankets** are the most effective active modality to prevent redistribution and radiant heat loss in adults undergoing major abdominal/bariatric surgery. In neonates and infants, increasing ambient OR temperature is the most effective single measure."
     },
     {
       id: 3,
