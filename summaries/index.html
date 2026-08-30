@@ -21,11 +21,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
-  <!-- Firebase SDKs (v9 Compat Mode - Aligned with Sub-Platforms) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     .safe-top { padding-top: env(safe-area-inset-top); }
@@ -543,6 +538,10 @@
 
   <!-- ES6 Application Logic + Namespaced Cross-Platform SM-2 Engine -->
   <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
     // Helper: Dynamic Module Fallback Loader
     async function loadModuleWithFallbacks(paths) {
       for (const p of paths) {
@@ -560,83 +559,53 @@
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
-      const mathBlocks = [];
-      const imgBlocks = []; 
 
-      // 0. Protect Image Tags and Links from text formatting
-      // This prevents the text modifiers from corrupting image URLs
-      processed = processed.replace(/<img[^>]+>/g, (match) => {
-        imgBlocks.push(match);
-        return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
-      });
-      processed = processed.replace(/!\[.*?\]\([^)]+\)/g, (match) => {
-        imgBlocks.push(match);
-        return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
-      });
+      if (window.katex) {
+        // 1. Explicit Block Math: $$...$$ or \[...\]
+        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
 
-      function renderKaTeX(math, displayMode) {
-        if (!window.katex) {
-          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
-          mathBlocks.push(`<span class="text-purple-300 font-semibold">${math}</span>`);
-          return id;
-        }
-        try {
-          let safeMath = math.replace(/_([a-zA-Z0-9]+)/g, '_{$1}');
-          const html = window.katex.renderToString(safeMath.trim(), { displayMode, throwOnError: true });
-          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
-          mathBlocks.push(html);
-          return id;
-        } catch (e) {
-          const clean = math.replace(/_/g, '').replace(/\^/g, '');
-          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
-          mathBlocks.push(`<span class="font-semibold text-purple-300">${clean}</span>`);
-          return id;
-        }
+        // 2. Explicit Inline Math: $...$ or \(...\)
+        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+
+        // 3. Standalone Raw LaTeX Equation Lines
+        const lines = processed.split('\n');
+        processed = lines.map(line => {
+          const trimmed = line.trim();
+          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
+          const isMathLine = hasLatexCommands && (trimmed.includes('=') || trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\times'));
+          const notHtmlOrHeader = !trimmed.startsWith('<') && !trimmed.startsWith('#');
+
+          if (isMathLine && notHtmlOrHeader) {
+            try { return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false }); } 
+            catch (e) { return line; }
+          }
+          return line;
+        }).join('\n');
+
+        // 4. Inline Un-delimited Math Expressions (Syntax Fixed)
+        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+))/g, (match) => {
+          if (match.includes('<') || match.includes('>')) return match;
+          if (!/\\[a-zA-Z]+|_[0-9A-Za-z{]|\^[0-9A-Za-z{]/.test(match)) return match;
+          try { return window.katex.renderToString(match.trim(), { displayMode: false, throwOnError: false }); } 
+          catch (e) { return match; }
+        });
       }
 
-      // 1. Aggressively strip unwanted HTML artifacts
-      processed = processed.replace(/<\/?(?:mark|font|span|color|bgcolor|div|section)[^>]*>/gi, '');
-      processed = processed.replace(/style="[^"]*"/gi, '');
-      
-      // 2. Fix Tildes (Strikethrough bug)
-      processed = processed.replace(/~/g, ' &sim; ').replace(/&sim;\s*&sim;/g, '~~');
-
-      // 3. Automated Spacing Repair
-      processed = processed.replace(/([a-z])([A-Z][a-z]{2,})/g, '$1 $2'); 
-      processed = processed.replace(/([a-zA-Z])\.([A-Z])/g, '$1. $2'); 
-      processed = processed.replace(/([a-zA-Z]):([A-Z])/g, '$1: $2'); 
-      processed = processed.replace(/([;\]\)])([A-Z])/g, '$1 $2');
-      processed = processed.replace(/\bWhere([A-Z])/g, 'Where $1');
-      processed = processed.replace(/\band([A-Z])/g, 'and $1');
-
-      // 4. Clean rogue markdown bold/italic artifacts
-      processed = processed.replace(/\*{3,}/g, '**'); 
-      processed = processed.replace(/([a-zA-Z])\*\*([a-zA-Z])/g, '$1 **$2'); 
-      processed = processed.replace(/\*\*\_(.*?)\_\*\*/g, '**$1**');
-      processed = processed.replace(/\*\*\_|\_\*\*/g, '');
-      processed = processed.replace(/(^|\s)_([A-Za-z0-9]+)/g, '$1$2');
-
-      // 5. Explicit Math Blocks
-      processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderKaTeX(m, true));
-      processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderKaTeX(m, true));
-      processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderKaTeX(m, false));
-      processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderKaTeX(m, false));
-
-      // 6. Auto-Detect Complex Orphaned Equations
-      const lines = processed.split('\n');
-      processed = lines.map(line => {
-        if (line.includes('MATHPLACEHOLDER') || line.includes('IMAGEPLACEHOLDER')) return line;
-        
-        let trimmed = line.trim();
-        if (trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\sum')) {
-           let mathStr = trimmed.replace(/^[*-]\s+/, ''); 
-           let html = renderKaTeX(mathStr, true);
-           return trimmed.startsWith('-') || trimmed.startsWith('*') ? `- ${html}` : html;
-        }
-        return line;
-      }).join('\n');
-
-      // 7. Safe HTML Subscript Mapping for Medical Variables
+      // Safe HTML Subscript Mapping for Medical Variables
       const medicalSubs = {
         'P_A_O_2': 'P<sub>A</sub>O<sub>2</sub>', 'P_I_O_2': 'P<sub>I</sub>O<sub>2</sub>',
         'P_A_CO_2': 'P<sub>A</sub>CO<sub>2</sub>', 'P_I_CO_2': 'P<sub>I</sub>CO<sub>2</sub>',
@@ -664,41 +633,18 @@
       
       processed = processed.replace(/(^|[^a-zA-Z])([A-Za-z]+)_([A-Za-z0-9]+)(?![a-zA-Z])/g, '$1$2<sub>$3</sub>');
 
-      // 8. Translate Stray LaTeX to HTML
-      processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
-      processed = processed.replace(/\\leftarrow/g, ' &larr; ');
-      processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
-      processed = processed.replace(/\\times/g, ' &times; ');
-      processed = processed.replace(/\\cdot/g, ' &middot; ');
-      processed = processed.replace(/\\Delta/g, ' &Delta; ');
-      processed = processed.replace(/\\downarrow/g, ' &darr; ');
-      processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
-
-      // 9. Restore Image Tags BEFORE Markdown parsing
-      imgBlocks.forEach((img, i) => {
-        processed = processed.replace(`IMAGEPLACEHOLDER${i}ENDIMAGE`, img);
-      });
-
-      // 10. Markdown & DOMPurify Execution
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
         .replace(/<\/table>/g, '</table></div>');
 
-      let sanitized = window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
+      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
         ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics', 'sup', 'sub', 'img'],
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'src', 'alt']
       }) : tableWrapped;
-
-      // 11. Re-Inject Safe KaTeX Blocks
-      mathBlocks.forEach((html, i) => {
-        sanitized = sanitized.split(`MATHPLACEHOLDER${i}ENDMATH`).join(html);
-      });
-
-      return sanitized;
     }
 
-    // Debounce Helper for Performance
+    // Debounce Helper
     function debounce(func, timeout = 300) {
       let timer;
       return (...args) => {
@@ -824,37 +770,31 @@
       80: { topic: "neuro", keywords: ["neurocritical", "traumatic brain injury", "tbi", "stroke", "brain death", "subarachnoid hemorrhage", "vasospasm"] }
     };
 
-    // Storage Management
+    // Storage Management (Included Comp)
     const LOCAL_SUMMARIES_KEY = 'ketofoldoc_summaries_progress';
     const LOCAL_SAUDI_KEY = 'saudi_board_progress';
     const LOCAL_1000_KEY = 'thousand_qs_progress';
+    const LOCAL_COMP_KEY = 'comp_qb_progress';
 
     let summariesState = { readChapters: {}, quizAnswers: {} };
     let saudiBoardCardStates = {};
     let thousandQsCardStates = {};
+    let compCardStates = {};
 
     function loadLocalProgress() {
       try {
         const sumSaved = localStorage.getItem(LOCAL_SUMMARIES_KEY);
-        if (sumSaved) {
-          const p = JSON.parse(sumSaved);
-          summariesState = p || { readChapters: {}, quizAnswers: {} };
-        }
+        if (sumSaved) summariesState = JSON.parse(sumSaved);
 
         const saudiSaved = localStorage.getItem(LOCAL_SAUDI_KEY);
-        if (saudiSaved) {
-          const p = JSON.parse(saudiSaved);
-          saudiBoardCardStates = (p && p.card_states) ? p.card_states : {};
-        }
+        if (saudiSaved) saudiBoardCardStates = JSON.parse(saudiSaved).card_states || {};
 
         const thSaved = localStorage.getItem(LOCAL_1000_KEY);
-        if (thSaved) {
-          const p = JSON.parse(thSaved);
-          thousandQsCardStates = (p && p.card_states) ? p.card_states : {};
-        }
-      } catch (e) {
-        console.warn("Local cache read error", e);
-      }
+        if (thSaved) thousandQsCardStates = JSON.parse(thSaved).card_states || {};
+
+        const compSaved = localStorage.getItem(LOCAL_COMP_KEY) || localStorage.getItem('hall_qb_progress');
+        if (compSaved) compCardStates = JSON.parse(compSaved).card_states || {};
+      } catch (e) {}
     }
 
     // App Initialization Function
@@ -862,13 +802,10 @@
       let allBooks = [];
       let questionChapters = [];
 
-      // Determine Base Path dynamically for subpath/subdomain resilience
       const currentPath = window.location.pathname;
-      const basePath = currentPath.endsWith('/') 
-        ? currentPath 
-        : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+      const basePath = currentPath.endsWith('/') ? currentPath : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-      // 1. Resilient Books Module Loader (Detects Raw Arrays of Chapters vs Objects)
+      // 1. Load Summary Books
       const booksMod = await loadModuleWithFallbacks([
         `${basePath}books/index.js`,
         '/summaries/books/index.js',
@@ -877,24 +814,15 @@
       ]);
 
       if (booksMod) {
-        let rawData = booksMod.allBooks || booksMod.books || booksMod.allChapters || booksMod.default || [];
-        if (!Array.isArray(rawData) && typeof booksMod === 'object') {
-          rawData = Object.values(booksMod).find(Array.isArray) || [];
-        }
-        
-        // Wrap raw chapters into a standard "Book" format if the module exports raw chapters
-        if (rawData.length > 0 && !rawData[0].chapters) {
-           allBooks = [{
-             id: 'default_book',
-             title: 'Textbook Library',
-             chapters: rawData
-           }];
-        } else {
-           allBooks = rawData;
+        allBooks = booksMod.allBooks || booksMod.books || booksMod.default || [];
+        if (!Array.isArray(allBooks) && typeof booksMod === 'object') {
+          allBooks = Object.values(booksMod).find(Array.isArray) || [];
         }
       }
 
-      // 2. Resilient Question Decks Loader
+      // 2. Load Decks (Saudi & 1000 Qs)
+      let saudi = [];
+      let thousand = [];
       const decksMod = await loadModuleWithFallbacks([
         `${basePath}decks/index.js`,
         '/summaries/decks/index.js',
@@ -904,31 +832,73 @@
 
       if (decksMod) {
         if (decksMod.allQuestionDecks) {
-          questionChapters = decksMod.allQuestionDecks;
+          saudi = decksMod.allQuestionDecks.filter(d => d.sourceName === 'Saudi Board QB' || d.id.includes('saudi'));
+          thousand = decksMod.allQuestionDecks.filter(d => d.sourceName === '1000 Questions' || d.id.includes('ch_'));
         } else {
-          const saudi = (decksMod.allDecks || []).map(d => ({
-            ...d,
-            sourceName: 'Saudi Board QB',
-            sourceKey: 'saudi_board_progress',
-            sourceBadgeColor: 'blue'
+          saudi = (decksMod.allDecks || []).map(d => ({
+            ...d, sourceName: 'Saudi Board QB', sourceKey: 'saudi_board_progress', sourceBadgeColor: 'blue'
           }));
-          const thousand = (decksMod.allChapters || []).map((ch, idx) => {
+          thousand = (decksMod.allChapters || []).map((ch, idx) => {
             const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
             const numOnly = rawId.replace(/\D/g, '');
             const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
             return {
-              ...ch,
-              id: key,
-              sourceName: '1000 Questions',
-              sourceKey: 'thousand_qs_progress',
-              sourceBadgeColor: 'emerald'
+              ...ch, id: key, sourceName: '1000 Questions', sourceKey: 'thousand_qs_progress', sourceBadgeColor: 'emerald'
             };
           });
-          questionChapters = [...saudi, ...thousand];
         }
       }
 
-      // 3. Resilient Highlighter Loader with Mock Fallback
+      // 3. Load Comprehensive Anesthesia Decks
+      let compChapters = [];
+      try {
+        const compMod = await loadModuleWithFallbacks([
+          '/comp/output_hall_js/index.js',
+          '../comp/output_hall_js/index.js',
+          '/hall/output_hall_js/index.js',
+          './output_hall_js/index.js'
+        ]);
+
+        if (compMod) {
+          let rawData = compMod.allChapters || compMod.allDecks || compMod.default || compMod;
+          if (rawData && !Array.isArray(rawData) && typeof rawData === 'object') {
+            const arrays = Object.values(rawData).filter(Array.isArray);
+            if (arrays.length > 0) rawData = arrays.flat();
+          }
+          if (Array.isArray(rawData) && rawData.length > 0) {
+            if (rawData[0].stem || rawData[0].question) {
+              const groups = {};
+              rawData.forEach(q => {
+                const chNum = q.chapter !== undefined ? q.chapter : 'Misc';
+                const key = `ch_${String(chNum).padStart(2, '0')}`;
+                if (!groups[key]) groups[key] = { id: key, title: q.chapterTitle || `Chapter ${chNum}`, questions: [] };
+                groups[key].questions.push(q);
+              });
+              compChapters = Object.values(groups);
+            } else if (rawData[0].questions) {
+              compChapters = rawData;
+            }
+          }
+        }
+      } catch (e) { console.warn("Failed to load Comprehensive QB for summaries", e); }
+
+      const compFormatted = compChapters.map((ch, idx) => {
+        const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
+        const numOnly = rawId.replace(/\D/g, '');
+        const key = numOnly ? `comp_${numOnly.padStart(2, '0')}` : `comp_${rawId}`;
+        return {
+          ...ch,
+          id: key,
+          sourceName: 'Comprehensive QB',
+          sourceKey: 'comp_qb_progress',
+          sourceBadgeColor: 'cyan'
+        };
+      });
+
+      // Combine all sources
+      questionChapters = [...saudi, ...thousand, ...compFormatted];
+
+      // 4. Resilient Highlighter Loader
       let StudyHighlighterClass = null;
       const hlMod = await loadModuleWithFallbacks([
         '/js/highlighter.js',
@@ -949,7 +919,7 @@
 
       loadLocalProgress();
 
-      let activeBookId = allBooks[0]?.id || 'default_book';
+      let activeBookId = allBooks[0]?.id || 'miller';
       let activeChapterId = null;
 
       function getActiveBook() {
@@ -963,7 +933,7 @@
         return book.chapters.find(c => c.id === activeChapterId) || null;
       }
 
-      // Unified Firebase Configuration (v9 Compat to align with global ecosystem scripts)
+      // Unified Firebase Configuration
       const firebaseConfig = {
         apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
         authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -978,14 +948,13 @@
       let currentUser = null;
 
       try {
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
       } catch (e) {
         console.warn("Firebase Init:", e);
       }
 
-      // Initialize Universal Study Highlighter
       const highlighter = new StudyHighlighterClass({
         storageKey: 'kd_summaries_highlights',
         onChange: () => {
@@ -996,7 +965,8 @@
         onSave: (allHighlights) => {
           if (currentUser && db) {
             try {
-              db.collection('users').doc(currentUser.uid).set({
+              const userDocRef = doc(db, 'users', currentUser.uid);
+              setDoc(userDocRef, {
                 summaries_highlights: allHighlights
               }, { merge: true });
             } catch (e) {
@@ -1007,15 +977,29 @@
       });
       window.highlighterInstance = highlighter;
 
-      // Cross-Platform Firestore & LocalStorage Sync with Namespaced IDs
+      // Cross-Platform Firestore & LocalStorage Sync
       async function syncCardSRS(question, quality) {
         const qId = question._namespacedId;
         if (!qId) return;
 
         const isSaudi = question._sourceName === 'Saudi Board QB';
-        const targetStates = isSaudi ? saudiBoardCardStates : thousandQsCardStates;
-        const targetStorageKey = isSaudi ? LOCAL_SAUDI_KEY : LOCAL_1000_KEY;
-        const targetFirestoreField = isSaudi ? 'saudi_board_progress' : 'thousand_qs_progress';
+        const isComp = question._sourceName === 'Comprehensive QB';
+
+        let targetStates, targetStorageKey, targetFirestoreField;
+        
+        if (isSaudi) {
+          targetStates = saudiBoardCardStates;
+          targetStorageKey = LOCAL_SAUDI_KEY;
+          targetFirestoreField = 'saudi_board_progress';
+        } else if (isComp) {
+          targetStates = compCardStates;
+          targetStorageKey = LOCAL_COMP_KEY;
+          targetFirestoreField = 'comp_qb_progress';
+        } else {
+          targetStates = thousandQsCardStates;
+          targetStorageKey = LOCAL_1000_KEY;
+          targetFirestoreField = 'thousand_qs_progress';
+        }
 
         const existingState = targetStates[qId] || {};
         const newCardState = calculateSM2(existingState, quality);
@@ -1029,7 +1013,8 @@
 
         if (currentUser && db) {
           try {
-            await db.collection('users').doc(currentUser.uid).set({
+            const userDocRef = doc(db, 'users', currentUser.uid);
+            await setDoc(userDocRef, {
               [targetFirestoreField]: { card_states: targetStates, lastUpdated: new Date().toISOString() },
               summaries_progress: summariesState
             }, { merge: true });
@@ -1041,7 +1026,7 @@
 
       // Auth State Observer
       if (auth) {
-        auth.onAuthStateChanged(async (user) => {
+        onAuthStateChanged(auth, async (user) => {
           currentUser = user;
           const authBtnLabel = document.getElementById('auth-label');
           
@@ -1050,8 +1035,8 @@
             
             if (db) {
               try {
-                const snap = await db.collection('users').doc(user.uid).get();
-                if (snap.exists) {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                if (snap.exists()) {
                   const data = snap.data();
                   if (data.summaries_progress) {
                     summariesState.readChapters = { ...summariesState.readChapters, ...(data.summaries_progress.readChapters || {}) };
@@ -1065,6 +1050,11 @@
                   if (data.thousand_qs_progress?.card_states) {
                     thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
                     localStorage.setItem(LOCAL_1000_KEY, JSON.stringify({ card_states: thousandQsCardStates }));
+                  }
+                  if (data.comp_qb_progress?.card_states || data.hall_qb_progress?.card_states) {
+                    const cloudStates = data.comp_qb_progress?.card_states || data.hall_qb_progress?.card_states;
+                    compCardStates = { ...compCardStates, ...cloudStates };
+                    localStorage.setItem(LOCAL_COMP_KEY, JSON.stringify({ card_states: compCardStates }));
                   }
                   if (data.summaries_highlights && highlighter.highlights) {
                     highlighter.highlights = { ...highlighter.highlights, ...data.summaries_highlights };
@@ -1091,19 +1081,18 @@
         if (!auth) return;
         if (currentUser) {
           if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
-            await auth.signOut();
+            await signOut(auth);
           }
         } else {
-          const provider = new firebase.auth.GoogleAuthProvider();
+          const provider = new GoogleAuthProvider();
           try {
-            await auth.signInWithPopup(provider);
+            await signInWithPopup(auth, provider);
           } catch (err) {
             console.error("Google sign-in error:", err);
           }
         }
       };
 
-      // Scroll Progress Tracker
       window.addEventListener('scroll', () => {
         if (!activeChapterId) return;
         const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
@@ -1112,7 +1101,6 @@
         document.getElementById('reading-progress-fill').style.width = `${scrolled}%`;
       });
 
-      // Navigation & Views
       function showDirectory() {
         activeChapterId = null;
         window.location.hash = '';
@@ -1150,7 +1138,6 @@
         lucide.createIcons();
       }
 
-      // Toggle Chapter Read Status
       async function toggleChapterRead(chapterId) {
         if (summariesState.readChapters[chapterId]) {
           delete summariesState.readChapters[chapterId];
@@ -1164,7 +1151,7 @@
 
         if (currentUser && db) {
           try {
-            await db.collection('users').doc(currentUser.uid).set({
+            await setDoc(doc(db, 'users', currentUser.uid), {
               summaries_progress: {
                 ...summariesState,
                 lastUpdated: new Date().toISOString()
@@ -1177,20 +1164,18 @@
         renderDirectory();
       }
 
-      // Helper to strip markdown hashes and bold/italic asterisks from titles
       function cleanText(str) {
         if (!str) return '';
         return String(str)
-          .replace(/^#+\s*/g, '')         // Remove leading #, ##, ###
-          .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
-          .replace(/__(.*?)__/g, '$1')     // Remove bold __text__
-          .replace(/\*(.*?)\*/g, '$1')     // Remove italic *text*
-          .replace(/_(.*?)_/g, '$1')       // Remove italic _text_
-          .replace(/^[📄\s]+/, '')         // Remove decorative document emojis
+          .replace(/^#+\s*/g, '')
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/__(.*?)__/g, '$1')
+          .replace(/\*(.*?)\*/g, '$1')
+          .replace(/_(.*?)_/g, '$1')
+          .replace(/^[📄\s]+/, '')
           .trim();
       }
 
-      // Section Normalization Engine (Strips Markdown Syntax & Promotes Headings)
       function processChapterSections(rawSections) {
         const processed = [];
         let companionSubtitle = '';
@@ -1202,7 +1187,6 @@
           const cleanContentStr = cleanText(rawContent);
           const isOverviewTitle = /^overview\s*\d*$/i.test(cleanTitleStr);
 
-          // 1. Detect Companion Subtitle / Manual Banner
           if (idx === 0 && (
             /COMPREHENSIVE.*(?:MANUAL|COMPANION|REVIEW)/i.test(cleanContentStr) ||
             /VERSION\s*\d+/i.test(cleanContentStr) ||
@@ -1212,7 +1196,6 @@
             return;
           }
 
-          // 2. Detect Major Section Markers
           const sectionMatch = cleanContentStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i) || 
                                cleanTitleStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i);
           
@@ -1225,47 +1208,28 @@
             return;
           }
 
-          // 3. Handle Overview X titles
           if (isOverviewTitle) {
             if (cleanContentStr.length < 90 && !cleanContentStr.includes('\n') && !cleanContentStr.includes('.')) {
-              processed.push({
-                type: 'sub_heading',
-                title: cleanContentStr,
-                content: ''
-              });
+              processed.push({ type: 'sub_heading', title: cleanContentStr, content: '' });
               return;
             }
 
             const mdHeaderMatch = rawContent.match(/^#{1,4}\s+(.+)$/m);
             if (mdHeaderMatch) {
-              processed.push({
-                type: 'normal',
-                title: cleanText(mdHeaderMatch[1]),
-                content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim()
-              });
+              processed.push({ type: 'normal', title: cleanText(mdHeaderMatch[1]), content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim() });
               return;
             }
 
-            processed.push({
-              type: 'normal',
-              title: `Topic ${processed.length + 1}`,
-              content: rawContent
-            });
+            processed.push({ type: 'normal', title: `Topic ${processed.length + 1}`, content: rawContent });
             return;
           }
 
-          // 4. Standard content section
-          processed.push({
-            type: 'normal',
-            title: cleanTitleStr,
-            content: rawContent
-          });
+          processed.push({ type: 'normal', title: cleanTitleStr, content: rawContent });
         });
 
         return { sections: processed, companionSubtitle };
       }
 
-      // Render Directory Landing Grid
       function renderDirectory(filterQuery = '') {
         const book = getActiveBook();
         const grid = document.getElementById('directory-grid');
@@ -1276,7 +1240,6 @@
           grid.innerHTML = `
             <div class="col-span-full py-16 text-center text-slate-400 text-sm space-y-3">
               <p class="font-bold text-slate-200">⚠️ No chapters found in library</p>
-              <p class="text-xs text-slate-500">Verify your connection or reload to retry module sync.</p>
               <button onclick="window.location.reload(true)" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold transition">
                 Reload Library
               </button>
@@ -1303,11 +1266,7 @@
         });
 
         if (filtered.length === 0) {
-          grid.innerHTML = `
-            <div class="col-span-full py-16 text-center text-slate-500 text-sm">
-              No chapters match your search query "<b>${window.DOMPurify ? window.DOMPurify.sanitize(filterQuery) : filterQuery}</b>".
-            </div>
-          `;
+          grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-500 text-sm">No chapters match your search query.</div>`;
           return;
         }
 
@@ -1366,7 +1325,6 @@
       document.getElementById('btn-back-to-library').onclick = showDirectory;
       document.getElementById('btn-bottom-library').onclick = showDirectory;
 
-      // Search Engine
       function searchAllSummaries(query) {
         const clean = query.trim().toLowerCase();
         if (clean.length < 2) return [];
@@ -1462,7 +1420,6 @@
         });
       }
 
-      // Search Handlers
       const searchModal = document.getElementById('modal-search');
       const searchInput = document.getElementById('search-input');
       document.getElementById('btn-search').onclick = () => {
@@ -1487,7 +1444,7 @@
         }
       });
 
-      // Dual-Bank Question Matching Engine
+      // Unified 3-Bank Question Matching Engine
       function renderInteractiveQuestions(chapterNumber) {
         const container = document.getElementById('quiz-cards-container');
         const badge = document.getElementById('quiz-count-badge');
@@ -1536,16 +1493,21 @@
                                   .sort((a, b) => b._relevanceScore - a._relevanceScore);
         const thousandScored = scored.filter(q => q._sourceName === '1000 Questions' && q._relevanceScore > 0)
                                      .sort((a, b) => b._relevanceScore - a._relevanceScore);
+        const compScored = scored.filter(q => q._sourceName === 'Comprehensive QB' && q._relevanceScore > 0)
+                                 .sort((a, b) => b._relevanceScore - a._relevanceScore);
 
-        const MAX_PER_SOURCE = 4;
-        const TARGET_TOTAL = 8;
+        // Pull up to 5 questions from each of the 3 banks to hit up to 15 total
+        const MAX_PER_SOURCE = 5;
+        const TARGET_TOTAL = 15;
 
         let selectedQuestions = [
           ...saudiScored.slice(0, MAX_PER_SOURCE),
-          ...thousandScored.slice(0, MAX_PER_SOURCE)
+          ...thousandScored.slice(0, MAX_PER_SOURCE),
+          ...compScored.slice(0, MAX_PER_SOURCE)
         ];
 
-        if (selectedQuestions.length < 5) {
+        // Backfill if we haven't reached the 15 cap
+        if (selectedQuestions.length < TARGET_TOTAL) {
           const chosenSet = new Set(selectedQuestions);
           const remaining = scored.filter(q => q._relevanceScore > 0 && !chosenSet.has(q))
                                   .sort((a, b) => b._relevanceScore - a._relevanceScore);
@@ -1554,7 +1516,11 @@
             selectedQuestions.push(q);
           }
         }
+        
+        // Strict cap at 15
+        selectedQuestions = selectedQuestions.slice(0, TARGET_TOTAL);
 
+        // Fallback: If 0 questions matched keywords, grab up to 15 from a matching topic deck
         if (selectedQuestions.length === 0) {
           const matchingDeck = questionChapters.find(d => (d.title || '').toLowerCase().includes(mapping.topic));
           if (matchingDeck && matchingDeck.questions) {
@@ -1584,11 +1550,13 @@
           const isRevealed = Boolean(selectedAns);
 
           const isSaudi = q._sourceName === 'Saudi Board QB';
-          const badgeStyle = isSaudi 
-            ? 'bg-blue-950/80 text-blue-300 border-blue-800/60' 
-            : 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60';
+          const isComp = q._sourceName === 'Comprehensive QB';
+          
+          const badgeStyle = isSaudi ? 'bg-blue-950/80 text-blue-300 border-blue-800/60' 
+                           : isComp ? 'bg-cyan-950/80 text-cyan-300 border-cyan-800/60' 
+                           : 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60';
 
-          const cardStates = isSaudi ? saudiBoardCardStates : thousandQsCardStates;
+          const cardStates = isSaudi ? saudiBoardCardStates : (isComp ? compCardStates : thousandQsCardStates);
           const existingSRS = cardStates[qId];
 
           const card = document.createElement('div');
@@ -1863,7 +1831,6 @@
         lucide.createIcons();
       }
 
-      // In-Chapter Table of Contents Drawer
       function renderTOC() {
         const ch = getActiveChapter();
         const list = document.getElementById('toc-list');
@@ -1909,7 +1876,6 @@
       };
       document.getElementById('btn-close-toc').onclick = () => document.getElementById('modal-toc').classList.add('hidden');
 
-      // Books & Chapter Drawer Navigation Modal
       function renderDrawer() {
         const book = getActiveBook();
         const tabs = document.getElementById('book-tabs');
@@ -1982,7 +1948,6 @@
       };
       document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
 
-      // Feedback Engine
       function captureSummaryContext() {
         const book = getActiveBook();
         const ch = getActiveChapter();
@@ -2075,7 +2040,7 @@
             })
           });
 
-          const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
+          const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
 
           await Promise.all([emailPromise, firestorePromise]);
 
@@ -2096,17 +2061,10 @@
         }
       };
 
-      // Handle Hash Routing
       const initialHash = window.location.hash.replace('#', '').trim();
       const book = getActiveBook();
       const initialChapter = book?.chapters?.find(c => c.id === initialHash);
 
-      if (initialChapter) {
-        openChapter(initialChapter.id);
-      } else {
-        showDirectory();
-      }
-      
       // Safari bfcache & Tab Switch UI update freeze fix
       window.addEventListener('pageshow', (event) => {
         if (event.persisted && auth && currentUser) {
@@ -2120,9 +2078,14 @@
           else renderDirectory();
         }
       });
+
+      if (initialChapter) {
+        openChapter(initialChapter.id);
+      } else {
+        showDirectory();
+      }
     }
 
-    // Initialize the Application
     initApp();
   </script>
 </body>
