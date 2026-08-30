@@ -580,11 +580,11 @@
 
       // 1. Resilient Module Loader
       const qbMod = await loadModuleWithFallbacks([
-        `${basePath}output_hall_js/index.js`,
-        '/hall/output_hall_js/index.js',
-        '../hall/output_hall_js/index.js',
-        './output_hall_js/index.js'
-      ]);
+  `${basePath}output_hall_js/index.js`,
+  '/comp/output_hall_js/index.js',
+  '../comp/output_hall_js/index.js',
+  './output_hall_js/index.js'
+]);
 
       if (qbMod) {
         let rawData = qbMod.allChapters || qbMod.allDecks || qbMod.default || qbMod;
@@ -774,19 +774,19 @@
       }
 
       const highlighter = new StudyHighlighterClass({
-        storageKey: 'kd_hall_highlights',
+        storageKey: 'kd_comp_highlights',
         onChange: () => render(),
         onSave: (allHighlights) => {
           if (db && currentUser) {
             db.collection('users').doc(currentUser.uid).set({
-              hall_highlights: allHighlights
+              comp_highlights: allHighlights
             }, { merge: true });
           }
         }
       });
       window.highlighterInstance = highlighter;
 
-      const LOCAL_STORAGE_KEY = 'hall_qb_progress';
+      const LOCAL_STORAGE_KEY = 'comp_qb_progress';
       const FIRESTORE_COLLECTION = 'users';
       const firstDeckKey = Object.keys(DECKS)[0] || 'ch_01';
 
