@@ -1,6 +1,6 @@
 /**
  * KetofolDoc Universal Study Highlighter Engine
- * Precision Anchored Context Matching (Prefix + Exact + Suffix)
+ * Desktop Precision Floating + Mobile Conflict-Free Bottom Docking
  */
 
 function escapeRegExp(string) {
@@ -77,15 +77,15 @@ export class StudyHighlighter {
 
     const bar = document.createElement('div');
     bar.id = 'kd-highlight-toolbar';
-    bar.className = 'fixed hidden z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center space-x-1.5 transition-opacity duration-150 select-none shadow-black/60 [-webkit-touch-callout:none]';
+    bar.className = 'fixed hidden z-[90] bg-slate-900/95 backdrop-blur-xl border border-slate-700/90 rounded-2xl shadow-2xl p-2 sm:p-1.5 flex items-center space-x-2 sm:space-x-1.5 transition-all duration-200 select-none shadow-black/80 [-webkit-touch-callout:none]';
     bar.innerHTML = `
-      <button type="button" data-color="blue" class="w-5 h-5 rounded-full bg-blue-500 hover:scale-110 active:scale-95 transition shadow-sm border border-blue-400" title="Highlight Neutral Blue"></button>
-      <button type="button" data-color="emerald" class="w-5 h-5 rounded-full bg-emerald-500 hover:scale-110 active:scale-95 transition shadow-sm border border-emerald-400" title="Highlight Emerald"></button>
-      <button type="button" data-color="amber" class="w-5 h-5 rounded-full bg-amber-400 hover:scale-110 active:scale-95 transition shadow-sm border border-amber-300" title="Highlight Amber"></button>
-      <button type="button" data-color="purple" class="w-5 h-5 rounded-full bg-purple-500 hover:scale-110 active:scale-95 transition shadow-sm border border-purple-400" title="Highlight Purple"></button>
-      <div class="w-px h-4 bg-slate-700 mx-1"></div>
-      <button type="button" data-action="remove" class="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition" title="Clear Highlight">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+      <button type="button" data-color="blue" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-blue-500 hover:scale-110 active:scale-95 transition shadow-sm border border-blue-400 flex items-center justify-center" title="Highlight Blue"></button>
+      <button type="button" data-color="emerald" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-emerald-500 hover:scale-110 active:scale-95 transition shadow-sm border border-emerald-400 flex items-center justify-center" title="Highlight Emerald"></button>
+      <button type="button" data-color="amber" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-amber-400 hover:scale-110 active:scale-95 transition shadow-sm border border-amber-300 flex items-center justify-center" title="Highlight Amber"></button>
+      <button type="button" data-color="purple" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-purple-500 hover:scale-110 active:scale-95 transition shadow-sm border border-purple-400 flex items-center justify-center" title="Highlight Purple"></button>
+      <div class="w-px h-5 sm:h-4 bg-slate-700 mx-1"></div>
+      <button type="button" data-action="remove" class="p-1.5 sm:p-1 rounded-xl text-slate-400 hover:text-rose-400 active:bg-slate-800 transition" title="Clear Highlight">
+        <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
       </button>
     `;
     document.body.appendChild(bar);
@@ -93,16 +93,20 @@ export class StudyHighlighter {
 
     this.toolbar.querySelectorAll('button[data-color]').forEach(btn => {
       btn.onmousedown = (e) => e.preventDefault();
+      btn.ontouchstart = (e) => e.stopPropagation();
       btn.onclick = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         this.applySelectedHighlight(btn.dataset.color);
       };
     });
 
     const removeBtn = this.toolbar.querySelector('button[data-action="remove"]');
     removeBtn.onmousedown = (e) => e.preventDefault();
+    removeBtn.ontouchstart = (e) => e.stopPropagation();
     removeBtn.onclick = (e) => {
       e.preventDefault();
+      e.stopPropagation();
       this.removeSelectedHighlight();
     };
   }
@@ -133,11 +137,20 @@ export class StudyHighlighter {
     };
 
     document.addEventListener('mouseup', handleSelection);
-    document.addEventListener('touchend', () => setTimeout(handleSelection, 120));
+    document.addEventListener('touchend', () => setTimeout(handleSelection, 100));
 
     document.addEventListener('mousedown', (e) => {
       if (this.toolbar && !this.toolbar.contains(e.target)) {
         this.hideToolbar();
+      }
+    });
+    
+    document.addEventListener('touchstart', (e) => {
+      if (this.toolbar && !this.toolbar.contains(e.target)) {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed) {
+          this.hideToolbar();
+        }
       }
     });
   }
@@ -148,31 +161,21 @@ export class StudyHighlighter {
     if (rect.width === 0 && rect.height === 0) return;
 
     this.toolbar.classList.remove('hidden');
-    const toolbarRect = this.toolbar.getBoundingClientRect();
 
-    const isMobileOrTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth < 640);
+    const isMobile = window.innerWidth < 768 || ('ontouchstart' in window);
 
-    if (isMobileOrTouch) {
-      // 📱 Mobile / iOS: Position safely BELOW the selection to avoid the native iOS callout menu
-      let top = rect.bottom + 14;
-      let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
-
-      // If selection is too close to the bottom footer, dock as a thumb-bar above the bottom controls
-      const maxBottom = window.innerHeight - 90;
-      if (top + toolbarRect.height > maxBottom) {
-        top = maxBottom - toolbarRect.height;
-      }
-
-      // Keep within screen edges
-      if (left < 16) left = 16;
-      if (left + toolbarRect.width > window.innerWidth - 16) {
-        left = window.innerWidth - toolbarRect.width - 16;
-      }
-
-      this.toolbar.style.top = `${top}px`;
-      this.toolbar.style.left = `${left}px`;
+    if (isMobile) {
+      // 📱 Mobile / iOS: Dock as an accessible bottom floating pill
+      this.toolbar.style.top = 'auto';
+      this.toolbar.style.bottom = '88px';
+      this.toolbar.style.left = '50%';
+      this.toolbar.style.transform = 'translateX(-50%)';
     } else {
-      // 💻 Desktop: Float cleanly above the selection
+      // 💻 Desktop: Float precision tooltip directly above text
+      this.toolbar.style.bottom = 'auto';
+      this.toolbar.style.transform = 'none';
+
+      const toolbarRect = this.toolbar.getBoundingClientRect();
       let top = rect.top - toolbarRect.height - 10;
       let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
 
@@ -210,13 +213,11 @@ export class StudyHighlighter {
       try {
         const range = selection.getRangeAt(0);
         
-        // Capture preceding context
         const preRange = document.createRange();
         preRange.selectNodeContents(container);
         preRange.setEnd(range.startContainer, range.startOffset);
         prefix = preRange.toString().slice(-30);
 
-        // Capture trailing context
         const postRange = document.createRange();
         postRange.selectNodeContents(container);
         postRange.setStart(range.endContainer, range.endOffset);
@@ -276,7 +277,6 @@ export class StudyHighlighter {
       const colorClass = this.colors[item.color] || this.colors.blue;
 
       let regex;
-      // Precision non-global matching (replaces ONLY the single instance with this context)
       if (pRegex && sRegex) {
         regex = new RegExp(`(${pRegex}(?:\\s+|<[^>]+>)*)(${tRegex})((?:\\s+|<[^>]+>)*${sRegex})`, 'i');
         highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2, p3) => `${p1}<mark class="${colorClass}">${p2}</mark>${p3}`);
