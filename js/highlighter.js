@@ -77,7 +77,7 @@ export class StudyHighlighter {
 
     const bar = document.createElement('div');
     bar.id = 'kd-highlight-toolbar';
-    bar.className = 'fixed hidden z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center space-x-1.5 transition-opacity duration-150 select-none';
+    bar.className = 'fixed hidden z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 flex items-center space-x-1.5 transition-opacity duration-150 select-none shadow-black/60 [-webkit-touch-callout:none]';
     bar.innerHTML = `
       <button type="button" data-color="blue" class="w-5 h-5 rounded-full bg-blue-500 hover:scale-110 active:scale-95 transition shadow-sm border border-blue-400" title="Highlight Neutral Blue"></button>
       <button type="button" data-color="emerald" class="w-5 h-5 rounded-full bg-emerald-500 hover:scale-110 active:scale-95 transition shadow-sm border border-emerald-400" title="Highlight Emerald"></button>
@@ -150,17 +150,41 @@ export class StudyHighlighter {
     this.toolbar.classList.remove('hidden');
     const toolbarRect = this.toolbar.getBoundingClientRect();
 
-    let top = rect.top - toolbarRect.height - 10;
-    let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
+    const isMobileOrTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth < 640);
 
-    if (top < 10) top = rect.bottom + 10;
-    if (left < 10) left = 10;
-    if (left + toolbarRect.width > window.innerWidth - 10) {
-      left = window.innerWidth - toolbarRect.width - 10;
+    if (isMobileOrTouch) {
+      // 📱 Mobile / iOS: Position safely BELOW the selection to avoid the native iOS callout menu
+      let top = rect.bottom + 14;
+      let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
+
+      // If selection is too close to the bottom footer, dock as a thumb-bar above the bottom controls
+      const maxBottom = window.innerHeight - 90;
+      if (top + toolbarRect.height > maxBottom) {
+        top = maxBottom - toolbarRect.height;
+      }
+
+      // Keep within screen edges
+      if (left < 16) left = 16;
+      if (left + toolbarRect.width > window.innerWidth - 16) {
+        left = window.innerWidth - toolbarRect.width - 16;
+      }
+
+      this.toolbar.style.top = `${top}px`;
+      this.toolbar.style.left = `${left}px`;
+    } else {
+      // 💻 Desktop: Float cleanly above the selection
+      let top = rect.top - toolbarRect.height - 10;
+      let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
+
+      if (top < 10) top = rect.bottom + 10;
+      if (left < 10) left = 10;
+      if (left + toolbarRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - toolbarRect.width - 10;
+      }
+
+      this.toolbar.style.top = `${top}px`;
+      this.toolbar.style.left = `${left}px`;
     }
-
-    this.toolbar.style.top = `${top}px`;
-    this.toolbar.style.left = `${left}px`;
   }
 
   hideToolbar() {
