@@ -323,7 +323,7 @@
           <i data-lucide="grid" class="w-4 h-4 mr-2"></i> Back to All Chapters
         </button>
 
-        <button id="btn-next-chapter" class="w-full sm:w-auto flex-1 py-3.5 px-5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
+        <button id="btn-next-chapter" class="w-full sm:w-auto flex-1 py-3.5 px-5 bg-purple-600 hover:bg-purple-50 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
           Next Chapter <i data-lucide="chevron-right" class="w-4 h-4 ml-2"></i>
         </button>
       </div>
@@ -564,16 +564,20 @@
 
       // Safe rendering wrapper to avoid KaTeX crashes
       function renderKaTeX(math, displayMode) {
-        if (!window.katex) return saveMath(`<span class="text-purple-300">${math}</span>`);
+        if (!window.katex) {
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
+          mathBlocks.push(`<span class="text-purple-300 font-semibold">${math}</span>`);
+          return id;
+        }
         try {
           let safeMath = math.replace(/_([a-zA-Z0-9]+)/g, '_{$1}');
           const html = window.katex.renderToString(safeMath.trim(), { displayMode, throwOnError: true });
-          const id = `@@MATH_${mathBlocks.length}@@`;
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
           mathBlocks.push(html);
           return id;
         } catch (e) {
           const clean = math.replace(/_/g, '').replace(/\^/g, '');
-          const id = `@@MATH_${mathBlocks.length}@@`;
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
           mathBlocks.push(`<span class="font-semibold text-purple-300">${clean}</span>`);
           return id;
         }
@@ -599,7 +603,6 @@
       processed = processed.replace(/([a-zA-Z])\*\*([a-zA-Z])/g, '$1 **$2'); 
       processed = processed.replace(/\*\*\_(.*?)\_\*\*/g, '**$1**');
       processed = processed.replace(/\*\*\_|\_\*\*/g, '');
-      processed = processed.replace(/(^|\s)_([A-Za-z0-9]+)/g, '$1$2'); // Remove stray leading underscores
 
       // 5. Explicit Math Blocks
       processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderKaTeX(m, true));
@@ -607,53 +610,10 @@
       processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderKaTeX(m, false));
       processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderKaTeX(m, false));
 
-      // 6. Auto-Detect Complex Orphaned Equations (Lines with \frac, \left, etc.)
-      const lines = processed.split('\n');
-      processed = lines.map(line => {
-        if (line.includes('@@MATH_')) return line;
-        
-        let trimmed = line.trim();
-        // If line has \frac or \left or \sum, it's definitely math
-        if (trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\sum')) {
-           let mathStr = trimmed.replace(/^[*-]\s+/, ''); 
-           let html = renderKaTeX(mathStr, true);
-           return trimmed.startsWith('-') || trimmed.startsWith('*') ? `- ${html}` : html;
-        }
-        return line;
-      }).join('\n');
-
-      // 7. Safe HTML Subscript Mapping for Medical/Chemical Variables (Zero Lookbehinds)
-      // This completely prevents KaTeX from crashing on simple terms like P_A_O_2
-      const medicalSubs = {
-        'P_A_O_2': 'P<sub>A</sub>O<sub>2</sub>', 'P_I_O_2': 'P<sub>I</sub>O<sub>2</sub>',
-        'P_A_CO_2': 'P<sub>A</sub>CO<sub>2</sub>', 'P_I_CO_2': 'P<sub>I</sub>CO<sub>2</sub>',
-        'P_a_O_2': 'PaO<sub>2</sub>', 'P_a_CO_2': 'PaCO<sub>2</sub>',
-        'PaCO_2': 'PaCO<sub>2</sub>', 'PaO_2': 'PaO<sub>2</sub>',
-        'FiO_2': 'FiO<sub>2</sub>', 'SpO_2': 'SpO<sub>2</sub>',
-        'SvO_2': 'SvO<sub>2</sub>', 'ScvO_2': 'ScvO<sub>2</sub>',
-        'V_CO_2': 'VCO<sub>2</sub>', 'V_O_2': 'VO<sub>2</sub>',
-        'CO_2': 'CO<sub>2</sub>', 'O_2': 'O<sub>2</sub>',
-        'H_2O': 'H<sub>2</sub>O', 'N_2O': 'N<sub>2</sub>O',
-        'Ca\\(OH\\)_2': 'Ca(OH)<sub>2</sub>', 'CaCO_3': 'CaCO<sub>3</sub>',
-        'Na_2CO_3': 'Na<sub>2</sub>CO<sub>3</sub>', 'H_2CO_3': 'H<sub>2</sub>CO<sub>3</sub>',
-        'Li_2CO_3': 'Li<sub>2</sub>CO<sub>3</sub>',
-        'V_A': 'V<sub>A</sub>', 'V_D': 'V<sub>D</sub>', 'V_T': 'V<sub>T</sub>', 'V_E': 'V<sub>E</sub>',
-        'P_PL': 'P<sub>PL</sub>', 'P_AW': 'P<sub>AW</sub>', 'P_TP': 'P<sub>TP</sub>',
-        'P_PA': 'P<sub>PA</sub>', 'P_PV': 'P<sub>PV</sub>', 'P_ALV': 'P<sub>ALV</sub>',
-        'C_RS': 'C<sub>RS</sub>', 'R_aw': 'R<sub>aw</sub>', 'P_vent': 'P<sub>vent</sub>',
-        'P_mus': 'P<sub>mus</sub>', 'PEEP_i': 'PEEP<sub>i</sub>'
-      };
-
-      for (const [raw, html] of Object.entries(medicalSubs)) {
-        // Safe regex mapping without lookbehinds for full iOS compatibility
-        const regex = new RegExp(`(^|[^a-zA-Z])(${raw})(?![a-zA-Z])`, 'g');
-        processed = processed.replace(regex, `$1${html}`);
-      }
-      
-      // Generic fallback for any remaining single underscore letter (e.g. n_A, n_total)
+      // 6. Generic Subscript Fallback (for things like V_A that didn't get wrapped in $)
       processed = processed.replace(/(^|[^a-zA-Z])([A-Za-z]+)_([A-Za-z0-9]+)(?![a-zA-Z])/g, '$1$2<sub>$3</sub>');
 
-      // 8. Translate Stray LaTeX to HTML (e.g. arrows in chemical formulas)
+      // 7. Translate Remaining LaTeX Commands
       processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
       processed = processed.replace(/\\leftarrow/g, ' &larr; ');
       processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
@@ -663,20 +623,20 @@
       processed = processed.replace(/\\downarrow/g, ' &darr; ');
       processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
 
-      // 9. Markdown & DOMPurify Execution
+      // 8. Markdown & DOMPurify Execution
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
         .replace(/<\/table>/g, '</table></div>');
 
       let sanitized = window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
-        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics', 'sup', 'sub'],
-        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class']
+        ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics', 'sup', 'sub', 'img'],
+        ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'src', 'alt']
       }) : tableWrapped;
 
-      // 10. Re-Inject Safe KaTeX Blocks
+      // 9. Re-Inject Safe KaTeX Blocks
       mathBlocks.forEach((html, i) => {
-        sanitized = sanitized.split(`@@MATH_${i}@@`).join(html);
+        sanitized = sanitized.split(`MATHPLACEHOLDER${i}ENDMATH`).join(html);
       });
 
       return sanitized;
