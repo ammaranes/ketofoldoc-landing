@@ -542,7 +542,7 @@
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-    // Helper: Dynamic Module Fallback Loader
+    // Dynamic Module Fallback Loader
     async function loadModuleWithFallbacks(paths) {
       for (const p of paths) {
         try {
@@ -555,57 +555,62 @@
       return null;
     }
 
-    // Formatting Helper with Robust KaTeX LaTeX Math & DOMPurify Sanitization
+    // High-Performance Tokenized Markdown & KaTeX Formatter
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
+      const mathBlocks = [];
+      const imgBlocks = []; 
 
-      if (window.katex) {
-        // 1. Explicit Block Math: $$...$$ or \[...\]
-        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
-          catch (e) { return math; }
-        });
-        processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
-          catch (e) { return math; }
-        });
+      // 1. Protect Image Tags
+      processed = processed.replace(/<img[^>]+>/g, (match) => {
+        imgBlocks.push(match);
+        return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
+      });
+      processed = processed.replace(/!\[.*?\]\([^)]+\)/g, (match) => {
+        imgBlocks.push(match);
+        return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
+      });
 
-        // 2. Explicit Inline Math: $...$ or \(...\)
-        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
-          catch (e) { return math; }
-        });
-        processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, math) => {
-          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
-          catch (e) { return math; }
-        });
-
-        // 3. Standalone Raw LaTeX Equation Lines
-        const lines = processed.split('\n');
-        processed = lines.map(line => {
-          const trimmed = line.trim();
-          const hasLatexCommands = /\\[a-zA-Z]+|\b[A-Za-z0-9]_[A-Za-z0-9{]/.test(trimmed);
-          const isMathLine = hasLatexCommands && (trimmed.includes('=') || trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\times'));
-          const notHtmlOrHeader = !trimmed.startsWith('<') && !trimmed.startsWith('#');
-
-          if (isMathLine && notHtmlOrHeader) {
-            try { return window.katex.renderToString(trimmed, { displayMode: true, throwOnError: false }); } 
-            catch (e) { return line; }
-          }
-          return line;
-        }).join('\n');
-
-        // 4. Inline Un-delimited Math Expressions (Syntax Fixed)
-        processed = processed.replace(/([A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?(?:\s*[=+\-*\/><]\s*(?:[A-Za-z0-9_\\]+(?:\{[^{}]*\}|\([^)]*\)|_[0-9A-Za-z{}]+|\^[0-9A-Za-z{}]+)?|\\dots|\\times)+))/g, (match) => {
-          if (match.includes('<') || match.includes('>')) return match;
-          if (!/\\[a-zA-Z]+|_[0-9A-Za-z{]|\^[0-9A-Za-z{]/.test(match)) return match;
-          try { return window.katex.renderToString(match.trim(), { displayMode: false, throwOnError: false }); } 
-          catch (e) { return match; }
-        });
+      function renderKaTeX(math, displayMode) {
+        if (!window.katex) {
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
+          mathBlocks.push(`<span class="text-purple-300 font-semibold">${math}</span>`);
+          return id;
+        }
+        try {
+          let safeMath = math.replace(/_([a-zA-Z0-9]+)/g, '_{$1}');
+          const html = window.katex.renderToString(safeMath.trim(), { displayMode, throwOnError: false });
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
+          mathBlocks.push(html);
+          return id;
+        } catch (e) {
+          const id = `MATHPLACEHOLDER${mathBlocks.length}ENDMATH`;
+          mathBlocks.push(`<span class="font-semibold text-purple-300">${math}</span>`);
+          return id;
+        }
       }
 
-      // Safe HTML Subscript Mapping for Medical Variables
+      // 2. Tokenize Explicit LaTeX Math
+      processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderKaTeX(m, true));
+      processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderKaTeX(m, true));
+      processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderKaTeX(m, false));
+      processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderKaTeX(m, false));
+
+      // 3. Standalone Math Lines
+      const lines = processed.split('\n');
+      processed = lines.map(line => {
+        if (line.includes('MATHPLACEHOLDER') || line.includes('IMAGEPLACEHOLDER')) return line;
+        let trimmed = line.trim();
+        if (trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\sum')) {
+          let mathStr = trimmed.replace(/^[*-]\s+/, ''); 
+          let html = renderKaTeX(mathStr, true);
+          return trimmed.startsWith('-') || trimmed.startsWith('*') ? `- ${html}` : html;
+        }
+        return line;
+      }).join('\n');
+
+      // 4. Safe Subscript Formatting for Medical Variables
       const medicalSubs = {
         'P_A_O_2': 'P<sub>A</sub>O<sub>2</sub>', 'P_I_O_2': 'P<sub>I</sub>O<sub>2</sub>',
         'P_A_CO_2': 'P<sub>A</sub>CO<sub>2</sub>', 'P_I_CO_2': 'P<sub>I</sub>CO<sub>2</sub>',
@@ -630,18 +635,30 @@
         const regex = new RegExp(`(^|[^a-zA-Z])(${raw})(?![a-zA-Z])`, 'g');
         processed = processed.replace(regex, `$1${html}`);
       }
-      
       processed = processed.replace(/(^|[^a-zA-Z])([A-Za-z]+)_([A-Za-z0-9]+)(?![a-zA-Z])/g, '$1$2<sub>$3</sub>');
 
+      // 5. Restore Image Tokens
+      imgBlocks.forEach((img, i) => {
+        processed = processed.replace(`IMAGEPLACEHOLDER${i}ENDIMAGE`, img);
+      });
+
+      // 6. Clean Markdown Parse
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
         .replace(/<\/table>/g, '</table></div>');
 
-      return window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
+      let sanitized = window.DOMPurify ? window.DOMPurify.sanitize(tableWrapped, {
         ADD_TAGS: ['math', 'mrow', 'mi', 'mn', 'mo', 'msup', 'msub', 'mfrac', 'mover', 'munder', 'munderover', 'mtable', 'mtr', 'mtd', 'span', 'annotation', 'semantics', 'sup', 'sub', 'img'],
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'src', 'alt']
       }) : tableWrapped;
+
+      // 7. Inject KaTeX After Marked to prevent layout corruption
+      mathBlocks.forEach((html, i) => {
+        sanitized = sanitized.split(`MATHPLACEHOLDER${i}ENDMATH`).join(html);
+      });
+
+      return sanitized;
     }
 
     // Debounce Helper
@@ -770,7 +787,7 @@
       80: { topic: "neuro", keywords: ["neurocritical", "traumatic brain injury", "tbi", "stroke", "brain death", "subarachnoid hemorrhage", "vasospasm"] }
     };
 
-    // Storage Management (Included Comp)
+    // Storage Management
     const LOCAL_SUMMARIES_KEY = 'ketofoldoc_summaries_progress';
     const LOCAL_SAUDI_KEY = 'saudi_board_progress';
     const LOCAL_1000_KEY = 'thousand_qs_progress';
@@ -805,7 +822,7 @@
       const currentPath = window.location.pathname;
       const basePath = currentPath.endsWith('/') ? currentPath : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-      // 1. Load Summary Books
+      // 1. Resilient Books Module Loader
       const booksMod = await loadModuleWithFallbacks([
         `${basePath}books/index.js`,
         '/summaries/books/index.js',
@@ -814,9 +831,20 @@
       ]);
 
       if (booksMod) {
-        allBooks = booksMod.allBooks || booksMod.books || booksMod.default || [];
-        if (!Array.isArray(allBooks) && typeof booksMod === 'object') {
-          allBooks = Object.values(booksMod).find(Array.isArray) || [];
+        let rawData = booksMod.allBooks || booksMod.books || booksMod.allChapters || booksMod.default || [];
+        if (!Array.isArray(rawData) && typeof booksMod === 'object') {
+          rawData = Object.values(booksMod).find(Array.isArray) || [];
+        }
+        
+        // Wrap flat chapter lists into standard book container
+        if (rawData.length > 0 && !rawData[0].chapters) {
+          allBooks = [{
+            id: 'default_book',
+            title: "Miller's Anesthesia",
+            chapters: rawData
+          }];
+        } else {
+          allBooks = rawData;
         }
       }
 
@@ -880,7 +908,7 @@
             }
           }
         }
-      } catch (e) { console.warn("Failed to load Comprehensive QB for summaries", e); }
+      } catch (e) { console.warn("Comprehensive QB load skipped", e); }
 
       const compFormatted = compChapters.map((ch, idx) => {
         const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
@@ -895,7 +923,7 @@
         };
       });
 
-      // Combine all sources
+      // Combine sources
       questionChapters = [...saudi, ...thousand, ...compFormatted];
 
       // 4. Resilient Highlighter Loader
@@ -919,7 +947,7 @@
 
       loadLocalProgress();
 
-      let activeBookId = allBooks[0]?.id || 'miller';
+      let activeBookId = allBooks[0]?.id || 'default_book';
       let activeChapterId = null;
 
       function getActiveBook() {
@@ -930,10 +958,10 @@
       function getActiveChapter() {
         const book = getActiveBook();
         if (!book || !book.chapters || !activeChapterId) return null;
-        return book.chapters.find(c => c.id === activeChapterId) || null;
+        return book.chapters.find(c => String(c.id) === String(activeChapterId)) || null;
       }
 
-      // Unified Firebase Configuration
+      // Firebase Configuration
       const firebaseConfig = {
         apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
         authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -958,9 +986,7 @@
       const highlighter = new StudyHighlighterClass({
         storageKey: 'kd_summaries_highlights',
         onChange: () => {
-          if (activeChapterId) {
-            renderReader();
-          }
+          if (activeChapterId) renderReader();
         },
         onSave: (allHighlights) => {
           if (currentUser && db) {
@@ -977,7 +1003,7 @@
       });
       window.highlighterInstance = highlighter;
 
-      // Cross-Platform Firestore & LocalStorage Sync
+      // Spaced Repetition Syncer
       async function syncCardSRS(question, quality) {
         const qId = question._namespacedId;
         if (!qId) return;
@@ -1024,7 +1050,7 @@
         }
       }
 
-      // Auth State Observer
+      // Auth Observer
       if (auth) {
         onAuthStateChanged(auth, async (user) => {
           currentUser = user;
@@ -1069,11 +1095,8 @@
             authBtnLabel.textContent = 'Sign In';
           }
 
-          if (activeChapterId) {
-            renderReader();
-          } else {
-            renderDirectory();
-          }
+          if (activeChapterId) renderReader();
+          else renderDirectory();
         });
       }
 
@@ -1093,6 +1116,7 @@
         }
       };
 
+      // Progress Tracker
       window.addEventListener('scroll', () => {
         if (!activeChapterId) return;
         const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
@@ -1444,7 +1468,7 @@
         }
       });
 
-      // Unified 3-Bank Question Matching Engine
+      // Chapter Question Practice Engine
       function renderInteractiveQuestions(chapterNumber) {
         const container = document.getElementById('quiz-cards-container');
         const badge = document.getElementById('quiz-count-badge');
@@ -1481,9 +1505,7 @@
           const fullContent = `${q.stem || q.question || ''} ${q.explanation || ''} ${optText}`.toLowerCase();
           
           mapping.keywords.forEach(kw => {
-            if (fullContent.includes(kw.toLowerCase())) {
-              score += 5;
-            }
+            if (fullContent.includes(kw.toLowerCase())) score += 5;
           });
 
           return { ...q, _relevanceScore: score };
@@ -1496,7 +1518,6 @@
         const compScored = scored.filter(q => q._sourceName === 'Comprehensive QB' && q._relevanceScore > 0)
                                  .sort((a, b) => b._relevanceScore - a._relevanceScore);
 
-        // Pull up to 5 questions from each of the 3 banks to hit up to 15 total
         const MAX_PER_SOURCE = 5;
         const TARGET_TOTAL = 15;
 
@@ -1506,7 +1527,6 @@
           ...compScored.slice(0, MAX_PER_SOURCE)
         ];
 
-        // Backfill if we haven't reached the 15 cap
         if (selectedQuestions.length < TARGET_TOTAL) {
           const chosenSet = new Set(selectedQuestions);
           const remaining = scored.filter(q => q._relevanceScore > 0 && !chosenSet.has(q))
@@ -1517,10 +1537,8 @@
           }
         }
         
-        // Strict cap at 15
         selectedQuestions = selectedQuestions.slice(0, TARGET_TOTAL);
 
-        // Fallback: If 0 questions matched keywords, grab up to 15 from a matching topic deck
         if (selectedQuestions.length === 0) {
           const matchingDeck = questionChapters.find(d => (d.title || '').toLowerCase().includes(mapping.topic));
           if (matchingDeck && matchingDeck.questions) {
@@ -1591,9 +1609,7 @@
           const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
           if (rawImg) {
             let cleanPath = String(rawImg);
-            if (!cleanPath.startsWith('/') && !cleanPath.startsWith('http')) {
-              cleanPath = '/' + cleanPath;
-            }
+            if (!cleanPath.startsWith('/') && !cleanPath.startsWith('http')) cleanPath = '/' + cleanPath;
             cardHtml += `<img src="${cleanPath}" class="max-h-64 mx-auto rounded-xl border border-slate-700 bg-white/5 p-1 mb-4 select-none" />`;
           }
 
@@ -1806,7 +1822,7 @@
 
         renderInteractiveQuestions(ch.chapterNumber || 1);
 
-        const chIndex = book.chapters.findIndex(c => c.id === ch.id);
+        const chIndex = book.chapters.findIndex(c => String(c.id) === String(ch.id));
         const prevBtn = document.getElementById('btn-prev-chapter');
         const nextBtn = document.getElementById('btn-next-chapter');
 
@@ -1903,10 +1919,10 @@
           tabs.appendChild(tabBtn);
         });
 
-        document.getElementById('chapters-available-count').textContent = `${book.chapters.length} Chapters`;
+        document.getElementById('chapters-available-count').textContent = `${book?.chapters?.length || 0} Chapters`;
 
-        book.chapters.forEach(ch => {
-          const isCurrent = ch.id === activeChapterId;
+        (book?.chapters || []).forEach(ch => {
+          const isCurrent = String(ch.id) === String(activeChapterId);
           const isRead = Boolean(summariesState.readChapters[ch.id]);
 
           const item = document.createElement('div');
@@ -2063,7 +2079,7 @@
 
       const initialHash = window.location.hash.replace('#', '').trim();
       const book = getActiveBook();
-      const initialChapter = book?.chapters?.find(c => c.id === initialHash);
+      const initialChapter = book?.chapters?.find(c => String(c.id) === String(initialHash));
 
       // Safari bfcache & Tab Switch UI update freeze fix
       window.addEventListener('pageshow', (event) => {
