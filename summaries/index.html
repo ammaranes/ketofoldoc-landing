@@ -832,8 +832,8 @@
 
       if (decksMod) {
         if (decksMod.allQuestionDecks) {
-          saudi = decksMod.allQuestionDecks.filter(d => d.sourceName === 'Saudi Board QB' || d.id.includes('saudi'));
-          thousand = decksMod.allQuestionDecks.filter(d => d.sourceName === '1000 Questions' || d.id.includes('ch_'));
+          saudi = decksMod.allQuestionDecks.filter(d => d.sourceName === 'Saudi Board QB' || String(d.id || '').includes('saudi'));
+          thousand = decksMod.allQuestionDecks.filter(d => d.sourceName === '1000 Questions' || String(d.id || '').includes('ch_'));
         } else {
           saudi = (decksMod.allDecks || []).map(d => ({
             ...d, sourceName: 'Saudi Board QB', sourceKey: 'saudi_board_progress', sourceBadgeColor: 'blue'
