@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <title>Comprehensive Anesthesia QB</title>
+  <title>Comprehensive Anesthesia QB | KetofolDoc</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
-  <!-- KaTeX Math Typesetting Engine (Fast & Lightweight) -->
+  <!-- KaTeX Math Typesetting Engine -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
@@ -578,13 +578,14 @@
         ? currentPath 
         : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-      // 1. Resilient Module Loader
+      // 1. Resilient Module Loader with Direct Chapter Fallback
       const qbMod = await loadModuleWithFallbacks([
-  `${basePath}output_hall_js/index.js`,
-  '/comp/output_hall_js/index.js',
-  '../comp/output_hall_js/index.js',
-  './output_hall_js/index.js'
-]);
+        `${basePath}output_hall_js/index.js`,
+        '/comp/output_hall_js/index.js',
+        '../comp/output_hall_js/index.js',
+        './output_hall_js/index.js',
+        '/output_hall_js/index.js'
+      ]);
 
       if (qbMod) {
         let rawData = qbMod.allChapters || qbMod.allDecks || qbMod.default || qbMod;
@@ -611,15 +612,37 @@
               }
               groups[key].questions.push(q);
             });
-            // Sort by Chapter ID safely
             allChapters = Object.values(groups).sort((a, b) => {
                const numA = parseInt(a.id.replace(/\D/g, '')) || 0;
                const numB = parseInt(b.id.replace(/\D/g, '')) || 0;
                return numA - numB;
             });
           } else if (rawData[0].questions) {
-            // Data is already correctly formatted
             allChapters = rawData;
+          }
+        }
+      }
+
+      // If index.js failed, load chapters 1 to 11 directly in a fallback loop
+      if (!allChapters || allChapters.length === 0) {
+        const directQuestions = [];
+        for (let i = 1; i <= 11; i++) {
+          const pad = String(i).padStart(2, '0');
+          const mod = await loadModuleWithFallbacks([
+            `${basePath}output_hall_js/chapter_${pad}.js`,
+            `/comp/output_hall_js/chapter_${pad}.js`,
+            `./output_hall_js/chapter_${pad}.js`
+          ]);
+          if (mod) {
+            const arr = mod[`chapter${pad}`] || Object.values(mod).find(Array.isArray) || [];
+            if (Array.isArray(arr) && arr.length > 0) {
+              const chTitle = arr[0].chapterTitle || `Chapter ${i}`;
+              allChapters.push({
+                id: `ch_${pad}`,
+                title: chTitle,
+                questions: arr
+              });
+            }
           }
         }
       }
@@ -630,7 +653,7 @@
           listEl.innerHTML = `
             <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-center text-xs text-rose-300 space-y-2">
               <p class="font-bold">⚠️ Chapters could not be loaded</p>
-              <p class="text-[11px] text-slate-400">Please verify your internet connection or reload the page.</p>
+              <p class="text-[11px] text-slate-400">Please verify your connection or reload the page.</p>
               <button onclick="window.location.reload(true)" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold text-xs transition">
                 Force Reload
               </button>
@@ -754,7 +777,7 @@
         console.warn("Firebase Init:", e);
       }
 
-      // 3. Resilient Highlighter Loader with Mock Fallback
+      // Universal Highlighter Loader
       let StudyHighlighterClass = null;
       const hlMod = await loadModuleWithFallbacks([
         '/js/highlighter.js',
@@ -835,7 +858,7 @@
         return normalized;
       }
 
-      const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('hall_qb_progress');
       if (savedProgress) {
         try { 
           const parsed = JSON.parse(savedProgress);
@@ -988,7 +1011,7 @@
 
             if (c) {
               state.userProgress[deckId] = state.userProgress[deckId] || { answers: {}, flags: [], srs: {} };
-              state.userProgress[deckId].srs = state.userProgress[deckId] || {};
+              state.userProgress[deckId].srs = state.userProgress[deckId].srs || {};
               state.userProgress[deckId].srs[idx] = {
                 repetitions: c.reps || c.repetitions || 0,
                 interval: c.interval || 0,
@@ -1067,7 +1090,7 @@
         syncUnsubscribe = userDocRef.onSnapshot((doc) => {
           if (doc.exists) {
             const cloudData = doc.data();
-            const qbData = cloudData.hall_qb_progress;
+            const qbData = cloudData.comp_qb_progress || cloudData.hall_qb_progress;
             if (qbData) {
               if (qbData.userProgress) {
                 state.userProgress = mergeUserProgress(state.userProgress, qbData.userProgress);
@@ -1079,9 +1102,9 @@
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
               render();
             }
-            if (cloudData.hall_highlights) {
-              highlighter.highlights = { ...highlighter.highlights, ...cloudData.hall_highlights };
-              localStorage.setItem('kd_hall_highlights', JSON.stringify(highlighter.highlights));
+            if (cloudData.comp_highlights) {
+              highlighter.highlights = { ...highlighter.highlights, ...cloudData.comp_highlights };
+              localStorage.setItem('kd_comp_highlights', JSON.stringify(highlighter.highlights));
               render();
             }
           } else {
@@ -1094,12 +1117,12 @@
         if (!db || !currentUser) return;
         state.userProgress = purgeGhostProgress(state.userProgress);
         db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
-          hall_qb_progress: {
+          comp_qb_progress: {
             userProgress: state.userProgress,
             card_states: compileCardStates(),
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
           },
-          hall_highlights: highlighter.highlights
+          comp_highlights: highlighter.highlights
         }, { merge: true });
       }
 
@@ -1386,7 +1409,6 @@
           return;
         }
 
-        // Initialize unanswered queue if empty and not in SRS mode
         if (!state.sessionState.isSRSMode && (!state.sessionState.order || state.sessionState.order.length === 0)) {
           const unans = getUnansweredIndices(activeDeck);
           if (state.sessionState.isShuffled) {
@@ -1399,7 +1421,6 @@
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
         const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
 
-        // Display Completed Screen
         if (activeTotal === 0 && !state.sessionState.isSRSMode) {
           DOM.viewEmpty.classList.remove('hidden');
           DOM.viewQuiz.classList.add('hidden');
@@ -1438,7 +1459,6 @@
         const parentDeckId = q._parentDeckId || Object.keys(state.decks)[0];
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
         
-        // Display origin chapter name
         const sourceDeck = state.decks[parentDeckId];
         if (DOM.questionSourceBadge) {
           DOM.questionSourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
@@ -1454,7 +1474,6 @@
         const pct = totalOriginal > 0 ? (completedCount / totalOriginal) * 100 : 0;
         DOM.progressBarFill.style.width = `${pct}%`;
 
-        // Calculate Accuracy
         let answeredCount = 0;
         let correctCount = 0;
 
@@ -1672,7 +1691,7 @@
         }
       };
 
-      // Render the Chapter List with Solo-Select and Multi-Select Support
+      // Render the Chapter List
       function renderDeckList() {
         const list = document.getElementById('deck-list');
         list.innerHTML = '';
@@ -1704,7 +1723,6 @@
           
           item.innerHTML = `
             <div class="flex items-center space-x-3 min-w-0 flex-1 pr-2">
-              <!-- Dedicated Checkbox for Multi-Select -->
               <div class="checkbox-tap-target p-1.5 -m-1.5 hover:bg-slate-700/50 rounded-lg transition flex items-center justify-center shrink-0" title="Toggle Multi-Select">
                 <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-600 focus:ring-0 focus:ring-offset-0 pointer-events-none" />
               </div>
@@ -1721,13 +1739,11 @@
             </span>
           `;
 
-          // 1. Row Click: Solo Select
           item.onclick = () => {
             state.selectedDeckKeys = new Set([id]);
             renderDeckList();
           };
 
-          // 2. Checkbox Click: Toggle Multi-Select
           const checkboxBtn = item.querySelector('.checkbox-tap-target');
           checkboxBtn.onclick = (e) => {
             e.stopPropagation();
@@ -1862,7 +1878,7 @@
 
         if (!q) {
           return {
-            pageType: "hall_qb",
+            pageType: "comp_qb",
             deckTitle: activeDeck?.title || "Comprehensive Anesthesia",
             questionNumber: null
           };
@@ -1873,7 +1889,7 @@
         normalizedOpts.forEach(o => { optionsDict[o.key] = o.text; });
 
         return {
-          pageType: "hall_qb",
+          pageType: "comp_qb",
           deckTitle: activeDeck.title,
           questionNumber: qPointer + 1,
           questionId: q._parentDeckId ? `${q._parentDeckId}_${q._parentIndex}` : (q.id || null),
