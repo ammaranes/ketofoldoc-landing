@@ -57,7 +57,7 @@ The portion of gas reaching the respiratory bronchioles and alveoli to participa
 **COPD:** Severe obstructive lung disease diverts inspired air into poorly perfused areas. This creates areas with excessively high local ventilation-perfusion ratios. Patients with end-stage COPD may manifest a $V_D/V_T$ ratio of up to 0.9. To preserve normocapnia, a theoretical minute ventilation of 30 to 50 L/min would be required, which is impossible due to diminished ventilatory reserves. As a result, these patients demonstrate reduced $\\dot{V}_A$ but elevated resting $PaCO_2$. This hypercapnia functions as a vital compensatory mechanism: when $PaCO_2$ is elevated, a lower absolute level of alveolar ventilation is capable of maintaining stable metabolic $CO_2$ excretion.
 
 > **FIG 12.1 Pathological Dead Space Visualized**
-> <img src="/images/miller/fig_12_1.png" alt="Pathological Dead Space" class="w-full max-w-md mx-auto rounded-xl border border-slate-700 bg-white/5 p-2 my-4 shadow-lg" />
+> <img src="./images/miller/fig_12_1.png" alt="Pathological Dead Space" class="w-full max-w-md mx-auto rounded-xl border border-slate-700 bg-white/5 p-2 my-4 shadow-lg" />
 > * **Normal Lung:** $V_D/V_T \\approx 0.3$ | $V_E = 7.1$ L/min
 > * **Pulmonary Embolism:** $V_D/V_T > 0.8$ | $V_E \\rightarrow 20$ L/min
 > * **COPD:** $V_D/V_T$ up to $0.9$ | $V_E$: $8.3 - 50$ L
