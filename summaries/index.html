@@ -555,32 +555,53 @@
       return null;
     }
 
-    // High-Performance Universal Markdown & Typography Sanitizer
+    // Universal Text Sanitizer (Strips OCR and Markdown artifacts from titles)
+    function cleanText(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/<\/?(?:mark|font|span|color|bgcolor|div|p)[^>]*>/gi, '')
+        .replace(/^#+\s*/g, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/__(.*?)__/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/_(.*?)_/g, '$1')
+        .replace(/^[📄\s]+/, '')
+        .replace(/^mark>|mark\s*>/gi, '')
+        .replace(/<\/mark>$/gi, '')
+        .trim();
+    }
+
+    // Universal Markdown & Math Formatter
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
       const mathBlocks = [];
       const imgBlocks = []; 
 
-      // 1. Protect Image Tags & Markdown Images from text modifications
-      processed = processed.replace(/<img[^>]+>/g, (match) => {
-        imgBlocks.push(match);
+      // 1. Protect Image Tags
+      processed = processed.replace(/<img[^>]+>/g, (m) => {
+        imgBlocks.push(m);
         return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
       });
-      processed = processed.replace(/!\[.*?\]\([^)]+\)/g, (match) => {
-        imgBlocks.push(match);
+      processed = processed.replace(/!\[.*?\]\([^)]+\)/g, (m) => {
+        imgBlocks.push(m);
         return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
       });
 
-      // 2. Strip rogue HTML highlight/color tags and inline formatting artifacts
+      // 2. Strip rogue HTML marks & inline styles
       processed = processed.replace(/<\/?(?:mark|font|color|bgcolor|highlight)[^>]*>/gi, '');
       processed = processed.replace(/style="[^"]*"/gi, '');
-      processed = processed.replace(/==(.*?)==/g, '$1'); // Strip markdown highlight notation
+      processed = processed.replace(/==(.*?)==/g, '$1');
 
-      // 3. Prevent Medical Approximation Tildes from triggering Markdown strikethrough
+      // 3. Fix JS string escape corruptions (imes -> \times, rac -> \frac, $ eta$ -> $\beta$)
+      processed = processed.replace(/(\s)imes(\s)/g, '$1\\times$2');
+      processed = processed.replace(/(\s)rac\{/g, '$1\\frac{');
+      processed = processed.replace(/\$\s*eta\s*\$/gi, '$\\beta$');
+
+      // 4. Safe Approximation Tildes
       processed = processed.replace(/~/g, ' &sim; ').replace(/&sim;\s*&sim;/g, '~~');
 
-      // 4. Automated OCR Word & Punctuation Spacing Repair
+      // 5. OCR Spacing Repairs
       processed = processed.replace(/([a-z])([A-Z][a-z]{2,})/g, '$1 $2'); 
       processed = processed.replace(/([a-zA-Z])\.([A-Z])/g, '$1. $2'); 
       processed = processed.replace(/([a-zA-Z]):([A-Z])/g, '$1: $2'); 
@@ -588,7 +609,7 @@
       processed = processed.replace(/\bWhere([A-Z])/g, 'Where $1');
       processed = processed.replace(/\band([A-Z])/g, 'and $1');
 
-      // 5. Clean Rogue Asterisks & Underscore Formatting Glitches
+      // 6. Clean rogue markdown asterisks & underscores
       processed = processed.replace(/\*{3,}/g, '**'); 
       processed = processed.replace(/([a-zA-Z])\*\*([a-zA-Z])/g, '$1 **$2'); 
       processed = processed.replace(/\*\*\_(.*?)\_\*\*/g, '**$1**');
@@ -614,18 +635,18 @@
         }
       }
 
-      // 6. Tokenize Explicit LaTeX Math Blocks
+      // 7. Tokenize LaTeX Math
       processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderKaTeX(m, true));
       processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderKaTeX(m, true));
       processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderKaTeX(m, false));
       processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderKaTeX(m, false));
 
-      // 7. Auto-detect Standalone Math Equation Lines
+      // 8. Auto-detect Standalone Math Lines
       const lines = processed.split('\n');
       processed = lines.map(line => {
         if (line.includes('MATHPLACEHOLDER') || line.includes('IMAGEPLACEHOLDER')) return line;
         let trimmed = line.trim();
-        if (trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\sum')) {
+        if (trimmed.includes('\\frac') || trimmed.includes('\\left') || trimmed.includes('\\sum') || trimmed.includes('\\times')) {
           let mathStr = trimmed.replace(/^[*-]\s+/, ''); 
           let html = renderKaTeX(mathStr, true);
           return trimmed.startsWith('-') || trimmed.startsWith('*') ? `- ${html}` : html;
@@ -633,7 +654,7 @@
         return line;
       }).join('\n');
 
-      // 8. Safe Subscript Formatting for Medical Variables
+      // 9. Safe Subscripts for Medical Variables
       const medicalSubs = {
         'P_A_O_2': 'P<sub>A</sub>O<sub>2</sub>', 'P_I_O_2': 'P<sub>I</sub>O<sub>2</sub>',
         'P_A_CO_2': 'P<sub>A</sub>CO<sub>2</sub>', 'P_I_CO_2': 'P<sub>I</sub>CO<sub>2</sub>',
@@ -660,22 +681,12 @@
       }
       processed = processed.replace(/(^|[^a-zA-Z])([A-Za-z]+)_([A-Za-z0-9]+)(?![a-zA-Z])/g, '$1$2<sub>$3</sub>');
 
-      // 9. Translate Stray LaTeX Symbols to Native HTML
-      processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
-      processed = processed.replace(/\\leftarrow/g, ' &larr; ');
-      processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
-      processed = processed.replace(/\\times/g, ' &times; ');
-      processed = processed.replace(/\\cdot/g, ' &middot; ');
-      processed = processed.replace(/\\Delta/g, ' &Delta; ');
-      processed = processed.replace(/\\downarrow/g, ' &darr; ');
-      processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
-
-      // 10. Restore Image Tokens
+      // 10. Restore Images
       imgBlocks.forEach((img, i) => {
         processed = processed.replace(`IMAGEPLACEHOLDER${i}ENDIMAGE`, img);
       });
 
-      // 11. Parse Markdown & Wrap Tables
+      // 11. Markdown Parsing
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
@@ -686,7 +697,7 @@
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'src', 'alt']
       }) : tableWrapped;
 
-      // 12. Re-inject KaTeX Blocks safely after parsing
+      // 12. Re-inject KaTeX
       mathBlocks.forEach((html, i) => {
         sanitized = sanitized.split(`MATHPLACEHOLDER${i}ENDMATH`).join(html);
       });
@@ -776,7 +787,7 @@
       18: { topic: "pharmacology", keywords: ["uptake", "distribution", "blood-gas", "solubility", "second gas", "concentration effect"] },
       19: { topic: "pharmacology", keywords: ["pulmonary pharmacology", "bronchodilation", "hpv", "hypoxic pulmonary", "airway resistance"] },
       20: { topic: "equipment", keywords: ["vaporizer", "machine", "circle system", "scavenging", "pipeline", "oxygen flush", "fail-safe"] },
-      21: { topic: "pharmacology", keywords: ["propofol", "etomidate", "ketamine", "barbiturate", "intravenous induction", "methohexital"] },
+      21: { topic: "pharmacology", keywords: ["propofol", "etomidate", "ketamine", "barbiturate", "intravenous induction", "methohexital", "benzodiazepine", "midazolam", "dexmedetomidine"] },
       22: { topic: "pharmacology", keywords: ["opioid", "fentanyl", "morphine", "remifentanil", "sufentanil", "mu receptor", "naloxone"] },
       23: { topic: "equipment", keywords: ["infusion", "tiva", "target controlled", "syringe pump", "ke0"] },
       24: { topic: "pharmacology", keywords: ["succinylcholine", "rocuronium", "vecuronium", "sugammadex", "neostigmine", "paralytic", "cisatracurium"] },
@@ -845,6 +856,67 @@
         const compSaved = localStorage.getItem(LOCAL_COMP_KEY) || localStorage.getItem('hall_qb_progress');
         if (compSaved) compCardStates = JSON.parse(compSaved).card_states || {};
       } catch (e) {}
+    }
+
+    // Section Normalization Engine
+    function processChapterSections(rawSections) {
+      const processed = [];
+      let companionSubtitle = '';
+
+      (rawSections || []).forEach((sec, idx) => {
+        const rawTitle = (sec.title || '').trim();
+        const rawContent = (sec.content || '').trim();
+        const cleanTitleStr = cleanText(rawTitle);
+        const cleanContentStr = cleanText(rawContent);
+        const isOverviewTitle = /^overview\s*\d*$/i.test(cleanTitleStr);
+
+        // Detect Subtitle
+        if (idx === 0 && (
+          /COMPREHENSIVE.*(?:MANUAL|COMPANION|REVIEW)/i.test(cleanContentStr) ||
+          /VERSION\s*\d+/i.test(cleanContentStr) ||
+          (isOverviewTitle && cleanContentStr.length < 140 && !cleanContentStr.includes('\n'))
+        )) {
+          companionSubtitle = cleanContentStr.replace(/^Comprehensive Learning Companion:\s*/i, '').trim();
+          return;
+        }
+
+        // Detect Major Section Numbers
+        const sectionMatch = cleanContentStr.match(/^(?:SECTION\s*\d+\s*:?|\d+\.)\s*(.+)$/i) || 
+                             cleanTitleStr.match(/^(?:SECTION\s*\d+\s*:?|\d+\.)\s*(.+)$/i);
+        
+        if (sectionMatch && cleanContentStr.length < 100 && !cleanContentStr.includes('\n')) {
+          processed.push({
+            type: 'major_section_header',
+            title: cleanText(cleanContentStr || cleanTitleStr),
+            content: ''
+          });
+          return;
+        }
+
+        if (isOverviewTitle) {
+          if (cleanContentStr.length < 90 && !cleanContentStr.includes('\n') && !cleanContentStr.includes('.')) {
+            processed.push({ type: 'sub_heading', title: cleanContentStr, content: '' });
+            return;
+          }
+
+          const mdHeaderMatch = rawContent.match(/^#{1,4}\s+(.+)$/m);
+          if (mdHeaderMatch) {
+            processed.push({ 
+              type: 'normal', 
+              title: cleanText(mdHeaderMatch[1]), 
+              content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim() 
+            });
+            return;
+          }
+
+          processed.push({ type: 'normal', title: `Topic ${processed.length + 1}`, content: rawContent });
+          return;
+        }
+
+        processed.push({ type: 'normal', title: cleanTitleStr, content: rawContent });
+      });
+
+      return { sections: processed, companionSubtitle };
     }
 
     // App Initialization Function
@@ -1302,72 +1374,6 @@
 
         renderReader();
         renderDirectory();
-      }
-
-      function cleanText(str) {
-        if (!str) return '';
-        return String(str)
-          .replace(/^#+\s*/g, '')
-          .replace(/\*\*(.*?)\*\*/g, '$1')
-          .replace(/__(.*?)__/g, '$1')
-          .replace(/\*(.*?)\*/g, '$1')
-          .replace(/_(.*?)_/g, '$1')
-          .replace(/^[📄\s]+/, '')
-          .trim();
-      }
-
-      function processChapterSections(rawSections) {
-        const processed = [];
-        let companionSubtitle = '';
-
-        (rawSections || []).forEach((sec, idx) => {
-          const rawTitle = (sec.title || '').trim();
-          const rawContent = (sec.content || '').trim();
-          const cleanTitleStr = cleanText(rawTitle);
-          const cleanContentStr = cleanText(rawContent);
-          const isOverviewTitle = /^overview\s*\d*$/i.test(cleanTitleStr);
-
-          if (idx === 0 && (
-            /COMPREHENSIVE.*(?:MANUAL|COMPANION|REVIEW)/i.test(cleanContentStr) ||
-            /VERSION\s*\d+/i.test(cleanContentStr) ||
-            (isOverviewTitle && cleanContentStr.length < 140 && !cleanContentStr.includes('\n'))
-          )) {
-            companionSubtitle = cleanContentStr.replace(/^Comprehensive Learning Companion:\s*/i, '').trim();
-            return;
-          }
-
-          const sectionMatch = cleanContentStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i) || 
-                               cleanTitleStr.match(/^SECTION\s*(\d+)\s*:\s*(.+)$/i);
-          
-          if (sectionMatch) {
-            processed.push({
-              type: 'major_section_header',
-              title: `SECTION ${sectionMatch[1]}: ${sectionMatch[2].trim()}`,
-              content: ''
-            });
-            return;
-          }
-
-          if (isOverviewTitle) {
-            if (cleanContentStr.length < 90 && !cleanContentStr.includes('\n') && !cleanContentStr.includes('.')) {
-              processed.push({ type: 'sub_heading', title: cleanContentStr, content: '' });
-              return;
-            }
-
-            const mdHeaderMatch = rawContent.match(/^#{1,4}\s+(.+)$/m);
-            if (mdHeaderMatch) {
-              processed.push({ type: 'normal', title: cleanText(mdHeaderMatch[1]), content: rawContent.replace(/^#{1,4}\s+.+$/m, '').trim() });
-              return;
-            }
-
-            processed.push({ type: 'normal', title: `Topic ${processed.length + 1}`, content: rawContent });
-            return;
-          }
-
-          processed.push({ type: 'normal', title: cleanTitleStr, content: rawContent });
-        });
-
-        return { sections: processed, companionSubtitle };
       }
 
       function renderDirectory(filterQuery = '') {
