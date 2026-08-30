@@ -555,14 +555,14 @@
       return null;
     }
 
-    // High-Performance Tokenized Markdown & KaTeX Formatter
+    // High-Performance Universal Markdown & Typography Sanitizer
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
       const mathBlocks = [];
       const imgBlocks = []; 
 
-      // 1. Protect Image Tags
+      // 1. Protect Image Tags & Markdown Images from text modifications
       processed = processed.replace(/<img[^>]+>/g, (match) => {
         imgBlocks.push(match);
         return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
@@ -571,6 +571,29 @@
         imgBlocks.push(match);
         return `IMAGEPLACEHOLDER${imgBlocks.length - 1}ENDIMAGE`;
       });
+
+      // 2. Strip rogue HTML highlight/color tags and inline formatting artifacts
+      processed = processed.replace(/<\/?(?:mark|font|color|bgcolor|highlight)[^>]*>/gi, '');
+      processed = processed.replace(/style="[^"]*"/gi, '');
+      processed = processed.replace(/==(.*?)==/g, '$1'); // Strip markdown highlight notation
+
+      // 3. Prevent Medical Approximation Tildes from triggering Markdown strikethrough
+      processed = processed.replace(/~/g, ' &sim; ').replace(/&sim;\s*&sim;/g, '~~');
+
+      // 4. Automated OCR Word & Punctuation Spacing Repair
+      processed = processed.replace(/([a-z])([A-Z][a-z]{2,})/g, '$1 $2'); 
+      processed = processed.replace(/([a-zA-Z])\.([A-Z])/g, '$1. $2'); 
+      processed = processed.replace(/([a-zA-Z]):([A-Z])/g, '$1: $2'); 
+      processed = processed.replace(/([;\]\)])([A-Z])/g, '$1 $2');
+      processed = processed.replace(/\bWhere([A-Z])/g, 'Where $1');
+      processed = processed.replace(/\band([A-Z])/g, 'and $1');
+
+      // 5. Clean Rogue Asterisks & Underscore Formatting Glitches
+      processed = processed.replace(/\*{3,}/g, '**'); 
+      processed = processed.replace(/([a-zA-Z])\*\*([a-zA-Z])/g, '$1 **$2'); 
+      processed = processed.replace(/\*\*\_(.*?)\_\*\*/g, '**$1**');
+      processed = processed.replace(/\*\*\_|\_\*\*/g, '');
+      processed = processed.replace(/(^|\s)_([A-Za-z0-9]+)/g, '$1$2');
 
       function renderKaTeX(math, displayMode) {
         if (!window.katex) {
@@ -591,13 +614,13 @@
         }
       }
 
-      // 2. Tokenize Explicit LaTeX Math
+      // 6. Tokenize Explicit LaTeX Math Blocks
       processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => renderKaTeX(m, true));
       processed = processed.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => renderKaTeX(m, true));
       processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, m) => renderKaTeX(m, false));
       processed = processed.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => renderKaTeX(m, false));
 
-      // 3. Standalone Math Lines
+      // 7. Auto-detect Standalone Math Equation Lines
       const lines = processed.split('\n');
       processed = lines.map(line => {
         if (line.includes('MATHPLACEHOLDER') || line.includes('IMAGEPLACEHOLDER')) return line;
@@ -610,7 +633,7 @@
         return line;
       }).join('\n');
 
-      // 4. Safe Subscript Formatting for Medical Variables
+      // 8. Safe Subscript Formatting for Medical Variables
       const medicalSubs = {
         'P_A_O_2': 'P<sub>A</sub>O<sub>2</sub>', 'P_I_O_2': 'P<sub>I</sub>O<sub>2</sub>',
         'P_A_CO_2': 'P<sub>A</sub>CO<sub>2</sub>', 'P_I_CO_2': 'P<sub>I</sub>CO<sub>2</sub>',
@@ -637,12 +660,22 @@
       }
       processed = processed.replace(/(^|[^a-zA-Z])([A-Za-z]+)_([A-Za-z0-9]+)(?![a-zA-Z])/g, '$1$2<sub>$3</sub>');
 
-      // 5. Restore Image Tokens
+      // 9. Translate Stray LaTeX Symbols to Native HTML
+      processed = processed.replace(/\\rightarrow|\\to/g, ' &rarr; ');
+      processed = processed.replace(/\\leftarrow/g, ' &larr; ');
+      processed = processed.replace(/\\rightleftharpoons/g, ' &#8652; ');
+      processed = processed.replace(/\\times/g, ' &times; ');
+      processed = processed.replace(/\\cdot/g, ' &middot; ');
+      processed = processed.replace(/\\Delta/g, ' &Delta; ');
+      processed = processed.replace(/\\downarrow/g, ' &darr; ');
+      processed = processed.replace(/\\text\{([^}]+)\}/g, '$1');
+
+      // 10. Restore Image Tokens
       imgBlocks.forEach((img, i) => {
         processed = processed.replace(`IMAGEPLACEHOLDER${i}ENDIMAGE`, img);
       });
 
-      // 6. Clean Markdown Parse
+      // 11. Parse Markdown & Wrap Tables
       const rawHtml = marked.parse(processed);
       const tableWrapped = rawHtml
         .replace(/<table/g, '<div class="table-wrapper"><table')
@@ -653,7 +686,7 @@
         ADD_ATTR: ['aria-hidden', 'encoding', 'mathvariant', 'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'd', 'style', 'class', 'src', 'alt']
       }) : tableWrapped;
 
-      // 7. Inject KaTeX After Marked to prevent layout corruption
+      // 12. Re-inject KaTeX Blocks safely after parsing
       mathBlocks.forEach((html, i) => {
         sanitized = sanitized.split(`MATHPLACEHOLDER${i}ENDMATH`).join(html);
       });
@@ -822,7 +855,7 @@
       const currentPath = window.location.pathname;
       const basePath = currentPath.endsWith('/') ? currentPath : currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-      // 1. Resilient Books Module Loader
+      // 1. Load Summary Books
       const booksMod = await loadModuleWithFallbacks([
         `${basePath}books/index.js`,
         '/summaries/books/index.js',
@@ -835,8 +868,6 @@
         if (!Array.isArray(rawData) && typeof booksMod === 'object') {
           rawData = Object.values(booksMod).find(Array.isArray) || [];
         }
-        
-        // Wrap flat chapter lists into standard book container
         if (rawData.length > 0 && !rawData[0].chapters) {
           allBooks = [{
             id: 'default_book',
@@ -848,9 +879,10 @@
         }
       }
 
-      // 2. Load Decks (Saudi & 1000 Qs)
+      // 2. Load Saudi Board QB & 1000 Qs with Multi-Path Fallbacks
       let saudi = [];
       let thousand = [];
+
       const decksMod = await loadModuleWithFallbacks([
         `${basePath}decks/index.js`,
         '/summaries/decks/index.js',
@@ -859,22 +891,106 @@
       ]);
 
       if (decksMod) {
-        if (decksMod.allQuestionDecks) {
-          saudi = decksMod.allQuestionDecks.filter(d => d.sourceName === 'Saudi Board QB' || String(d.id || '').includes('saudi'));
-          thousand = decksMod.allQuestionDecks.filter(d => d.sourceName === '1000 Questions' || String(d.id || '').includes('ch_'));
-        } else {
-          saudi = (decksMod.allDecks || []).map(d => ({
-            ...d, sourceName: 'Saudi Board QB', sourceKey: 'saudi_board_progress', sourceBadgeColor: 'blue'
-          }));
-          thousand = (decksMod.allChapters || []).map((ch, idx) => {
-            const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
-            const numOnly = rawId.replace(/\D/g, '');
-            const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
-            return {
-              ...ch, id: key, sourceName: '1000 Questions', sourceKey: 'thousand_qs_progress', sourceBadgeColor: 'emerald'
-            };
+        if (decksMod.allQuestionDecks && Array.isArray(decksMod.allQuestionDecks)) {
+          decksMod.allQuestionDecks.forEach((d, idx) => {
+            const rawId = String(d.id || idx);
+            const isSaudi = d.sourceName === 'Saudi Board QB' || rawId.toLowerCase().includes('saudi') || (d.title && d.title.toLowerCase().includes('saudi'));
+            if (isSaudi) {
+              saudi.push({
+                ...d,
+                id: rawId.startsWith('saudi_') ? rawId : `saudi_${rawId}`,
+                sourceName: 'Saudi Board QB',
+                sourceKey: 'saudi_board_progress',
+                sourceBadgeColor: 'blue'
+              });
+            } else {
+              thousand.push({
+                ...d,
+                id: rawId.startsWith('ch_') ? rawId : `ch_${rawId}`,
+                sourceName: '1000 Questions',
+                sourceKey: 'thousand_qs_progress',
+                sourceBadgeColor: 'emerald'
+              });
+            }
           });
+        } else {
+          if (decksMod.allDecks && Array.isArray(decksMod.allDecks)) {
+            saudi = decksMod.allDecks.map((d, idx) => ({
+              ...d,
+              id: d.id !== undefined ? `saudi_${d.id}` : `saudi_${idx + 1}`,
+              sourceName: 'Saudi Board QB',
+              sourceKey: 'saudi_board_progress',
+              sourceBadgeColor: 'blue'
+            }));
+          }
+          if (decksMod.allChapters && Array.isArray(decksMod.allChapters)) {
+            thousand = decksMod.allChapters.map((ch, idx) => {
+              const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
+              const numOnly = rawId.replace(/\D/g, '');
+              const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : (rawId.startsWith('ch_') ? rawId : `ch_${rawId}`);
+              return {
+                ...ch,
+                id: key,
+                sourceName: '1000 Questions',
+                sourceKey: 'thousand_qs_progress',
+                sourceBadgeColor: 'emerald'
+              };
+            });
+          }
         }
+      }
+
+      // Direct fallback loader for Saudi QB
+      if (saudi.length === 0) {
+        try {
+          const saudiMod = await loadModuleWithFallbacks([
+            '/saudi/output_saudi_js/index.js',
+            '../saudi/output_saudi_js/index.js',
+            '/saudi/decks/index.js',
+            '../saudi/decks/index.js'
+          ]);
+          if (saudiMod) {
+            let rawData = saudiMod.allDecks || saudiMod.allChapters || saudiMod.default || saudiMod;
+            if (Array.isArray(rawData)) {
+              saudi = rawData.map((d, idx) => ({
+                ...d,
+                id: d.id !== undefined ? `saudi_${d.id}` : `saudi_${idx + 1}`,
+                sourceName: 'Saudi Board QB',
+                sourceKey: 'saudi_board_progress',
+                sourceBadgeColor: 'blue'
+              }));
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Direct fallback loader for 1000 Qs
+      if (thousand.length === 0) {
+        try {
+          const thousandMod = await loadModuleWithFallbacks([
+            '/1000qs/output_1000_js/index.js',
+            '../1000qs/output_1000_js/index.js',
+            '/1000qs/decks/index.js',
+            '../1000qs/decks/index.js'
+          ]);
+          if (thousandMod) {
+            let rawData = thousandMod.allChapters || thousandMod.allDecks || thousandMod.default || thousandMod;
+            if (Array.isArray(rawData)) {
+              thousand = rawData.map((ch, idx) => {
+                const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
+                const numOnly = rawId.replace(/\D/g, '');
+                const key = numOnly ? `ch_${numOnly.padStart(2, '0')}` : `ch_${rawId}`;
+                return {
+                  ...ch,
+                  id: key,
+                  sourceName: '1000 Questions',
+                  sourceKey: 'thousand_qs_progress',
+                  sourceBadgeColor: 'emerald'
+                };
+              });
+            }
+          }
+        } catch (e) {}
       }
 
       // 3. Load Comprehensive Anesthesia Decks
@@ -908,7 +1024,7 @@
             }
           }
         }
-      } catch (e) { console.warn("Comprehensive QB load skipped", e); }
+      } catch (e) {}
 
       const compFormatted = compChapters.map((ch, idx) => {
         const rawId = ch.id !== undefined ? String(ch.id) : String(idx + 1);
@@ -923,10 +1039,10 @@
         };
       });
 
-      // Combine sources
+      // Combine all sources cleanly
       questionChapters = [...saudi, ...thousand, ...compFormatted];
 
-      // 4. Resilient Highlighter Loader
+      // 4. Highlighter Loader
       let StudyHighlighterClass = null;
       const hlMod = await loadModuleWithFallbacks([
         '/js/highlighter.js',
@@ -1468,7 +1584,7 @@
         }
       });
 
-      // Chapter Question Practice Engine
+      // Chapter Question Practice Engine (Balanced 3-Way Distribution)
       function renderInteractiveQuestions(chapterNumber) {
         const container = document.getElementById('quiz-cards-container');
         const badge = document.getElementById('quiz-count-badge');
@@ -1511,48 +1627,56 @@
           return { ...q, _relevanceScore: score };
         });
 
-        const saudiScored = scored.filter(q => q._sourceName === 'Saudi Board QB' && q._relevanceScore > 0)
-                                  .sort((a, b) => b._relevanceScore - a._relevanceScore);
-        const thousandScored = scored.filter(q => q._sourceName === '1000 Questions' && q._relevanceScore > 0)
-                                     .sort((a, b) => b._relevanceScore - a._relevanceScore);
-        const compScored = scored.filter(q => q._sourceName === 'Comprehensive QB' && q._relevanceScore > 0)
-                                 .sort((a, b) => b._relevanceScore - a._relevanceScore);
-
-        const MAX_PER_SOURCE = 5;
-        const TARGET_TOTAL = 15;
-
-        let selectedQuestions = [
-          ...saudiScored.slice(0, MAX_PER_SOURCE),
-          ...thousandScored.slice(0, MAX_PER_SOURCE),
-          ...compScored.slice(0, MAX_PER_SOURCE)
-        ];
-
-        if (selectedQuestions.length < TARGET_TOTAL) {
-          const chosenSet = new Set(selectedQuestions);
-          const remaining = scored.filter(q => q._relevanceScore > 0 && !chosenSet.has(q))
-                                  .sort((a, b) => b._relevanceScore - a._relevanceScore);
-          for (const q of remaining) {
-            if (selectedQuestions.length >= TARGET_TOTAL) break;
-            selectedQuestions.push(q);
+        // Helper to grab questions per bank with topic fallbacks
+        function getTopQuestionsForBank(sourceName, maxCount) {
+          const bankQuestions = scored.filter(q => q._sourceName === sourceName);
+          let matched = bankQuestions.filter(q => q._relevanceScore > 0)
+                                     .sort((a, b) => b._relevanceScore - a._relevanceScore)
+                                     .slice(0, maxCount);
+          
+          if (matched.length < maxCount) {
+            const chosenIds = new Set(matched.map(q => q._namespacedId));
+            const topicDecks = questionChapters.filter(d => d.sourceName === sourceName && (d.title || '').toLowerCase().includes(mapping.topic));
+            
+            for (const deck of topicDecks) {
+              for (let i = 0; i < (deck.questions || []).length; i++) {
+                if (matched.length >= maxCount) break;
+                const nId = `${deck.id}_${i}`;
+                if (!chosenIds.has(nId)) {
+                  matched.push({
+                    ...deck.questions[i],
+                    _namespacedId: nId,
+                    _parentDeckId: deck.id,
+                    _parentIndex: i,
+                    _deckTitle: deck.title,
+                    _sourceName: deck.sourceName,
+                    _sourceBadgeColor: deck.sourceBadgeColor || 'purple'
+                  });
+                  chosenIds.add(nId);
+                }
+              }
+            }
           }
-        }
-        
-        selectedQuestions = selectedQuestions.slice(0, TARGET_TOTAL);
 
-        if (selectedQuestions.length === 0) {
-          const matchingDeck = questionChapters.find(d => (d.title || '').toLowerCase().includes(mapping.topic));
-          if (matchingDeck && matchingDeck.questions) {
-            selectedQuestions = matchingDeck.questions.slice(0, TARGET_TOTAL).map((q, qIndex) => ({
-              ...q,
-              _namespacedId: `${matchingDeck.id}_${qIndex}`,
-              _parentDeckId: matchingDeck.id,
-              _parentIndex: qIndex,
-              _deckTitle: matchingDeck.title,
-              _sourceName: matchingDeck.sourceName || 'Question Bank',
-              _sourceBadgeColor: matchingDeck.sourceBadgeColor || 'purple'
-            }));
+          if (matched.length < maxCount) {
+            const chosenIds = new Set(matched.map(q => q._namespacedId));
+            for (const q of bankQuestions) {
+              if (matched.length >= maxCount) break;
+              if (!chosenIds.has(q._namespacedId)) {
+                matched.push(q);
+                chosenIds.add(q._namespacedId);
+              }
+            }
           }
+
+          return matched;
         }
+
+        const saudiSelected = getTopQuestionsForBank('Saudi Board QB', 5);
+        const thousandSelected = getTopQuestionsForBank('1000 Questions', 5);
+        const compSelected = getTopQuestionsForBank('Comprehensive QB', 5);
+
+        const selectedQuestions = [...saudiSelected, ...thousandSelected, ...compSelected];
 
         if (selectedQuestions.length === 0) {
           section.classList.add('hidden');
