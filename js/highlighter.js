@@ -1,51 +1,36 @@
 /**
  * KetofolDoc Universal Study Highlighter Engine
- * Desktop Precision Floating + Mobile Conflict-Free Bottom Docking
+ * iOS WebKit & Desktop Compatible
  */
-
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function makeTagTolerantRegex(str) {
-  if (!str) return '';
-  return str
-    .trim()
-    .split(/\s+/)
-    .map(word => {
-      return word
-        .split('')
-        .map(char => escapeRegExp(char))
-        .join('(?:<[^>]+>)*');
-    })
-    .join('(?:\\s+|<[^>]+>)+');
-}
 
 export class StudyHighlighter {
   constructor(options = {}) {
-    this.storageKey = options.storageKey || 'kd_user_highlights';
-    this.onSave = options.onSave || null;
-    this.onChange = options.onChange || null;
+    this.storageKey = options.storageKey || 'kd_highlights_data';
+    this.onChange = options.onChange || (() => {});
+    this.onSave = options.onSave || (() => {});
+    
+    this.currentContext = null;
+    this.currentRange = null;
+    this.isInteractingWithToolbar = false;
     this.highlights = this.loadHighlights();
-    this.currentContextId = null;
-    this.toolbar = null;
-    this.activeRange = null;
+    
+    this.colors = [
+      { name: 'emerald', bg: 'rgba(52, 211, 153, 0.35)', border: '#34d399', btnClass: 'bg-emerald-400' },
+      { name: 'amber',   bg: 'rgba(251, 191, 36, 0.35)',  border: '#fbbf24', btnClass: 'bg-amber-400' },
+      { name: 'purple',  bg: 'rgba(192, 132, 252, 0.35)', border: '#c084fc', btnClass: 'bg-purple-400' },
+      { name: 'blue',    bg: 'rgba(96, 165, 250, 0.35)',  border: '#60a5fa', btnClass: 'bg-blue-400' }
+    ];
 
-    this.colors = {
-      blue: 'bg-blue-500/25 text-blue-100 rounded px-0.5 border-b border-blue-400/80',
-      emerald: 'bg-emerald-500/25 text-emerald-100 rounded px-0.5 border-b border-emerald-400/80',
-      amber: 'bg-amber-500/25 text-amber-100 rounded px-0.5 border-b border-amber-400/80',
-      purple: 'bg-purple-500/25 text-purple-100 rounded px-0.5 border-b border-purple-400/80'
-    };
-
-    this.initDOM();
-    this.attachEventListeners();
+    this.initToolbar();
+    this.initEventListeners();
   }
 
   loadHighlights() {
     try {
-      return JSON.parse(localStorage.getItem(this.storageKey)) || {};
+      const stored = localStorage.getItem(this.storageKey);
+      return stored ? JSON.parse(stored) : {};
     } catch (e) {
+      console.warn("Highlighter local storage load error:", e);
       return {};
     }
   }
@@ -53,245 +38,203 @@ export class StudyHighlighter {
   saveHighlights() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.highlights));
-      if (typeof this.onSave === 'function') {
-        this.onSave(this.highlights);
-      }
-      if (typeof this.onChange === 'function') {
-        this.onChange();
-      }
+      this.onSave(this.highlights);
     } catch (e) {
-      console.warn('Highlighter storage error:', e);
+      console.warn("Highlighter save error:", e);
     }
   }
 
   setContext(contextId) {
-    this.currentContextId = contextId;
+    this.currentContext = contextId ? String(contextId) : null;
     this.hideToolbar();
   }
 
-  initDOM() {
-    if (document.getElementById('kd-highlight-toolbar')) {
-      this.toolbar = document.getElementById('kd-highlight-toolbar');
+  initToolbar() {
+    if (document.getElementById('kd-highlighter-toolbar')) {
+      this.toolbar = document.getElementById('kd-highlighter-toolbar');
       return;
     }
 
-    const bar = document.createElement('div');
-    bar.id = 'kd-highlight-toolbar';
-    bar.className = 'fixed hidden z-[90] bg-slate-900/95 backdrop-blur-xl border border-slate-700/90 rounded-2xl shadow-2xl p-2 sm:p-1.5 flex items-center space-x-2 sm:space-x-1.5 transition-all duration-200 select-none shadow-black/80 [-webkit-touch-callout:none]';
-    bar.innerHTML = `
-      <button type="button" data-color="blue" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-blue-500 hover:scale-110 active:scale-95 transition shadow-sm border border-blue-400 flex items-center justify-center" title="Highlight Blue"></button>
-      <button type="button" data-color="emerald" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-emerald-500 hover:scale-110 active:scale-95 transition shadow-sm border border-emerald-400 flex items-center justify-center" title="Highlight Emerald"></button>
-      <button type="button" data-color="amber" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-amber-400 hover:scale-110 active:scale-95 transition shadow-sm border border-amber-300 flex items-center justify-center" title="Highlight Amber"></button>
-      <button type="button" data-color="purple" class="w-7 h-7 sm:w-5 sm:h-5 rounded-full bg-purple-500 hover:scale-110 active:scale-95 transition shadow-sm border border-purple-400 flex items-center justify-center" title="Highlight Purple"></button>
-      <div class="w-px h-5 sm:h-4 bg-slate-700 mx-1"></div>
-      <button type="button" data-action="remove" class="p-1.5 sm:p-1 rounded-xl text-slate-400 hover:text-rose-400 active:bg-slate-800 transition" title="Clear Highlight">
-        <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-      </button>
-    `;
-    document.body.appendChild(bar);
-    this.toolbar = bar;
+    const toolbar = document.createElement('div');
+    toolbar.id = 'kd-highlighter-toolbar';
+    toolbar.className = 'fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700/80 rounded-2xl px-3.5 py-2 shadow-2xl backdrop-blur-md flex items-center space-x-2.5 transition-all duration-200 opacity-0 pointer-events-none transform translate-y-4 select-none';
 
-    this.toolbar.querySelectorAll('button[data-color]').forEach(btn => {
-      btn.onmousedown = (e) => e.preventDefault();
-      btn.ontouchstart = (e) => e.stopPropagation();
-      btn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.applySelectedHighlight(btn.dataset.color);
-      };
-    });
-
-    const removeBtn = this.toolbar.querySelector('button[data-action="remove"]');
-    removeBtn.onmousedown = (e) => e.preventDefault();
-    removeBtn.ontouchstart = (e) => e.stopPropagation();
-    removeBtn.onclick = (e) => {
+    // Prevent iOS Safari from clearing text selection when touching the toolbar
+    const preventDeselect = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.removeSelectedHighlight();
+      this.isInteractingWithToolbar = true;
     };
+
+    toolbar.addEventListener('mousedown', preventDeselect);
+    toolbar.addEventListener('touchstart', preventDeselect, { passive: false });
+    toolbar.addEventListener('pointerdown', preventDeselect);
+
+    // Color Swatches
+    this.colors.forEach(col => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `w-7 h-7 rounded-full ${col.btnClass} shadow-md active:scale-90 transition border border-white/20 shrink-0`;
+      btn.setAttribute('data-color', col.name);
+
+      btn.addEventListener('pointerup', (e) => {
+        e.preventDefault();
+        this.applyHighlight(col.name);
+        this.finishInteraction();
+      });
+
+      toolbar.appendChild(btn);
+    });
+
+    // Remove Highlight / Eraser Button
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'w-7 h-7 rounded-full bg-slate-800 border border-slate-600 text-rose-400 hover:text-rose-300 flex items-center justify-center active:scale-90 transition shrink-0';
+    removeBtn.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+    
+    removeBtn.addEventListener('pointerup', (e) => {
+      e.preventDefault();
+      this.removeHighlight();
+      this.finishInteraction();
+    });
+
+    toolbar.appendChild(removeBtn);
+    document.body.appendChild(toolbar);
+    this.toolbar = toolbar;
   }
 
-  attachEventListeners() {
+  initEventListeners() {
     const handleSelection = () => {
-      const selection = window.getSelection();
-      if (!selection || selection.isCollapsed) {
-        this.hideToolbar();
-        return;
-      }
+      if (this.isInteractingWithToolbar) return;
 
-      const text = selection.toString().trim();
-      if (text.length < 1) {
-        this.hideToolbar();
-        return;
-      }
-
-      const anchorNode = selection.anchorNode;
-      const container = anchorNode?.nodeType === 3 ? anchorNode.parentElement : anchorNode;
-      if (!container || !container.closest('.highlightable-content')) {
-        this.hideToolbar();
-        return;
-      }
-
-      this.activeRange = selection.getRangeAt(0);
-      this.showToolbar(this.activeRange);
-    };
-
-    document.addEventListener('mouseup', handleSelection);
-    document.addEventListener('touchend', () => setTimeout(handleSelection, 100));
-
-    document.addEventListener('mousedown', (e) => {
-      if (this.toolbar && !this.toolbar.contains(e.target)) {
-        this.hideToolbar();
-      }
-    });
-    
-    document.addEventListener('touchstart', (e) => {
-      if (this.toolbar && !this.toolbar.contains(e.target)) {
-        const selection = window.getSelection();
-        if (!selection || selection.isCollapsed) {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+        if (!this.isInteractingWithToolbar) {
           this.hideToolbar();
         }
+        return;
       }
-    });
+
+      // Ensure the selection occurred inside an annotated container
+      const anchorNode = sel.anchorNode;
+      const highlightContainer = anchorNode?.nodeType === 1 
+        ? anchorNode.closest('.highlightable-content') 
+        : anchorNode?.parentElement?.closest('.highlightable-content');
+
+      if (!highlightContainer) {
+        this.hideToolbar();
+        return;
+      }
+
+      // Clone and preserve the Range object immediately
+      if (sel.rangeCount > 0) {
+        this.currentRange = sel.getRangeAt(0).cloneRange();
+        this.showToolbar();
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelection);
+    document.addEventListener('touchend', () => setTimeout(handleSelection, 80));
+    document.addEventListener('mouseup', () => setTimeout(handleSelection, 50));
   }
 
-  showToolbar(range) {
-    if (!range || !this.toolbar) return;
-    const rect = range.getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) return;
-
-    this.toolbar.classList.remove('hidden');
-
-    const isMobile = window.innerWidth < 768 || ('ontouchstart' in window);
-
-    if (isMobile) {
-      // 📱 Mobile / iOS: Dock as an accessible bottom floating pill
-      this.toolbar.style.top = 'auto';
-      this.toolbar.style.bottom = '88px';
-      this.toolbar.style.left = '50%';
-      this.toolbar.style.transform = 'translateX(-50%)';
-    } else {
-      // 💻 Desktop: Float precision tooltip directly above text
-      this.toolbar.style.bottom = 'auto';
-      this.toolbar.style.transform = 'none';
-
-      const toolbarRect = this.toolbar.getBoundingClientRect();
-      let top = rect.top - toolbarRect.height - 10;
-      let left = rect.left + (rect.width / 2) - (toolbarRect.width / 2);
-
-      if (top < 10) top = rect.bottom + 10;
-      if (left < 10) left = 10;
-      if (left + toolbarRect.width > window.innerWidth - 10) {
-        left = window.innerWidth - toolbarRect.width - 10;
-      }
-
-      this.toolbar.style.top = `${top}px`;
-      this.toolbar.style.left = `${left}px`;
-    }
+  showToolbar() {
+    if (!this.toolbar) return;
+    this.toolbar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+    this.toolbar.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
   }
 
   hideToolbar() {
-    if (this.toolbar) {
-      this.toolbar.classList.add('hidden');
-    }
+    if (!this.toolbar || this.isInteractingWithToolbar) return;
+    this.toolbar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+    this.toolbar.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+    this.currentRange = null;
   }
 
-  applySelectedHighlight(colorKey) {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
+  finishInteraction() {
+    this.hideToolbar();
+    setTimeout(() => {
+      this.isInteractingWithToolbar = false;
+      const sel = window.getSelection();
+      if (sel) sel.removeAllRanges();
+    }, 150);
+  }
 
-    const exact = selection.toString().trim();
-    if (!exact || !this.currentContextId) return;
-
-    const anchorNode = selection.anchorNode;
-    const container = (anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode)?.closest('.highlightable-content');
+  applyHighlight(colorName) {
+    if (!this.currentContext) return;
     
-    let prefix = '';
-    let suffix = '';
-
-    if (container) {
-      try {
-        const range = selection.getRangeAt(0);
-        
-        const preRange = document.createRange();
-        preRange.selectNodeContents(container);
-        preRange.setEnd(range.startContainer, range.startOffset);
-        prefix = preRange.toString().slice(-30);
-
-        const postRange = document.createRange();
-        postRange.selectNodeContents(container);
-        postRange.setStart(range.endContainer, range.endOffset);
-        suffix = postRange.toString().slice(0, 30);
-      } catch (e) {
-        console.warn('Could not extract surrounding context:', e);
-      }
+    let selectedText = '';
+    if (this.currentRange) {
+      selectedText = this.currentRange.toString().trim();
+    } else {
+      const sel = window.getSelection();
+      selectedText = sel ? sel.toString().trim() : '';
     }
 
-    const targetContextId = container?.getAttribute('data-highlight-context') || this.currentContextId;
-    this.highlights[targetContextId] = this.highlights[targetContextId] || [];
+    if (!selectedText) return;
 
-    this.highlights[targetContextId].push({
-      id: 'hl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-      text: exact,
-      prefix: prefix,
-      suffix: suffix,
-      color: colorKey
+    this.highlights[this.currentContext] = this.highlights[this.currentContext] || [];
+    
+    // Remove existing identical entries before pushing new color
+    this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(
+      h => h.text !== selectedText
+    );
+
+    this.highlights[this.currentContext].push({
+      text: selectedText,
+      color: colorName,
+      createdAt: Date.now()
     });
 
     this.saveHighlights();
-    this.hideToolbar();
-    window.getSelection()?.removeAllRanges();
+    this.onChange();
   }
 
-  removeSelectedHighlight() {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
-    const text = selection.toString().trim();
-    
-    const anchorNode = selection.anchorNode;
-    const container = (anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode)?.closest('.highlightable-content');
-    const targetContextId = container?.getAttribute('data-highlight-context') || this.currentContextId;
+  removeHighlight() {
+    if (!this.currentContext || !this.highlights[this.currentContext]) return;
 
-    if (!text || !targetContextId || !this.highlights[targetContextId]) return;
+    let selectedText = '';
+    if (this.currentRange) {
+      selectedText = this.currentRange.toString().trim();
+    } else {
+      const sel = window.getSelection();
+      selectedText = sel ? sel.toString().trim() : '';
+    }
 
-    this.highlights[targetContextId] = this.highlights[targetContextId].filter(
-      h => !h.text.includes(text) && !text.includes(h.text)
+    if (!selectedText) return;
+
+    this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(
+      h => !h.text.includes(selectedText) && !selectedText.includes(h.text)
     );
 
     this.saveHighlights();
-    this.hideToolbar();
-    window.getSelection()?.removeAllRanges();
+    this.onChange();
   }
 
-  renderHighlights(rawHtml, contextId = this.currentContextId) {
-    if (!rawHtml || !contextId) return rawHtml || '';
-    const list = this.highlights[contextId] || [];
-    if (list.length === 0) return rawHtml;
+  renderHighlights(htmlContent, contextId) {
+    if (!htmlContent) return '';
+    const ctx = contextId ? String(contextId) : this.currentContext;
+    if (!ctx || !this.highlights[ctx] || this.highlights[ctx].length === 0) {
+      return htmlContent;
+    }
 
-    let highlightedHtml = String(rawHtml);
+    let rendered = String(htmlContent);
+    const ctxHighlights = this.highlights[ctx];
 
-    list.forEach(item => {
-      const pRegex = item.prefix ? makeTagTolerantRegex(item.prefix) : '';
-      const tRegex = makeTagTolerantRegex(item.text);
-      const sRegex = item.suffix ? makeTagTolerantRegex(item.suffix) : '';
-      const colorClass = this.colors[item.color] || this.colors.blue;
+    // Sort by text length descending so sub-strings don't break larger highlighted blocks
+    const sorted = [...ctxHighlights].sort((a, b) => b.text.length - a.text.length);
 
-      let regex;
-      if (pRegex && sRegex) {
-        regex = new RegExp(`(${pRegex}(?:\\s+|<[^>]+>)*)(${tRegex})((?:\\s+|<[^>]+>)*${sRegex})`, 'i');
-        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2, p3) => `${p1}<mark class="${colorClass}">${p2}</mark>${p3}`);
-      } else if (pRegex) {
-        regex = new RegExp(`(${pRegex}(?:\\s+|<[^>]+>)*)(${tRegex})`, 'i');
-        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2) => `${p1}<mark class="${colorClass}">${p2}</mark>`);
-      } else if (sRegex) {
-        regex = new RegExp(`(${tRegex})((?:\\s+|<[^>]+>)*${sRegex})`, 'i');
-        highlightedHtml = highlightedHtml.replace(regex, (m, p1, p2) => `<mark class="${colorClass}">${p1}</mark>${p2}`);
-      } else {
-        regex = new RegExp(`(?![^<]*>)(${tRegex})`, 'i');
-        highlightedHtml = highlightedHtml.replace(regex, `<mark class="${colorClass}">$1</mark>`);
-      }
+    sorted.forEach(({ text, color }) => {
+      if (!text || text.length < 2) return;
+      
+      const colObj = this.colors.find(c => c.name === color) || this.colors[0];
+      const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Match text outside HTML tags
+      const regex = new RegExp(`(?![^<]*>)(${escaped})`, 'gi');
+      rendered = rendered.replace(regex, `<mark class="rounded px-0.5" style="background-color: ${colObj.bg}; border-bottom: 2px solid ${colObj.border}; color: inherit;">$1</mark>`);
     });
 
-    return highlightedHtml;
+    return rendered;
   }
 }
