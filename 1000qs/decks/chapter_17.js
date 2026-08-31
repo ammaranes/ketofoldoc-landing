@@ -76,7 +76,7 @@ export const chapter17 = [
     "id": 6,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "A 20-year-old G1P0 female at 425 weeks of gestation presents to labor and delivery floor with rupture of membranes and onset of early labor. She appears uncomfortable and becomes extremely anxious with peripheral IV placement, and begins to hyperventilate. If allowed to continue hyperventilation, it will cause",
+    "stem": "A 20-year-old G1P0 female at 42+5 weeks of gestation presents to labor and delivery floor with rupture of membranes and onset of early labor. She appears uncomfortable and becomes extremely anxious with peripheral IV placement, and begins to hyperventilate. If allowed to continue hyperventilation, it will cause",
     "options": {
       "A": "Increased placental perfusion",
       "B": "Decreased maternal arterial pH",
