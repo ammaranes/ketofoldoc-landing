@@ -266,7 +266,7 @@ export const chapter02 = [
     "correctAnswer": "B",
     "explanation": "The presentation of acute aphonia and respiratory distress immediately after thyroidectomy are suggestive of bilateral injury to the recurrent laryngeal nerve (RLN), a recognized complication of this surgery. Bilateral RLN injury leaves the vocal cords tensed and closed due to the unopposed action of the cricothyroid muscles. The cricothyroid muscle is innervated by the external (motor) branch of the superior laryngeal nerve (SLN). Blockade of the motor branch of the SLN should improve the patient’s respiratory distress by relaxing the vocal cords but would have no impact on the aphonia. Practically speaking, a typical “SLN block” (i.e., injection of ∼2 mL of local anesthetic between the greater cornu of the hyoid cartilage and the superior cornu of the thyroid cartilage) is likely to only block the internal (sensory) branch of this nerve as opposed to the motor branch (Fig. 2-4). Figure 2-4. Gross anatomic distribution of the SLN and RLN.",
     "explanationImages": [
-      "/100qs/images/ch02/fig_2_4.png"
+      "/1000qs/images/ch02/fig_2_4.png"
     ]
   },
   {
