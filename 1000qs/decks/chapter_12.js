@@ -239,6 +239,9 @@ export const chapter12 = [
     },
     "correctAnswer": "D",
     "explanation": "During spontaneous ventilation in lateral decubitus position, ventilation/perfusion matching is preserved because the lower lung receives more perfusion due to gravity and more ventilation due to better contraction of the dependent hemidiaphragm. The dependent hemidiaphragm gets a better displacement from a higher position in the chest. The dependent lung has a better compliance as well—this improves ventilation. Figure 12-5."
+    "explanationImages": [
+      "/100qs/images/ch12/fig_12_e17.png"
+    ]  
   },
   {
     "id": 18,
@@ -253,6 +256,8 @@ export const chapter12 = [
     },
     "correctAnswer": "A",
     "explanation": "Inspiration in a lateral position during spontaneous ventilation causes more negative pleural pressure on the dependent side of the open pneumothorax. The relatively higher pressure on the nondependent side causes a downward shift of the mediastinum during inspiration. The reverse happens on expiration, and the mediastinum shifts upward. This results in an ineffective respiratory exchange, but the major effect is by decreasing the contribution of the dependent lung to the tidal volume. Figure 12-6."
+    "explanationImages": [
+      "/100qs/images/ch12/fig_12_e18.png"
   },
   {
     "id": 19,
@@ -463,6 +468,8 @@ export const chapter12 = [
     },
     "correctAnswer": "A",
     "explanation": "Anesthetic considerations for tracheal resection include invasive monitoring, use of anticholinergics to prevent increased secretions, slow inhalational induction maintaining spontaneous ventilation, airway stimulation after attaining a deep plane of anesthesia, return of spontaneous ventilation, and early extubation. The left radial artery is preferred for lower tracheal resections because of the potential for compression of the innominate artery. A nonirritating inhalational agent like sevoflurane in 100% oxygen can be used along with short-acting opioids like remifentanil. Care should be taken to decrease the FIO2 to below 0.3 if the surgeon is using laser to resect the scar tissue. After opening the stenosed segment, the surgeon can insert a sterile endotracheal tube into the segment of trachea below the lesion and patient can be ventilated through that. There will be a brief period of apnea as the surgeon is anastomosing the anterior part of trachea after resection. Once the anastomosis is complete, the initial endotracheal tube can be readvanced below the lesion. The neck is kept flexed in the postoperative period to minimize tension on the tracheal suture line. Heliox offers a method to avoid turbulence due to its lower density. Flow–volume loops confirm the location of the obstruction and aid the clinician in evaluating the severity of the lesion. Figure 12-7."
+    "explanationImages": [
+      "/100qs/images/ch12/fig_12_e33.png"
   },
   {
     "id": 34,
@@ -553,6 +560,7 @@ export const chapter12 = [
     "chapter": 12,
     "chapterTitle": "Thoracic Anesthesia",
     "stem": "Which of the following flow–volume loops will be expected in a child with variable extrathoracic obstruction? Figure 12-2.",
+    "image": "/1000qs/images/ch12/fig_12_q40.png",
     "options": {
       "A": "A",
       "B": "B",
