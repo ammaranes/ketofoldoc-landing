@@ -609,6 +609,50 @@
         };
       }
 
+      function getShuffledSRSQueue(questions, srsProgressMap = {}) {
+  const now = new Date();
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+
+  const overdue = [];
+  const dueToday = [];
+  const newCards = [];
+
+  questions.forEach((q, idx) => {
+    // Check if SRS data is stored on the question object or in a progress map
+    const qId = q.id || q._id || q.questionId || `${q.chapter || 'ch'}_${idx}`;
+    const srs = q.srs || srsProgressMap[qId];
+
+    if (!srs || !srs.dueDate || srs.repetitions === 0) {
+      newCards.push(q);
+    } else {
+      const dueTime = new Date(srs.dueDate).getTime();
+      if (dueTime < todayStart) {
+        overdue.push(q);
+      } else if (dueTime <= todayEnd) {
+        dueToday.push(q);
+      }
+    }
+  });
+
+  // Fisher-Yates array shuffler
+  const shuffle = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  // Prioritizes Overdue -> Due Today -> New Cards, randomized within each tier
+  return [
+    ...shuffle(overdue),
+    ...shuffle(dueToday),
+    ...shuffle(newCards)
+  ];
+}
+
       function normalizeChapterKey(rawKey) {
         if (!rawKey) return 'ch_01';
         const num = String(rawKey).replace(/\D/g, '');
@@ -1165,33 +1209,44 @@
         saveState();
       }
 
-      function toggleSRSMode() {
-        const activeDeck = getActiveCompositeDeck();
-        if (!activeDeck || activeDeck.questions.length === 0) return;
+      // Helper: Fisher-Yates shuffle
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
-        state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
-        state.sessionState.isShuffled = false;
-        state.sessionState.srsSessionAnswers = {};
+function toggleSRSMode() {
+  const activeDeck = getActiveCompositeDeck();
+  if (!activeDeck || activeDeck.questions.length === 0) return;
 
-        if (state.sessionState.isSRSMode) {
-          const dueIndices = getDueIndices(activeDeck);
+  state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
+  state.sessionState.isShuffled = false;
+  state.sessionState.srsSessionAnswers = {};
 
-          if (dueIndices.length === 0) {
-            alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
-            state.sessionState.isSRSMode = false;
-            state.sessionState.order = getUnansweredIndices(activeDeck);
-            state.sessionState.currentIndex = 0;
-          } else {
-            state.sessionState.order = [...dueIndices];
-            state.sessionState.currentIndex = 0;
-          }
-        } else {
-          state.sessionState.order = getUnansweredIndices(activeDeck);
-          state.sessionState.currentIndex = 0;
-        }
+  if (state.sessionState.isSRSMode) {
+    const dueIndices = getDueIndices(activeDeck);
 
-        saveState();
-      }
+    if (dueIndices.length === 0) {
+      alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
+      state.sessionState.isSRSMode = false;
+      state.sessionState.order = getUnansweredIndices(activeDeck);
+      state.sessionState.currentIndex = 0;
+    } else {
+      // Automatically randomize the order of due review questions
+      state.sessionState.order = shuffleArray(dueIndices);
+      state.sessionState.currentIndex = 0;
+    }
+  } else {
+    state.sessionState.order = getUnansweredIndices(activeDeck);
+    state.sessionState.currentIndex = 0;
+  }
+
+  saveState();
+}
 
       function handleNextNavigation() {
         const activeDeck = getActiveCompositeDeck();
