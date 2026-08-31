@@ -1313,6 +1313,15 @@
         saveState();
       }
 
+      function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+      }
+
       function toggleSRSMode() {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || activeDeck.questions.length === 0) return;
@@ -1322,21 +1331,19 @@
         state.sessionState.srsSessionAnswers = {};
 
         if (state.sessionState.isSRSMode) {
-          const dueIndices = getDueIndices(activeDeck);
+        const dueIndices = getDueIndices(activeDeck);
 
-          if (dueIndices.length === 0) {
-            alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
-            state.sessionState.isSRSMode = false;
-            state.sessionState.order = getUnansweredIndices(activeDeck);
-            state.sessionState.currentIndex = 0;
-          } else {
-            state.sessionState.order = [...dueIndices];
-            state.sessionState.currentIndex = 0;
-          }
-        } else {
+        if (dueIndices.length === 0) {
+          alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
+          state.sessionState.isSRSMode = false;
           state.sessionState.order = getUnansweredIndices(activeDeck);
           state.sessionState.currentIndex = 0;
+        } else {
+          // Auto-shuffles the due review questions upon SRS activation
+          state.sessionState.order = shuffleArray(dueIndices);
+          state.sessionState.currentIndex = 0;
         }
+      }
 
         saveState();
       }
