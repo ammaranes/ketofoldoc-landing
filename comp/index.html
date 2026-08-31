@@ -1428,7 +1428,7 @@
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
         const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
 
-        if (activeTotal === 0 && !state.sessionState.isSRSMode) {
+        if ((activeTotal === 0 || activeDeck.isCompleted) && !state.sessionState.isSRSMode) {
           DOM.viewEmpty.classList.remove('hidden');
           DOM.viewQuiz.classList.add('hidden');
           DOM.quizFooter.classList.add('hidden');
