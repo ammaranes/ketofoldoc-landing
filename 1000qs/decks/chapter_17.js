@@ -524,7 +524,7 @@ export const chapter17 = [
     "id": 38,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Four hours postdelivery, and after the epidural is removed, the patient now requires emergent anesthesia for surgical removal of retained placental products. The appropriate anesthetic management includes all of the following, except",
+    "stem": "Four hours postdelivery, and after the epidural is removed, a patient now requires emergent anesthesia for surgical removal of retained placental products. The appropriate anesthetic management includes all of the following, except",
     "options": {
       "A": "Antibiotic administration",
       "B": "Total intravenous anesthesia",
