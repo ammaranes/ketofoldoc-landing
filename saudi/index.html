@@ -1220,7 +1220,7 @@
         const activeTotal = hasCustomOrder ? state.sessionState.order.length : activeDeck.questions.length;
 
         // Display Completed Screen
-        if (activeTotal === 0 && !state.sessionState.isSRSMode) {
+        if ((activeTotal === 0 || activeDeck.isCompleted) && !state.sessionState.isSRSMode) {
           document.getElementById('view-empty').classList.remove('hidden');
           document.getElementById('view-quiz').classList.add('hidden');
           document.getElementById('quiz-footer').classList.add('hidden');
