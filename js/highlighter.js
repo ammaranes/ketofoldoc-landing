@@ -1,6 +1,6 @@
 /**
  * KetofolDoc Universal Study Highlighter Engine
- * iOS WebKit & Desktop Compatible
+ * Context-Anchored Single-Occurrence Highlighting (iOS & Desktop Compatible)
  */
 
 export class StudyHighlighter {
@@ -59,7 +59,6 @@ export class StudyHighlighter {
     toolbar.id = 'kd-highlighter-toolbar';
     toolbar.className = 'fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700/80 rounded-2xl px-3.5 py-2 shadow-2xl backdrop-blur-md flex items-center space-x-2.5 transition-all duration-200 opacity-0 pointer-events-none transform translate-y-4 select-none';
 
-    // Prevent iOS Safari from clearing text selection when touching the toolbar
     const preventDeselect = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -70,7 +69,6 @@ export class StudyHighlighter {
     toolbar.addEventListener('touchstart', preventDeselect, { passive: false });
     toolbar.addEventListener('pointerdown', preventDeselect);
 
-    // Color Swatches
     this.colors.forEach(col => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -86,7 +84,6 @@ export class StudyHighlighter {
       toolbar.appendChild(btn);
     });
 
-    // Remove Highlight / Eraser Button
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.className = 'w-7 h-7 rounded-full bg-slate-800 border border-slate-600 text-rose-400 hover:text-rose-300 flex items-center justify-center active:scale-90 transition shrink-0';
@@ -115,7 +112,6 @@ export class StudyHighlighter {
         return;
       }
 
-      // Ensure the selection occurred inside an annotated container
       const anchorNode = sel.anchorNode;
       const highlightContainer = anchorNode?.nodeType === 1 
         ? anchorNode.closest('.highlightable-content') 
@@ -126,7 +122,6 @@ export class StudyHighlighter {
         return;
       }
 
-      // Clone and preserve the Range object immediately
       if (sel.rangeCount > 0) {
         this.currentRange = sel.getRangeAt(0).cloneRange();
         this.showToolbar();
@@ -136,6 +131,38 @@ export class StudyHighlighter {
     document.addEventListener('selectionchange', handleSelection);
     document.addEventListener('touchend', () => setTimeout(handleSelection, 80));
     document.addEventListener('mouseup', () => setTimeout(handleSelection, 50));
+  }
+
+  getRangeContext(range) {
+    if (!range) return { exact: '', prefix: '', suffix: '' };
+
+    const exact = range.toString().trim();
+    if (!exact) return { exact: '', prefix: '', suffix: '' };
+
+    let container = range.commonAncestorContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentElement;
+    }
+    container = container?.closest('.highlightable-content') || container || document.body;
+
+    let prefix = '';
+    let suffix = '';
+
+    try {
+      const preRange = document.createRange();
+      preRange.selectNodeContents(container);
+      preRange.setEnd(range.startContainer, range.startOffset);
+      prefix = preRange.toString().slice(-30);
+
+      const postRange = document.createRange();
+      postRange.selectNodeContents(container);
+      postRange.setStart(range.endContainer, range.endOffset);
+      suffix = postRange.toString().slice(0, 30);
+    } catch (e) {
+      console.warn("Could not calculate surrounding text context:", e);
+    }
+
+    return { exact, prefix, suffix };
   }
 
   showToolbar() {
@@ -163,25 +190,21 @@ export class StudyHighlighter {
   applyHighlight(colorName) {
     if (!this.currentContext) return;
     
-    let selectedText = '';
-    if (this.currentRange) {
-      selectedText = this.currentRange.toString().trim();
-    } else {
-      const sel = window.getSelection();
-      selectedText = sel ? sel.toString().trim() : '';
-    }
-
-    if (!selectedText) return;
+    const { exact, prefix, suffix } = this.getRangeContext(this.currentRange);
+    if (!exact) return;
 
     this.highlights[this.currentContext] = this.highlights[this.currentContext] || [];
     
-    // Remove existing identical entries before pushing new color
+    // Remove duplicate entry if identical context was already saved
     this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(
-      h => h.text !== selectedText
+      h => !(h.text === exact && h.prefix === prefix && h.suffix === suffix)
     );
 
     this.highlights[this.currentContext].push({
-      text: selectedText,
+      id: 'hl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      text: exact,
+      prefix: prefix,
+      suffix: suffix,
       color: colorName,
       createdAt: Date.now()
     });
@@ -193,19 +216,21 @@ export class StudyHighlighter {
   removeHighlight() {
     if (!this.currentContext || !this.highlights[this.currentContext]) return;
 
-    let selectedText = '';
-    if (this.currentRange) {
-      selectedText = this.currentRange.toString().trim();
-    } else {
-      const sel = window.getSelection();
-      selectedText = sel ? sel.toString().trim() : '';
-    }
+    const { exact, prefix, suffix } = this.getRangeContext(this.currentRange);
+    if (!exact) return;
 
-    if (!selectedText) return;
+    const cleanPre = prefix.trim();
+    const cleanPost = suffix.trim();
 
-    this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(
-      h => !h.text.includes(selectedText) && !selectedText.includes(h.text)
-    );
+    this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(hl => {
+      const matchPre = cleanPre && hl.prefix && (hl.prefix.includes(cleanPre) || cleanPre.includes(hl.prefix));
+      const matchPost = cleanPost && hl.suffix && (hl.suffix.includes(cleanPost) || cleanPost.includes(hl.suffix));
+      const matchText = hl.text === exact;
+
+      if ((matchPre || matchPost) && matchText) return false;
+      if (!hl.prefix && !hl.suffix && matchText) return false;
+      return true;
+    });
 
     this.saveHighlights();
     this.onChange();
@@ -221,18 +246,64 @@ export class StudyHighlighter {
     let rendered = String(htmlContent);
     const ctxHighlights = this.highlights[ctx];
 
-    // Sort by text length descending so sub-strings don't break larger highlighted blocks
+    const makeToken = (str) => {
+      if (!str) return '';
+      const parts = str.trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return '';
+      return parts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(?:\\s+|<[^>]+>)*');
+    };
+
+    // Sort by text length descending so longer phrases match before sub-words
     const sorted = [...ctxHighlights].sort((a, b) => b.text.length - a.text.length);
 
-    sorted.forEach(({ text, color }) => {
-      if (!text || text.length < 2) return;
-      
+    sorted.forEach((hl) => {
+      const { text, prefix, suffix, color } = hl;
+      if (!text || text.trim().length === 0) return;
+
       const colObj = this.colors.find(c => c.name === color) || this.colors[0];
-      const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      
-      // Match text outside HTML tags
-      const regex = new RegExp(`(?![^<]*>)(${escaped})`, 'gi');
-      rendered = rendered.replace(regex, `<mark class="rounded px-0.5" style="background-color: ${colObj.bg}; border-bottom: 2px solid ${colObj.border}; color: inherit;">$1</mark>`);
+      const markStart = `<mark class="rounded px-0.5" style="background-color: ${colObj.bg}; border-bottom: 2px solid ${colObj.border}; color: inherit;">`;
+      const markEnd = `</mark>`;
+
+      const exactToken = makeToken(text);
+      const prefixToken = makeToken(prefix);
+      const suffixToken = makeToken(suffix);
+
+      let replaced = false;
+
+      // 1. Precise Match: Prefix + Target Text + Suffix
+      if (prefixToken && suffixToken) {
+        const fullRegex = new RegExp(`(${prefixToken}(?:\\s+|<[^>]+>)*)(${exactToken})((?:\\s+|<[^>]+>)*${suffixToken})`, 'i');
+        if (fullRegex.test(rendered)) {
+          rendered = rendered.replace(fullRegex, `$1${markStart}$2${markEnd}$3`);
+          replaced = true;
+        }
+      }
+
+      // 2. Prefix Anchor Match
+      if (!replaced && prefixToken) {
+        const preRegex = new RegExp(`(${prefixToken}(?:\\s+|<[^>]+>)*)(${exactToken})`, 'i');
+        if (preRegex.test(rendered)) {
+          rendered = rendered.replace(preRegex, `$1${markStart}$2${markEnd}`);
+          replaced = true;
+        }
+      }
+
+      // 3. Suffix Anchor Match
+      if (!replaced && suffixToken) {
+        const postRegex = new RegExp(`(${exactToken})((?:\\s+|<[^>]+>)*${suffixToken})`, 'i');
+        if (postRegex.test(rendered)) {
+          rendered = rendered.replace(postRegex, `${markStart}$1${markEnd}$2`);
+          replaced = true;
+        }
+      }
+
+      // 4. Single-occurrence fallback only for legacy unanchored highlights
+      if (!replaced && !prefixToken && !suffixToken) {
+        const fallbackRegex = new RegExp(`(?![^<]*>)(${exactToken})`, 'i');
+        if (fallbackRegex.test(rendered)) {
+          rendered = rendered.replace(fallbackRegex, `${markStart}$1${markEnd}`);
+        }
+      }
     });
 
     return rendered;
