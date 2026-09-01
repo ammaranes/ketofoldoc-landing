@@ -56,13 +56,13 @@ export const chapter18 = [
       "D": "9"
     },
     "correctAnswer": "B",
-    "explanation": "Apgar scores recorded at 1 minute and 5 minutes after birth remains a valuable method for assessment of the well-being of a neonate. Table 18-2 Apgar Score Apgar score in this case would be 1 + 2 + 1 + 2 + 1 = 7."
+    "explanation": "Apgar scores recorded at 1 minute and 5 minutes after birth remains a valuable method for assessment of the well-being of a neonate. Apgar score in this case would be 1 + 2 + 1 + 2 + 1 = 7."
   },
   {
     "id": 5,
     "chapter": 18,
     "chapterTitle": "Pediatric Anesthesia",
-    "stem": "After initial evaluation of the baby described above, the next step in managing her would be",
+    "stem": "A newborn baby of 37 weeks of gestation has a heart rate of 90 bpm, is crying, is pink with blue extremities, and shows some flexion. After initial evaluation of the baby described above, the next step in managing her would be",
     "options": {
       "A": "Provide positive-pressure ventilation",
       "B": "Chest compressions",
@@ -695,6 +695,6 @@ export const chapter18 = [
       "D": "Cannot be predicted"
     },
     "correctAnswer": "A",
-    "explanation": "Because of shorter circulation times than adults, all pediatric patients have a shorter onset time (up to 50% less) of muscle relaxants. Nonetheless, intravenous succinylcholine (1–1.5 mg/kg) has the fastest onset among muscle relaxants. Significantly larger volume of distribution is attributed to larger dose requirements in infants. With the notable exclusion of succinylcholine, mivacurium, and possibly cisatracurium, infants require significantly less muscle relaxant than older children. Moreover, based on weight, older children require higher doses than adults for some neuromuscular blocking agents (e.g., mivacurium and atracurium). As with adults, a more rapid intubation can be achieved with a muscle relaxant dose that is 1.5 to 2 times the ED95 dose at the expense of prolonging the duration of action. Critical Care David Stahl, Daniel Johnson, and Edward Bittner"
+    "explanation": "Because of shorter circulation times than adults, all pediatric patients have a shorter onset time (up to 50% less) of muscle relaxants. Nonetheless, intravenous succinylcholine (1–1.5 mg/kg) has the fastest onset among muscle relaxants. Significantly larger volume of distribution is attributed to larger dose requirements in infants. With the notable exclusion of succinylcholine, mivacurium, and possibly cisatracurium, infants require significantly less muscle relaxant than older children. Moreover, based on weight, older children require higher doses than adults for some neuromuscular blocking agents (e.g., mivacurium and atracurium). As with adults, a more rapid intubation can be achieved with a muscle relaxant dose that is 1.5 to 2 times the ED95 dose at the expense of prolonging the duration of action."
   }
 ];
