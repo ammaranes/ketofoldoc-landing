@@ -138,7 +138,7 @@
       <div id="options-container" class="space-y-3 mb-6 select-none"></div>
 
       <!-- Explanation & Rationale Box -->
-      <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300">
+      <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300 scroll-mt-24">
         <div class="flex items-center text-emerald-400 font-bold mb-2 select-none">
           <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
         </div>
@@ -1567,6 +1567,11 @@ function toggleSRSMode() {
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         state.userProgress[parentDeckId].answers[parentIdx] = letter;
         saveState();
+        setTimeout(() => {
+          if (!DOM.expBox.classList.contains('hidden')) {
+            DOM.expBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 50);
       }
 
       window.rateRecall = (rating) => {
@@ -1717,16 +1722,21 @@ function toggleSRSMode() {
 
         saveState();
         document.getElementById('modal-decks').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       };
 
       DOM.shuffleBtn.onclick = () => toggleShuffleMode();
       DOM.srsBtn.onclick = () => toggleSRSMode();
-      DOM.nextBtn.onclick = handleNextNavigation;
+      DOM.nextBtn.onclick = () => {
+        handleNextNavigation();
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scrolls to top
+      };
 
       DOM.prevBtn.onclick = () => {
         if (state.sessionState.currentIndex > 0) { 
           state.sessionState.currentIndex--; 
           saveState(); 
+          window.scrollTo({ top: 0, behavior: 'smooth' }); // Scrolls to top
         }
       };
 
