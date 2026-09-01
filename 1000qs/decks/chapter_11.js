@@ -230,7 +230,7 @@ export const chapter11 = [
     "id": 17,
     "chapter": 11,
     "chapterTitle": "Cardiovascular Anesthesia",
-    "stem": "The patient mentioned above develops severe hypotension immediately after intubation. Which of the following agents is most suited to bring the blood pressure back to normal values?",
+    "stem": "A 67-year-old patient with uncontrolled hypertension presents for an elective dialysis access creation. The patient develops severe hypotension immediately after intubation. Which of the following agents is most suited to bring the blood pressure back to normal values?",
     "options": {
       "A": "Ephedrine",
       "B": "Phenylephrine",
@@ -1064,6 +1064,6 @@ export const chapter11 = [
       "D": "Posterior papillary muscle dysfunction"
     },
     "correctAnswer": "D",
-    "explanation": "Acute mitral regurgitation (MR) post–CPB is often noticed as a prominent V wave in PAOP tracing. If there is a transesophageal echocardiograph (TEE) in place, we may be able to see a wide MR jet, with observation of an echogenic mass attached to the mitral valve or when a mobile mass is seen to prolapse into the left atrium during systole and to move back into the left ventricle during diastole. The posterior papillary muscle, along with the posterior wall, is entirely perfused either by the right coronary artery (RCA) or by the third obtuse marginal branch, usually by a single artery unlike the anterior, which derives its blood supply from two arteries. It is usually a complication of acute mitral infarction but maybe seen at the end of CPB due to inadequate myocardial protection (warm blood in the adjacent descending aorta providing inadequate protection) during CPB or air entry into the RCA. Acute MR due to volume overload from excessive fluid administration is usually a central MR as evidenced in TEE with a distended ventricle and can be managed by decreasing the preload. Thoracic Anesthesia Deppu Ushakumari and Ashish Sinha"
+    "explanation": "Acute mitral regurgitation (MR) post–CPB is often noticed as a prominent V wave in PAOP tracing. If there is a transesophageal echocardiograph (TEE) in place, we may be able to see a wide MR jet, with observation of an echogenic mass attached to the mitral valve or when a mobile mass is seen to prolapse into the left atrium during systole and to move back into the left ventricle during diastole. The posterior papillary muscle, along with the posterior wall, is entirely perfused either by the right coronary artery (RCA) or by the third obtuse marginal branch, usually by a single artery unlike the anterior, which derives its blood supply from two arteries. It is usually a complication of acute mitral infarction but maybe seen at the end of CPB due to inadequate myocardial protection (warm blood in the adjacent descending aorta providing inadequate protection) during CPB or air entry into the RCA. Acute MR due to volume overload from excessive fluid administration is usually a central MR as evidenced in TEE with a distended ventricle and can be managed by decreasing the preload."
   }
 ];
