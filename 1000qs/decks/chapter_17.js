@@ -308,7 +308,7 @@ export const chapter17 = [
       "D": "Fetal alkalosis"
     },
     "correctAnswer": "C",
-    "explanation": "Late decelerations are shallow, uniformly shaped decelerations that are characterized by a gradual decrease from and return to baseline of the fetal heart rate. The nadir of late decelerations usually is between 5 and 30 bpm below the baseline. Late decelerations typically begin near the end of a contraction; with return to baseline, FHR always occurring after the contractions have ended. Uteroplacental insufficiency (e.g., umbilical cord compression, maternal supine hypotension syndrome) contributes to late decelerations. Cephalopelvic disproportion and fetal head compression are associated with early decelerations (Fig 17-2). Figure 17-2."
+    "explanation": "Late decelerations are shallow, uniformly shaped decelerations that are characterized by a gradual decrease from and return to baseline of the fetal heart rate. The nadir of late decelerations usually is between 5 and 30 bpm below the baseline. Late decelerations typically begin near the end of a contraction; with return to baseline, FHR always occurring after the contractions have ended. Uteroplacental insufficiency (e.g., umbilical cord compression, maternal supine hypotension syndrome) contributes to late decelerations. Cephalopelvic disproportion and fetal head compression are associated with early decelerations."
   },
   {
     "id": 23,
@@ -812,6 +812,6 @@ export const chapter17 = [
       "D": "Meigs syndrome" 
     },
     "correctAnswer": "B",
-    "explanation": "During pregnancy, hypertrophy and hyperplasia of lactotrophs result in enlargement of the anterior pituitary, but without a corresponding increase in blood supply. As such, major hemorrhage or hypotension during labor and delivery can result in anterior pituitary ischemia and necrosis. Sheehan syndrome specifically is hypopituitarism caused by ischemic necrosis during the peripartum period. Pediatric Anesthesia Dipty Mangla and Ashish Sinha"
+    "explanation": "During pregnancy, hypertrophy and hyperplasia of lactotrophs result in enlargement of the anterior pituitary, but without a corresponding increase in blood supply. As such, major hemorrhage or hypotension during labor and delivery can result in anterior pituitary ischemia and necrosis. Sheehan syndrome specifically is hypopituitarism caused by ischemic necrosis during the peripartum period."
   }
 ];
