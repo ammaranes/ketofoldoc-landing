@@ -700,6 +700,6 @@ export const chapter19 = [
       "D": "Sodium thiosulfate"
     },
     "correctAnswer": "B",
-    "explanation": "The half-life of carboxyhemoglobin is reduced significantly by ventilation with 100% oxygen. Choices A and D are treatments for cyanide poisoning. Ventilation with air would greatly prolong the time to resolution of carboxyhemoglobinemia. Postoperative Anesthesia Care Sheri Berg and Edward Bittner"
+    "explanation": "The half-life of carboxyhemoglobin is reduced significantly by ventilation with 100% oxygen. Choices A and D are treatments for cyanide poisoning. Ventilation with air would greatly prolong the time to resolution of carboxyhemoglobinemia."
   }
 ];
