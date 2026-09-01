@@ -56,7 +56,7 @@ export const chapter18 = [
       "D": "9"
     },
     "correctAnswer": "B",
-    "explanation": "Apgar scores recorded at 1 minute and 5 minutes after birth remains a valuable method for assessment of the well-being of a neonate. Apgar score in this case would be 1 + 2 + 1 + 2 + 1 = 7."
+    "explanation": "Apgar scores recorded at 1 minute and 5 minutes after birth remains a valuable method for assessment of the well-being of a neonate. Apgar score in this case would be 1 + 2 + 1 + 2 + 1 = 7.",
     "explanationImages": [
       "/1000qs/images/ch18/fig_18_e4.png"
     ]  
@@ -73,7 +73,7 @@ export const chapter18 = [
       "D": "Cardiology consult"
     },
     "correctAnswer": "A",
-    "explanation": "Indications of positive-pressure ventilation in a newborn include apnea, gasping respirations, persistent central cyanosis with 100% oxygen, and heart rate less than 100 bpm. Assisted ventilation by bag and mask should be at a rate of 30 to 60 bpm with 100% oxygen. If after 30 seconds the heart rate is less than 80 bpm, chest compressions should be started and the neonate should be intubated (Fig 18-2). Figure 18-2. Reused with permission from Kattwinkel J, Perlman JM, Aziz K, et al. 2010 American Heart Association Guidelines for Cardiopulmonary Resuscitation and Emergency Cardiovascular Care Science. Part 15: Neonatal Resuscitation. Circulation. 2010;122:S909–S919."
+    "explanation": "Indications of positive-pressure ventilation in a newborn include apnea, gasping respirations, persistent central cyanosis with 100% oxygen, and heart rate less than 100 bpm. Assisted ventilation by bag and mask should be at a rate of 30 to 60 bpm with 100% oxygen. If after 30 seconds the heart rate is less than 80 bpm, chest compressions should be started and the neonate should be intubated.",
     "explanationImages": [
       "/1000qs/images/ch18/fig_18_e5.png"
     ]
@@ -195,7 +195,14 @@ export const chapter18 = [
     "chapter": 18,
     "chapterTitle": "Pediatric Anesthesia",
     "stem": "The most common type of tracheoesophageal fistula (TEF) is Figure 18-1.",
-    "options": {},
+    "image": "/1000qs/images/ch18/fig_18_q14.png",
+    "options": {
+      "A": "A",
+      "B": "B",
+      "C": "C",
+      "D": "D",
+      "E": "E"
+    },
     "correctAnswer": "C",
     "explanation": "Among the different types of TEF, the most common is the type IIIB. This is where the upper esophagus ends in a blind pouch and a lower esophagus that connects to the trachea. At birth, TEF is suspected by failure to pass a catheter into the stomach and visualization of the catheter coiled in the blind upper esophageal pouch. Typically, breathing leads to gastric distension and feeding leads to choking and cyanosis. TEF patients are, therefore, prone to pulmonary aspiration. Coexistence of cardiac congenital anomalies is common. TEF patients may have associated vertebral defects, anal atresia, and radial dysplasia, known as the VATER syndrome. Addition of cardiac and limb anomalies is called the VACTERL variant."
   },
@@ -295,7 +302,10 @@ export const chapter18 = [
       "D": "80 bpm for a 3-year-old"
     },
     "correctAnswer": "A",
-    "explanation": "Normal cardiovascular variables in children: Table 18-4"
+    "explanation": "Normal cardiovascular variables in children: Table 18-4",
+    "explanationImages": [
+      "/1000qs/images/ch18/fig_18_e21.png"
+    ]  
   },
   {
     "id": 22,
@@ -323,7 +333,10 @@ export const chapter18 = [
       "D": "50 to 80"
     },
     "correctAnswer": "B",
-    "explanation": "Laboratory value of blood glucose in children: Table 18-5"
+    "explanation": "Laboratory value of blood glucose in children: Table 18-5",
+    "explanationImages": [
+      "/1000qs/images/ch18/fig_18_e23.png"
+    ]  
   },
   {
     "id": 24,
@@ -365,7 +378,10 @@ export const chapter18 = [
       "D": "80 to 90"
     },
     "correctAnswer": "A",
-    "explanation": "Developmental changes in blood volume: Table 18-6 Age Blood Volume (mL/kg) Preterm 90–105 Term neonate 78–86 1–12 Months 73–78 1–3 Years 74–82 4–6 Years 80–86 7–18 Years 83–90 Adults 68–88"
+    "explanation": "Developmental changes in blood volume: Table 18-6 Age Blood Volume (mL/kg) Preterm 90–105 Term neonate 78–86 1–12 Months 73–78 1–3 Years 74–82 4–6 Years 80–86 7–18 Years 83–90 Adults 68–88",
+    "explanationImages": [
+      "/1000qs/images/ch18/fig_18_e26.png"
+    ]  
   },
   {
     "id": 27,
