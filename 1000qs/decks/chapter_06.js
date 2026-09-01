@@ -153,7 +153,7 @@ export const chapter06 = [
       "C": "Ephedrine",
       "D": "Phenylephrine"
     },
-    "correctAnswer": "B",
+    "correctAnswer": "C",
     "explanation": "Phenelzine inhibits monoamine oxidase, an enzyme that metabolizes catecholamines, allowing their levels to build up in the adrenergic neurons. Ephedrine has both direct and indirect actions on adrenergic system. Indirect action involves release of exaggerated amounts of norepinephrine from the adrenergic neurons leading to catastrophic increase in blood pressure. More direct-acting medication like phenylephrine is a better choice in a patient using monoamine oxidase inhibitors."
   },
   {
@@ -1414,6 +1414,6 @@ export const chapter06 = [
       "D": "Radio contrast dyes"
     },
     "correctAnswer": "A",
-    "explanation": "Anaphylactic reaction during anesthesia is estimated to occur between 1 in 5,000 and 1 in 25,000 cases. Neuromuscular-blocking drugs seem to be the most common agents causing this reaction. Incidence is far too low to determine the relative frequency of occurrence with individual neuromuscular blocker. Latex, antibiotics, and induction agents are much less common etiologic agents in anesthesia. Opioids extremely rarely cause anaphylactic reactions. Spinal and Epidural Anesthesia Thomas Halaszynski"
+    "explanation": "Anaphylactic reaction during anesthesia is estimated to occur between 1 in 5,000 and 1 in 25,000 cases. Neuromuscular-blocking drugs seem to be the most common agents causing this reaction. Incidence is far too low to determine the relative frequency of occurrence with individual neuromuscular blocker. Latex, antibiotics, and induction agents are much less common etiologic agents in anesthesia. Opioids extremely rarely cause anaphylactic reactions."
   }
 ];
