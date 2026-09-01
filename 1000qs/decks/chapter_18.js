@@ -57,6 +57,9 @@ export const chapter18 = [
     },
     "correctAnswer": "B",
     "explanation": "Apgar scores recorded at 1 minute and 5 minutes after birth remains a valuable method for assessment of the well-being of a neonate. Apgar score in this case would be 1 + 2 + 1 + 2 + 1 = 7."
+    "explanationImages": [
+      "/1000qs/images/ch18/fig_18_e4.png"
+    ]  
   },
   {
     "id": 5,
@@ -71,6 +74,9 @@ export const chapter18 = [
     },
     "correctAnswer": "A",
     "explanation": "Indications of positive-pressure ventilation in a newborn include apnea, gasping respirations, persistent central cyanosis with 100% oxygen, and heart rate less than 100 bpm. Assisted ventilation by bag and mask should be at a rate of 30 to 60 bpm with 100% oxygen. If after 30 seconds the heart rate is less than 80 bpm, chest compressions should be started and the neonate should be intubated (Fig 18-2). Figure 18-2. Reused with permission from Kattwinkel J, Perlman JM, Aziz K, et al. 2010 American Heart Association Guidelines for Cardiopulmonary Resuscitation and Emergency Cardiovascular Care Science. Part 15: Neonatal Resuscitation. Circulation. 2010;122:S909–S919."
+    "explanationImages": [
+      "/1000qs/images/ch18/fig_18_e5.png"
+    ]
   },
   {
     "id": 6,
