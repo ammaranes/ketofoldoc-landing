@@ -235,7 +235,7 @@ export const chapter03 = [
       "A": "Carbonates, water, heat",
       "B": "Carbonates, heat, sodium hydroxide",
       "C": "Sodium hydroxide, water, heat",
-      "D": "Carbonates, sodium hydroxide, water, heat 1. CO2 + H2O → H2CO3 2. H2CO3 + 2 NaOH (or KOH) → Na2CO3 (or K2CO3) + 2 H2O + Energy 3. Na2CO3 (or K2CO3) + Ca(OH)2 → CaCO3 + 2 NaOH (or KOH)"
+      "D": "Carbonates, sodium hydroxide, water, heat"
     },
     "correctAnswer": "D",
     "explanation": "End products of the reaction occurring in a soda lime CO2 canister are carbonates, sodium hydroxide (regeneration), water, and heat. Following are the reactions:"
@@ -365,6 +365,6 @@ export const chapter03 = [
       "D": "Desflurane"
     },
     "correctAnswer": "D",
-    "explanation": "Desflurane produces the highest amount of carbon monoxide in the CO2-absorbent canister, which can increase carboxyhemoglobin blood concentration. Production of carbon monoxide is increased by using low fresh gas flow rates, high concentrations of volatile agent, and a dry absorbent. Patient Monitoring Darren Hyatt, Ala Nozari, and Edward Bittner"
+    "explanation": "Desflurane produces the highest amount of carbon monoxide in the CO2-absorbent canister, which can increase carboxyhemoglobin blood concentration. Production of carbon monoxide is increased by using low fresh gas flow rates, high concentrations of volatile agent, and a dry absorbent."
   }
 ];
