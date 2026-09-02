@@ -755,7 +755,7 @@ export const chapter06 = [
       "C": "Mitral regurgitation",
       "D": "Renal failure"
     },
-    "correctAnswer": "D",
+    "correctAnswer": "B",
     "explanation": "Hallmark of nitroprusside poisoning is increasing metabolic acidosis secondary to impaired oxidative phosphorylation in the cell because of accumulation of cyanide ions. Acute myocardial infarction is not a contraindication in itself of nitroprusside therapy as long as it is needed to treat high blood pressure. Same is true for mitral regurgitation, and in fact, nitroprusside may be helpful as it may increase the cardiac output in this condition by decreasing the afterload. Renal failure may increase the availability of sulfate ion, which allows production of more thiosulfate to act as a donor and thus convert cyanide to thiocyanate. Prolonged administration of high doses of nitroprusside may lead to thiocyanate accumulation and toxicity."
   },
   {
