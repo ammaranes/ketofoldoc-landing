@@ -762,7 +762,7 @@ export const chapter17 = [
     "id": 55,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The appropriate next step considering persistent fetal bradycardia (<80 bpm) is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 34+1 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The appropriate next step considering persistent fetal bradycardia (<80 bpm) is",
     "options": {
       "A": "Administer 1 mg/kg of rocuronium intravenously",
       "B": "Use bag-mask ventilation and allow surgical delivery to proceed",
