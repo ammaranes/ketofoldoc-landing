@@ -637,6 +637,7 @@ export const chapter13 = [
     "chapter": 13,
     "chapterTitle": "Neuroanesthesia",
     "stem": "The following graph depicts the relationship between cerebral perfusion and Figure 13-1.",
+    "image": "/1000qs/images/ch13/fig_13_q46.png",
     "options": {
       "A": "PaCO2",
       "B": "PaO2",
@@ -651,6 +652,7 @@ export const chapter13 = [
     "chapter": 13,
     "chapterTitle": "Neuroanesthesia",
     "stem": "The following graph depicts the relationship between cerebral perfusion and Figure 13-2.",
+    "image": "/1000qs/images/ch13/fig_13_q47.png",
     "options": {
       "A": "PaCO2",
       "B": "PaO2",
@@ -700,6 +702,6 @@ export const chapter13 = [
       "D": "Hypertension, hypervolemia, hypocarbia"
     },
     "correctAnswer": "A",
-    "explanation": "Cerebral vasospasm occurs in about one-third of patients surviving the initial aneurysmal rupture, and carries a high degree of morbidity and mortality. The degree of vasospasm depends on the degree of initial subarachnoid hemorrhage. Vasospasm usually develops 3 to 14 days postsubarachnoid hemorrhage results in narrowing of cerebral blood vessels and decreased blood flow distally. This may lead to an ischemic deficit and cerebral infarction, if left untreated. Therapies for cerebral vasospasm include “triple-H therapy” (hypertension/hypervolemia/hemodilution), balloon angioplasty, and intra-arterial nicardipine and other vasodilators. <CT> Gastrointestinal, Liver, and Renal Diseases Thoha Pham"
+    "explanation": "Cerebral vasospasm occurs in about one-third of patients surviving the initial aneurysmal rupture, and carries a high degree of morbidity and mortality. The degree of vasospasm depends on the degree of initial subarachnoid hemorrhage. Vasospasm usually develops 3 to 14 days postsubarachnoid hemorrhage results in narrowing of cerebral blood vessels and decreased blood flow distally. This may lead to an ischemic deficit and cerebral infarction, if left untreated. Therapies for cerebral vasospasm include “triple-H therapy” (hypertension/hypervolemia/hemodilution), balloon angioplasty, and intra-arterial nicardipine and other vasodilators."
   }
 ];
