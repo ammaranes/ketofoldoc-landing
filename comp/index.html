@@ -1694,6 +1694,7 @@
 
         if (state.sessionState.isSRSMode) {
           handleNextNavigation();
+          window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
       };
 
