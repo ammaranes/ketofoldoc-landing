@@ -1551,9 +1551,10 @@
 
         if (state.sessionState.isSRSMode) {
           handleNextNavigation();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       };
-
+      
       function renderDeckList() {
         DOM.deckList.innerHTML = '';
         const deckKeys = Object.keys(state.decks);
