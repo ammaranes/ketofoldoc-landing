@@ -139,8 +139,7 @@
       <div id="options-container" class="space-y-3 mb-6 select-none"></div>
 
       <!-- Explanation & Rationale Box -->
-      <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300">
-        <div class="flex items-center text-emerald-400 font-bold mb-2 select-none">
+      <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300 scroll-mt-24">        <div class="flex items-center text-emerald-400 font-bold mb-2 select-none">
           <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
         </div>
         
@@ -466,6 +465,76 @@
   <script type="module">
     import { StudyHighlighter } from '/js/highlighter.js';
 
+    // Cached DOM Elements
+    const DOM = {
+      viewEmpty: document.getElementById('view-empty'),
+      viewQuiz: document.getElementById('view-quiz'),
+      quizFooter: document.getElementById('quiz-footer'),
+      deckTitle: document.getElementById('deck-title'),
+      deckProgressText: document.getElementById('deck-progress-text'),
+      progressBarFill: document.getElementById('progress-bar-fill'),
+      emptyTitle: document.getElementById('empty-title'),
+      emptyDesc: document.getElementById('empty-desc'),
+      btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
+      questionSourceBadge: document.getElementById('question-source-badge'),
+      qNumberBadge: document.getElementById('question-number-badge'),
+      scoreBadge: document.getElementById('score-badge'),
+      shuffleBtn: document.getElementById('btn-shuffle'),
+      shuffleTag: document.getElementById('shuffle-mode-tag'),
+      srsBtn: document.getElementById('btn-srs-filter'),
+      srsTag: document.getElementById('srs-mode-tag'),
+      qStem: document.getElementById('question-stem'),
+      stemImgContainer: document.getElementById('stem-image-container'),
+      stemImg: document.getElementById('stem-image'),
+      flagBtn: document.getElementById('btn-flag'),
+      optionsContainer: document.getElementById('options-container'),
+      expBox: document.getElementById('explanation-box'),
+      expContent: document.getElementById('explanation-content'),
+      expImgContainer: document.getElementById('explanation-images-container'),
+      srsStatusTag: document.getElementById('srs-status-tag'),
+      prevBtn: document.getElementById('btn-prev'),
+      nextBtn: document.getElementById('btn-next'),
+      revealBtn: document.getElementById('btn-reveal'),
+      deckList: document.getElementById('deck-list'),
+      selectedSummaryText: document.getElementById('selected-summary-text'),
+      btnSelectAll: document.getElementById('btn-select-all'),
+      btnClearAll: document.getElementById('btn-clear-all'),
+      btnResetSelected: document.getElementById('btn-reset-selected'),
+      btnLaunchMulti: document.getElementById('btn-launch-multi'),
+      btnLaunchText: document.getElementById('btn-launch-text'),
+      modalDecks: document.getElementById('modal-decks'),
+      btnMenu: document.getElementById('btn-menu'),
+      btnCloseDecks: document.getElementById('btn-close-decks'),
+      modalSearch: document.getElementById('modal-search'),
+      searchInput: document.getElementById('search-input'),
+      searchResults: document.getElementById('search-results-list'),
+      searchCountBadge: document.getElementById('search-count-badge'),
+      btnSearch: document.getElementById('btn-search'),
+      btnCloseSearch: document.getElementById('btn-close-search'),
+      modalAuth: document.getElementById('modal-auth'),
+      btnAuthModal: document.getElementById('btn-auth-modal'),
+      btnCloseAuthModal: document.getElementById('btn-close-auth-modal'),
+      authStateLoggedIn: document.getElementById('auth-state-logged-in'),
+      authStateLoggedOut: document.getElementById('auth-state-logged-out'),
+      authAvatar: document.getElementById('auth-avatar'),
+      userDisplayName: document.getElementById('user-display-name'),
+      userDisplayEmail: document.getElementById('user-display-email'),
+      userDisplayAvatar: document.getElementById('user-display-avatar'),
+      syncDot: document.getElementById('sync-dot'),
+      btnGoogleLogin: document.getElementById('btn-google-login'),
+      authErrorBox: document.getElementById('auth-error-box'),
+      btnLogout: document.getElementById('btn-logout'),
+      modalFeedback: document.getElementById('modal-feedback'),
+      btnFeedbackTrigger: document.getElementById('btn-feedback-trigger'),
+      btnCloseFeedback: document.getElementById('btn-close-feedback'),
+      btnCancelFeedback: document.getElementById('btn-cancel-feedback'),
+      btnSubmitFeedback: document.getElementById('btn-submit-feedback'),
+      feedbackContextBadge: document.getElementById('feedback-context-badge'),
+      feedbackContextSummary: document.getElementById('feedback-context-summary'),
+      feedbackComment: document.getElementById('feedback-comment'),
+      feedbackStatusMsg: document.getElementById('feedback-status-msg')
+    };
+
     async function initApp() {
       let allDecks = [];
       try {
@@ -482,9 +551,8 @@
       }
 
       if (!allDecks || allDecks.length === 0) {
-        const listEl = document.getElementById('deck-list');
-        if (listEl) {
-          listEl.innerHTML = `
+        if (DOM.deckList) {
+          DOM.deckList.innerHTML = `
             <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/60 text-center text-xs text-rose-300 space-y-2">
               <p class="font-bold">⚠️ Modules could not be loaded</p>
               <p class="text-[11px] text-slate-400">Please verify your internet connection or reload the page.</p>
@@ -515,7 +583,7 @@
         };
       }
 
-      // Options Normalization Helper (Supports Array & Object schemas)
+      // Options Normalization Helper
       function getNormalizedOptions(q) {
         if (!q || !q.options) return [];
         if (Array.isArray(q.options)) {
@@ -542,7 +610,7 @@
         return [];
       }
 
-      // Spaced Repetition (SM-2) Calculator (Timezone Aware)
+      // Spaced Repetition (SM-2) Calculator
       function calculateNextSRS(currentSRS, rating) {
         let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
         const now = new Date();
@@ -583,7 +651,7 @@
         };
       }
 
-      // Build Decks Map from allDecks
+      // Build Decks Map
       const DECKS = {};
       (allDecks || []).forEach(d => {
         DECKS[d.id] = d;
@@ -845,35 +913,31 @@
           if (user) initUserCloudSync(user.uid);
           else {
             if (syncUnsubscribe) syncUnsubscribe();
-            document.getElementById('sync-dot').classList.add('hidden');
+            DOM.syncDot.classList.add('hidden');
           }
         });
       }
 
       function updateAuthUI(user) {
-        const loggedInView = document.getElementById('auth-state-logged-in');
-        const loggedOutView = document.getElementById('auth-state-logged-out');
-        const avatar = document.getElementById('auth-avatar');
-
         if (user) {
-          loggedInView.classList.remove('hidden');
-          loggedOutView.classList.add('hidden');
-          document.getElementById('user-display-name').textContent = user.displayName || 'Doctor / Candidate';
-          document.getElementById('user-display-email').textContent = user.email;
+          DOM.authStateLoggedIn.classList.remove('hidden');
+          DOM.authStateLoggedOut.classList.add('hidden');
+          DOM.userDisplayName.textContent = user.displayName || 'Doctor / Candidate';
+          DOM.userDisplayEmail.textContent = user.email;
           const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
-          document.getElementById('user-display-avatar').textContent = initial;
-          avatar.innerHTML = `<span class="text-blue-400 font-bold">${initial}</span>`;
+          DOM.userDisplayAvatar.textContent = initial;
+          DOM.authAvatar.innerHTML = `<span class="text-blue-400 font-bold">${initial}</span>`;
         } else {
-          loggedInView.classList.add('hidden');
-          loggedOutView.classList.remove('hidden');
-          avatar.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i>`;
+          DOM.authStateLoggedIn.classList.add('hidden');
+          DOM.authStateLoggedOut.classList.remove('hidden');
+          DOM.authAvatar.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i>`;
         }
         lucide.createIcons();
       }
 
       function initUserCloudSync(userId) {
         if (!db) return;
-        document.getElementById('sync-dot').classList.remove('hidden');
+        DOM.syncDot.classList.remove('hidden');
         if (syncUnsubscribe) syncUnsubscribe();
 
         const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
@@ -925,21 +989,16 @@
       }
 
       // Global Search
-      const searchModal = document.getElementById('modal-search');
-      const searchInput = document.getElementById('search-input');
-      const searchResults = document.getElementById('search-results-list');
-      const searchCountBadge = document.getElementById('search-count-badge');
-
       function openSearchModal() {
-        searchModal.classList.remove('hidden');
-        searchInput.value = '';
-        searchInput.focus();
+        DOM.modalSearch.classList.remove('hidden');
+        DOM.searchInput.value = '';
+        DOM.searchInput.focus();
         renderSearchResults('');
         lucide.createIcons();
       }
 
       function closeSearchModal() {
-        searchModal.classList.add('hidden');
+        DOM.modalSearch.classList.add('hidden');
       }
 
       function highlightKeyword(text, query) {
@@ -998,21 +1057,21 @@
 
       function renderSearchResults(query) {
         const results = searchAllQuestions(query);
-        searchResults.innerHTML = '';
+        DOM.searchResults.innerHTML = '';
 
         if (query.trim().length < 2) {
-          searchResults.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">Type at least 2 characters to search across all modules...</div>`;
-          searchCountBadge.textContent = '0 results found';
+          DOM.searchResults.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">Type at least 2 characters to search across all modules...</div>`;
+          DOM.searchCountBadge.textContent = '0 results found';
           return;
         }
 
         if (results.length === 0) {
-          searchResults.innerHTML = `<div class="text-xs text-amber-400/80 text-center py-8">No matching terms found for "<b>${window.DOMPurify ? window.DOMPurify.sanitize(query) : query}</b>".</div>`;
-          searchCountBadge.textContent = '0 results found';
+          DOM.searchResults.innerHTML = `<div class="text-xs text-amber-400/80 text-center py-8">No matching terms found for "<b>${window.DOMPurify ? window.DOMPurify.sanitize(query) : query}</b>".</div>`;
+          DOM.searchCountBadge.textContent = '0 results found';
           return;
         }
 
-        searchCountBadge.textContent = `${results.length} result${results.length > 1 ? 's' : ''} found`;
+        DOM.searchCountBadge.textContent = `${results.length} result${results.length > 1 ? 's' : ''} found`;
 
         results.forEach(res => {
           const item = document.createElement('div');
@@ -1040,14 +1099,14 @@
             closeSearchModal();
           };
 
-          searchResults.appendChild(item);
+          DOM.searchResults.appendChild(item);
         });
       }
 
-      document.getElementById('btn-search').onclick = openSearchModal;
-      document.getElementById('btn-close-search').onclick = closeSearchModal;
+      DOM.btnSearch.onclick = openSearchModal;
+      DOM.btnCloseSearch.onclick = closeSearchModal;
 
-      searchInput.addEventListener('input', debounce((e) => {
+      DOM.searchInput.addEventListener('input', debounce((e) => {
         renderSearchResults(e.target.value);
       }));
 
@@ -1057,21 +1116,21 @@
           openSearchModal();
         }
         if (e.key === 'Escape') {
-          if (!searchModal.classList.contains('hidden')) closeSearchModal();
-          if (!document.getElementById('modal-feedback').classList.contains('hidden')) document.getElementById('modal-feedback').classList.add('hidden');
+          if (!DOM.modalSearch.classList.contains('hidden')) closeSearchModal();
+          if (!DOM.modalFeedback.classList.contains('hidden')) DOM.modalFeedback.classList.add('hidden');
         }
         
         const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
-        if (!isTyping && searchModal.classList.contains('hidden') && document.getElementById('modal-feedback').classList.contains('hidden')) {
+        if (!isTyping && DOM.modalSearch.classList.contains('hidden') && DOM.modalFeedback.classList.contains('hidden')) {
           if (e.key === 'ArrowRight') {
             e.preventDefault();
-            document.getElementById('btn-next').click();
+            DOM.nextBtn.click();
           } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            document.getElementById('btn-prev').click();
+            DOM.prevBtn.click();
           } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
             e.preventDefault();
-            document.getElementById('btn-reveal').click();
+            DOM.revealBtn.click();
           }
         }
       });
@@ -1105,13 +1164,13 @@
       }
 
       function shuffleArray(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
 
       function toggleSRSMode() {
         const activeDeck = getActiveCompositeDeck();
@@ -1122,19 +1181,22 @@
         state.sessionState.srsSessionAnswers = {};
 
         if (state.sessionState.isSRSMode) {
-        const dueIndices = getDueIndices(activeDeck);
+          const dueIndices = getDueIndices(activeDeck);
 
-        if (dueIndices.length === 0) {
-          alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
-          state.sessionState.isSRSMode = false;
+          if (dueIndices.length === 0) {
+            alert('🎉 Excellent! No previously studied questions are due for review across the selected chapters today.');
+            state.sessionState.isSRSMode = false;
+            state.sessionState.order = getUnansweredIndices(activeDeck);
+            state.sessionState.currentIndex = 0;
+          } else {
+            // Auto-shuffles the due review questions upon SRS activation
+            state.sessionState.order = shuffleArray(dueIndices);
+            state.sessionState.currentIndex = 0;
+          }
+        } else {
           state.sessionState.order = getUnansweredIndices(activeDeck);
           state.sessionState.currentIndex = 0;
-        } else {
-          // Auto-shuffles the due review questions upon SRS activation
-          state.sessionState.order = shuffleArray(dueIndices);
-          state.sessionState.currentIndex = 0;
         }
-      }
         saveState();
       }
 
@@ -1197,12 +1259,12 @@
         const activeDeck = getActiveCompositeDeck();
 
         if (!activeDeck || activeDeck.questions.length === 0) {
-          document.getElementById('view-empty').classList.remove('hidden');
-          document.getElementById('view-quiz').classList.add('hidden');
-          document.getElementById('quiz-footer').classList.add('hidden');
-          document.getElementById('deck-title').textContent = 'Saudi Anesthesia Board QB';
-          document.getElementById('deck-progress-text').textContent = '0 / 0 Completed';
-          document.getElementById('progress-bar-fill').style.width = '0%';
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
+          DOM.deckTitle.textContent = 'Saudi Anesthesia Board QB';
+          DOM.deckProgressText.textContent = '0 / 0 Completed';
+          DOM.progressBarFill.style.width = '0%';
           return;
         }
 
@@ -1221,30 +1283,30 @@
 
         // Display Completed Screen
         if ((activeTotal === 0 || activeDeck.isCompleted) && !state.sessionState.isSRSMode) {
-          document.getElementById('view-empty').classList.remove('hidden');
-          document.getElementById('view-quiz').classList.add('hidden');
-          document.getElementById('quiz-footer').classList.add('hidden');
+          DOM.viewEmpty.classList.remove('hidden');
+          DOM.viewQuiz.classList.add('hidden');
+          DOM.quizFooter.classList.add('hidden');
 
           if (activeDeck.isCompleted) {
-            document.getElementById('empty-title').textContent = "Module Completed!";
-            document.getElementById('empty-desc').textContent = "You have answered every question in the selected module(s). Click below to reset and practice again.";
-            document.getElementById('btn-reset-current-deck').classList.remove('hidden');
+            DOM.emptyTitle.textContent = "Module Completed!";
+            DOM.emptyDesc.textContent = "You have answered every question in the selected module(s). Click below to reset and practice again.";
+            DOM.btnResetCurrentDeck.classList.remove('hidden');
           } else {
-            document.getElementById('empty-title').textContent = "No Questions Available";
-            document.getElementById('empty-desc').textContent = "Select one or more modules from the menu to start practicing.";
-            document.getElementById('btn-reset-current-deck').classList.add('hidden');
+            DOM.emptyTitle.textContent = "No Questions Available";
+            DOM.emptyDesc.textContent = "Select one or more modules from the menu to start practicing.";
+            DOM.btnResetCurrentDeck.classList.add('hidden');
           }
 
-          document.getElementById('deck-title').textContent = activeDeck.title;
-          document.getElementById('deck-progress-text').textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
-          document.getElementById('progress-bar-fill').style.width = '100%';
+          DOM.deckTitle.textContent = activeDeck.title;
+          DOM.deckProgressText.textContent = `${activeDeck.totalOriginal} / ${activeDeck.totalOriginal} Completed`;
+          DOM.progressBarFill.style.width = '100%';
           lucide.createIcons();
           return;
         }
 
-        document.getElementById('view-empty').classList.add('hidden');
-        document.getElementById('view-quiz').classList.remove('hidden');
-        document.getElementById('quiz-footer').classList.remove('hidden');
+        DOM.viewEmpty.classList.add('hidden');
+        DOM.viewQuiz.classList.remove('hidden');
+        DOM.quizFooter.classList.remove('hidden');
 
         if (state.sessionState.currentIndex >= activeTotal) {
           state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
@@ -1259,20 +1321,19 @@
         const parentIdx = q._parentIndex !== undefined ? q._parentIndex : 0;
 
         const sourceDeck = state.decks[parentDeckId];
-        const sourceBadge = document.getElementById('question-source-badge');
-        if (sourceBadge) {
-          sourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
+        if (DOM.questionSourceBadge) {
+          DOM.questionSourceBadge.textContent = sourceDeck ? sourceDeck.title : '';
         }
 
-        document.getElementById('deck-title').textContent = activeDeck.title;
+        DOM.deckTitle.textContent = activeDeck.title;
         
         const totalOriginal = activeDeck.totalOriginal || activeDeck.questions.length;
         const completedCount = activeDeck.totalAnswered || 0;
         const remainingCount = Math.max(0, totalOriginal - completedCount);
 
-        document.getElementById('deck-progress-text').textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
+        DOM.deckProgressText.textContent = `${completedCount} / ${totalOriginal} Completed (${remainingCount} Left)`;
         const pct = totalOriginal > 0 ? (completedCount / totalOriginal) * 100 : 0;
-        document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+        DOM.progressBarFill.style.width = `${pct}%`;
 
         // Calculate Accuracy across all selected modules
         let answeredCount = 0;
@@ -1296,31 +1357,26 @@
         });
 
         const acc = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 100;
-        document.getElementById('score-badge').textContent = `Accuracy: ${acc}%`;
-
-        const shuffleBtn = document.getElementById('btn-shuffle');
-        const shuffleTag = document.getElementById('shuffle-mode-tag');
-        const srsBtn = document.getElementById('btn-srs-filter');
-        const srsTag = document.getElementById('srs-mode-tag');
+        DOM.scoreBadge.textContent = `Accuracy: ${acc}%`;
 
         if (state.sessionState.isShuffled) {
-          shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
-          shuffleTag.classList.remove('hidden');
-          srsTag.classList.add('hidden');
-          srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+          DOM.shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.remove('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         } else if (state.sessionState.isSRSMode) {
-          srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
-          srsTag.classList.remove('hidden');
-          shuffleTag.classList.add('hidden');
-          shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          document.getElementById('question-number-badge').textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
+          DOM.srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsTag.classList.remove('hidden');
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.qNumberBadge.textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
         } else {
-          shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
-          shuffleTag.classList.add('hidden');
-          srsTag.classList.add('hidden');
-          document.getElementById('question-number-badge').textContent = `Question ${qPointer + 1} of ${activeTotal}`;
+          DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+          DOM.shuffleTag.classList.add('hidden');
+          DOM.srsTag.classList.add('hidden');
+          DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
         }
 
         // Render Question Stem with Safe Highlighter Fallback
@@ -1328,31 +1384,27 @@
         highlighter.setContext(questionContextId);
 
         const rawStem = q.stem || q.question || q.text || '';
-        const stemEl = document.getElementById('question-stem');
-        stemEl.className = "text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content";
-        stemEl.setAttribute('data-highlight-context', questionContextId);
-        stemEl.setAttribute('data-raw-text', rawStem);
-        stemEl.innerHTML = highlighter.renderHighlights(rawStem, questionContextId);
+        DOM.qStem.className = "text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content";
+        DOM.qStem.setAttribute('data-highlight-context', questionContextId);
+        DOM.qStem.setAttribute('data-raw-text', rawStem);
+        DOM.qStem.innerHTML = highlighter.renderHighlights(rawStem, questionContextId);
 
         // Render Stem Image with absolute path resolution
-        const stemImgContainer = document.getElementById('stem-image-container');
-        const stemImg = document.getElementById('stem-image');
         const rawImg = q.image || q.figure || q.stemImage || q.img || q.figureImage;
         if (rawImg) {
           let imgPath = String(rawImg);
           if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
             imgPath = '/' + imgPath;
           }
-          stemImg.src = imgPath;
-          stemImgContainer.classList.remove('hidden');
+          DOM.stemImg.src = imgPath;
+          DOM.stemImgContainer.classList.remove('hidden');
         } else {
-          stemImgContainer.classList.add('hidden');
+          DOM.stemImgContainer.classList.add('hidden');
         }
 
         const parentProgress = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         const isFlagged = (parentProgress.flags || []).includes(parentIdx);
-        const flagBtn = document.getElementById('btn-flag');
-        flagBtn.className = isFlagged 
+        DOM.flagBtn.className = isFlagged 
           ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0' 
           : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
@@ -1360,8 +1412,7 @@
           ? (state.sessionState.srsSessionAnswers?.[`${parentDeckId}_${parentIdx}`])
           : ((parentProgress.answers || {})[parentIdx]);
 
-        const optionsContainer = document.getElementById('options-container');
-        optionsContainer.innerHTML = '';
+        DOM.optionsContainer.innerHTML = '';
         const normalizedOpts = getNormalizedOptions(q);
 
         normalizedOpts.forEach(({ key: letter, text }) => {
@@ -1386,43 +1437,39 @@
           btn.appendChild(textSpan);
           btn.onclick = () => handleSelectOption(q, letter);
           
-          optionsContainer.appendChild(btn);
+          DOM.optionsContainer.appendChild(btn);
         });
 
-        const expBox = document.getElementById('explanation-box');
-        const expImgContainer = document.getElementById('explanation-images-container');
         const expText = q.explanation || q.rationale || '';
 
         if (selectedAnswer && (expText || q.correctAnswer)) {
-          expBox.classList.remove('hidden');
+          DOM.expBox.classList.remove('hidden');
 
           const formattedExp = formatMarkdown(expText) || 'No rationale provided.';
-          const expContentEl = document.getElementById('explanation-content');
-          expContentEl.className = "leading-relaxed space-y-2 highlightable-content";
-          expContentEl.setAttribute('data-highlight-context', questionContextId);
-          expContentEl.setAttribute('data-raw-text', formattedExp);
+          DOM.expContent.className = "leading-relaxed space-y-2 highlightable-content";
+          DOM.expContent.setAttribute('data-highlight-context', questionContextId);
+          DOM.expContent.setAttribute('data-raw-text', formattedExp);
 
-          expContentEl.innerHTML = `
+          DOM.expContent.innerHTML = `
             <div><b>Correct Answer:</b> Option ${q.correctAnswer || 'A'}</div>
             <div class="mt-1 text-slate-300">${highlighter.renderHighlights(formattedExp, questionContextId)}</div>
           `;
 
           const srsData = (parentProgress.srs || {})[parentIdx];
-          const srsTagStatus = document.getElementById('srs-status-tag');
-          if (srsTagStatus) {
+          if (DOM.srsStatusTag) {
             if (srsData && srsData.dueDate) {
               const daysLeft = Math.ceil((new Date(srsData.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-              srsTagStatus.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srsData.interval}d)`;
-              srsTagStatus.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
+              DOM.srsStatusTag.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srsData.interval}d)`;
+              DOM.srsStatusTag.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
             } else {
-              srsTagStatus.textContent = 'Not rated yet';
-              srsTagStatus.className = 'text-[10px] text-slate-500';
+              DOM.srsStatusTag.textContent = 'Not rated yet';
+              DOM.srsStatusTag.className = 'text-[10px] text-slate-500';
             }
           }
 
           const expImages = q.explanationImages || q.explanation_images || [];
           if (Array.isArray(expImages) && expImages.length > 0) {
-            expImgContainer.innerHTML = '';
+            DOM.expImgContainer.innerHTML = '';
             expImages.forEach(src => {
               if (src) {
                 let cleanSrc = String(src);
@@ -1432,27 +1479,25 @@
                 const img = document.createElement('img');
                 img.src = cleanSrc;
                 img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
-                expImgContainer.appendChild(img);
+                DOM.expImgContainer.appendChild(img);
               }
             });
-            expImgContainer.classList.remove('hidden');
-          } else if (expImgContainer) {
-            expImgContainer.classList.add('hidden');
+            DOM.expImgContainer.classList.remove('hidden');
+          } else if (DOM.expImgContainer) {
+            DOM.expImgContainer.classList.add('hidden');
           }
         } else {
-          expBox.classList.add('hidden');
+          DOM.expBox.classList.add('hidden');
         }
 
-        const prevBtn = document.getElementById('btn-prev');
-        const nextBtn = document.getElementById('btn-next');
-        if (prevBtn) {
-          prevBtn.disabled = qPointer <= 0;
-          prevBtn.classList.toggle('opacity-50', qPointer <= 0);
-          prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
+        if (DOM.prevBtn) {
+          DOM.prevBtn.disabled = qPointer <= 0;
+          DOM.prevBtn.classList.toggle('opacity-50', qPointer <= 0);
+          DOM.prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
         }
-        if (nextBtn) {
+        if (DOM.nextBtn) {
           const isLast = qPointer >= activeTotal - 1;
-          nextBtn.innerHTML = isLast 
+          DOM.nextBtn.innerHTML = isLast 
             ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
             : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
         }
@@ -1473,6 +1518,12 @@
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         state.userProgress[parentDeckId].answers[parentIdx] = letter;
         saveState();
+        
+        setTimeout(() => {
+          if (!DOM.expBox.classList.contains('hidden')) {
+            DOM.expBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 50); 
       }
 
       window.rateRecall = (rating) => {
@@ -1497,10 +1548,9 @@
         const updatedSRS = calculateNextSRS(state.userProgress[parentDeckId].srs[parentIdx], rating);
         state.userProgress[parentDeckId].srs[parentIdx] = updatedSRS;
         
-        const srsTagStatus = document.getElementById('srs-status-tag');
-        if (srsTagStatus) {
-          srsTagStatus.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
-          srsTagStatus.className = updatedSRS.interval <= 1 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
+        if (DOM.srsStatusTag) {
+          DOM.srsStatusTag.textContent = `Due in ${updatedSRS.interval}d (Interval: ${updatedSRS.interval}d)`;
+          DOM.srsStatusTag.className = updatedSRS.interval <= 1 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
         }
 
         saveState();
@@ -1511,8 +1561,7 @@
       };
 
       function renderDeckList() {
-        const list = document.getElementById('deck-list');
-        list.innerHTML = '';
+        DOM.deckList.innerHTML = '';
         const deckKeys = Object.keys(state.decks);
 
         let totalSelectedQuestions = 0;
@@ -1575,38 +1624,37 @@
             renderDeckList();
           };
 
-          list.appendChild(item);
+          DOM.deckList.appendChild(item);
         });
 
-        document.getElementById('selected-summary-text').textContent = `${state.selectedDeckKeys.size} Module${state.selectedDeckKeys.size !== 1 ? 's' : ''} selected (${totalSelectedQuestions} Qs)`;
-        const launchBtn = document.getElementById('btn-launch-multi');
-        launchBtn.disabled = state.selectedDeckKeys.size === 0;
-        document.getElementById('btn-launch-text').textContent = state.selectedDeckKeys.size === 0 
+        DOM.selectedSummaryText.textContent = `${state.selectedDeckKeys.size} Module${state.selectedDeckKeys.size !== 1 ? 's' : ''} selected (${totalSelectedQuestions} Qs)`;
+        DOM.btnLaunchMulti.disabled = state.selectedDeckKeys.size === 0;
+        DOM.btnLaunchText.textContent = state.selectedDeckKeys.size === 0 
           ? 'Select at least 1 Module' 
           : `Start Practice (${totalSelectedQuestions} Questions)`;
 
         lucide.createIcons();
       }
 
-      document.getElementById('btn-select-all').onclick = () => {
+      DOM.btnSelectAll.onclick = () => {
         Object.keys(state.decks).forEach(k => state.selectedDeckKeys.add(k));
         renderDeckList();
       };
 
-      document.getElementById('btn-clear-all').onclick = () => {
+      DOM.btnClearAll.onclick = () => {
         state.selectedDeckKeys.clear();
         renderDeckList();
       };
 
-      document.getElementById('btn-reset-selected').onclick = () => {
+      DOM.btnResetSelected.onclick = () => {
         resetChapters(Array.from(state.selectedDeckKeys));
       };
 
-      document.getElementById('btn-reset-current-deck').onclick = () => {
+      DOM.btnResetCurrentDeck.onclick = () => {
         resetChapters(Array.from(state.selectedDeckKeys));
       };
 
-      document.getElementById('btn-launch-multi').onclick = () => {
+      DOM.btnLaunchMulti.onclick = () => {
         if (state.selectedDeckKeys.size === 0) return;
         const activeDeck = getActiveCompositeDeck();
         state.sessionState.currentIndex = 0;
@@ -1621,21 +1669,27 @@
         }
 
         saveState();
-        document.getElementById('modal-decks').classList.add('hidden');
+        DOM.modalDecks.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       };
 
-      document.getElementById('btn-shuffle').onclick = () => toggleShuffleMode();
-      document.getElementById('btn-srs-filter').onclick = () => toggleSRSMode();
-      document.getElementById('btn-next').onclick = handleNextNavigation;
+      DOM.shuffleBtn.onclick = () => toggleShuffleMode();
+      DOM.srsBtn.onclick = () => toggleSRSMode();
+      
+      DOM.nextBtn.onclick = () => {
+        handleNextNavigation();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
 
-      document.getElementById('btn-prev').onclick = () => {
+      DOM.prevBtn.onclick = () => {
         if (state.sessionState.currentIndex > 0) { 
           state.sessionState.currentIndex--; 
           saveState(); 
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       };
 
-      document.getElementById('btn-reveal').onclick = () => {
+      DOM.revealBtn.onclick = () => {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || !activeDeck.questions.length) return;
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
@@ -1647,7 +1701,7 @@
         }
       };
 
-      document.getElementById('btn-flag').onclick = () => {
+      DOM.flagBtn.onclick = () => {
         const activeDeck = getActiveCompositeDeck();
         if (!activeDeck || !activeDeck.questions.length) return;
         const hasCustomOrder = state.sessionState.order && state.sessionState.order.length > 0;
@@ -1667,26 +1721,25 @@
         saveState();
       };
 
-      document.getElementById('btn-menu').onclick = () => { renderDeckList(); document.getElementById('modal-decks').classList.remove('hidden'); };
-      document.getElementById('btn-close-decks').onclick = () => document.getElementById('modal-decks').classList.add('hidden');
-      document.getElementById('btn-auth-modal').onclick = () => document.getElementById('modal-auth').classList.remove('hidden');
-      document.getElementById('btn-close-auth-modal').onclick = () => document.getElementById('modal-auth').classList.add('hidden');
+      DOM.btnMenu.onclick = () => { renderDeckList(); DOM.modalDecks.classList.remove('hidden'); };
+      DOM.btnCloseDecks.onclick = () => DOM.modalDecks.classList.add('hidden');
+      DOM.btnAuthModal.onclick = () => DOM.modalAuth.classList.remove('hidden');
+      DOM.btnCloseAuthModal.onclick = () => DOM.modalAuth.classList.add('hidden');
 
-      document.getElementById('btn-google-login').onclick = () => {
+      DOM.btnGoogleLogin.onclick = () => {
         if (!auth) return;
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).then(() => {
-          document.getElementById('modal-auth').classList.add('hidden');
+          DOM.modalAuth.classList.add('hidden');
         }).catch((err) => {
-          const box = document.getElementById('auth-error-box');
-          box.textContent = err.message;
-          box.classList.remove('hidden');
+          DOM.authErrorBox.textContent = err.message;
+          DOM.authErrorBox.classList.remove('hidden');
         });
       };
 
-      document.getElementById('btn-logout').onclick = () => {
+      DOM.btnLogout.onclick = () => {
         if (!auth) return;
-        auth.signOut().then(() => document.getElementById('modal-auth').classList.add('hidden'));
+        auth.signOut().then(() => DOM.modalAuth.classList.add('hidden'));
       };
 
       function captureCurrentContext() {
@@ -1720,33 +1773,27 @@
         };
       }
 
-      const feedbackModal = document.getElementById('modal-feedback');
-      const feedbackContextBadge = document.getElementById('feedback-context-badge');
-      const feedbackContextSummary = document.getElementById('feedback-context-summary');
-      const feedbackComment = document.getElementById('feedback-comment');
-      const feedbackStatusMsg = document.getElementById('feedback-status-msg');
-
-      document.getElementById('btn-feedback-trigger').onclick = () => {
+      DOM.btnFeedbackTrigger.onclick = () => {
         const ctx = captureCurrentContext();
-        feedbackModal.classList.remove('hidden');
-        feedbackComment.value = '';
-        feedbackStatusMsg.classList.add('hidden');
+        DOM.modalFeedback.classList.remove('hidden');
+        DOM.feedbackComment.value = '';
+        DOM.feedbackStatusMsg.classList.add('hidden');
         
         if (ctx.questionNumber) {
-          feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
-          feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
+          DOM.feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
+          DOM.feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
         } else {
-          feedbackContextBadge.textContent = ctx.deckTitle;
-          feedbackContextSummary.textContent = "General module navigation / view";
+          DOM.feedbackContextBadge.textContent = ctx.deckTitle;
+          DOM.feedbackContextSummary.textContent = "General module navigation / view";
         }
         lucide.createIcons();
       };
 
-      document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
-      document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
+      DOM.btnCloseFeedback.onclick = () => DOM.modalFeedback.classList.add('hidden');
+      DOM.btnCancelFeedback.onclick = () => DOM.modalFeedback.classList.add('hidden');
 
-      document.getElementById('btn-submit-feedback').onclick = async () => {
-        const comment = feedbackComment.value.trim();
+      DOM.btnSubmitFeedback.onclick = async () => {
+        const comment = DOM.feedbackComment.value.trim();
         if (!comment) {
           alert("Please write your comment or suggestion before submitting.");
           return;
@@ -1754,10 +1801,9 @@
 
         const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "Content Error / Typo";
         const context = captureCurrentContext();
-        const submitBtn = document.getElementById('btn-submit-feedback');
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
+        
+        DOM.btnSubmitFeedback.disabled = true;
+        DOM.btnSubmitFeedback.textContent = "Submitting...";
 
         const feedbackData = {
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1795,20 +1841,20 @@
 
           await Promise.all([emailPromise, firestorePromise]);
 
-          feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
-          feedbackStatusMsg.textContent = "✓ Thank you! Your feedback and question details have been submitted.";
+          DOM.feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
+          DOM.feedbackStatusMsg.textContent = "✓ Thank you! Your feedback and question details have been submitted.";
           setTimeout(() => {
-            feedbackModal.classList.add('hidden');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
+            DOM.modalFeedback.classList.add('hidden');
+            DOM.btnSubmitFeedback.disabled = false;
+            DOM.btnSubmitFeedback.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
             lucide.createIcons();
           }, 1500);
         } catch (err) {
           console.error("Feedback submit error:", err);
-          feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
-          feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<span>Send Feedback</span>`;
+          DOM.feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
+          DOM.feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
+          DOM.btnSubmitFeedback.disabled = false;
+          DOM.btnSubmitFeedback.innerHTML = `<span>Send Feedback</span>`;
         }
       };
 
