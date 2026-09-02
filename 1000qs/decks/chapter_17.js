@@ -84,7 +84,7 @@ export const chapter17 = [
       "D": "Decreased maternal uterine artery flow"
     },
     "correctAnswer": "D",
-    "explanation": "Hyperventilation with oxygen consumption creates significant changes in acid–base status that can be hazardous to the fetus. Extremely low PaCO2 levels result in vasoconstriction and global reduction in placental perfusion and blood flow. The alkalemia also shifts the oxygen–hemoglobin dissociation curve to the left, impairing the release of oxygen from maternal blood to fetal blood. Both factors will decrease the availability of oxygen delivery to the fetus (Fig 17-1). Figure 17-1."
+    "explanation": "Hyperventilation with oxygen consumption creates significant changes in acid–base status that can be hazardous to the fetus. Extremely low PaCO2 levels result in vasoconstriction and global reduction in placental perfusion and blood flow. The alkalemia also shifts the oxygen–hemoglobin dissociation curve to the left, impairing the release of oxygen from maternal blood to fetal blood. Both factors will decrease the availability of oxygen delivery to the fetus"
   },
   {
     "id": 7,
