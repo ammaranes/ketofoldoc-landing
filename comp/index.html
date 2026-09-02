@@ -1661,11 +1661,6 @@
         state.userProgress[parentDeckId] = state.userProgress[parentDeckId] || { answers: {}, flags: [], srs: {} };
         state.userProgress[parentDeckId].answers[parentIdx] = letter;
         saveState();
-        setTimeout(() => {
-          if (!DOM.expBox.classList.contains('hidden')) {
-            DOM.expBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 50); 
       }
 
       window.rateRecall = (rating) => {
