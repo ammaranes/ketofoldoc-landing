@@ -1189,7 +1189,7 @@ export const chapter06 = [
       "C": "Clopidogrel is associated with pancytopenia",
       "D": "Inhibition of platelet function by clopidogrel is reversible"
     },
-    "correctAnswer": "A",
+    "correctAnswer": "B",
     "explanation": "Clopidogrel binds to ADP receptors on the surface of platelets. This action leads to inhibition of activation, aggregation, and degranulation of platelets. Clopidogrel modifies the ADP receptor irreversibly, resulting in its inhibition for the lifetime of the platelet, which is up to 7 days. So recommendation from ASRA is to avoid performing a neuraxial block for 7 days even if only a single therapeutic dose of clopidogrel was used by the patient. Clopidogrel may cause neutropenia, thrombotic thrombocytopenic purpura, and hepatic dysfunction but has not been associated with pancytopenia."
   },
   {
