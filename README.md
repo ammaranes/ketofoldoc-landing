@@ -43,4 +43,6 @@ ketofoldoc-landing/
 │   └── decks/               # Recall question decks
 ├── images_hall/             # Clinical diagrams and figure assets for Comprehensive QB
 └── js/
-    └── highlighter.js       # Universal study highlighter engine
+|
+|    └── highlighter.js       # Universal study highlighter engine
+└── recalls                   # Previous exam recalls
