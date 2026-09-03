@@ -33,7 +33,12 @@ ketofoldoc-landing/
 ├── index.html               # Main landing portal & unified analytics hub
 ├── logo.svg                 # Ecosystem branding icon
 ├── 1000qs/                  # 1000 Anesthesia Questions platform
+    ├── index.html
+    ├── decks/               # JS modules
+    ├── images/              # Clinical diagrams and figure assets for 1000 QB
 ├── saudi/                   # Saudi Board QB platform
+    ├── index.html
+    ├── decks/               # Chapter JS modules
 ├── comp/                    # Comprehensive Anesthesia QB platform
 │   ├── index.html
 │   └── output_hall_js/      # Chapter JS modules (chapter_01 to chapter_11)
@@ -45,4 +50,8 @@ ketofoldoc-landing/
 └── js/
 |
 |    └── highlighter.js       # Universal study highlighter engine
-└── recalls                   # Previous exam recalls
+└── recalls/                  # Previous exam recalls
+    ├── index.html
+    ├── central/              # Central region recalls for part 1, part 2 and promotion exams
+    ├── part/                 # Recalls of previous part exams
+    ├── promotion/            # Recalls of previous promotion exams
