@@ -2,8 +2,8 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Exam Recalls | KetofolDoc</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Recalls | KetofolDoc Ecosystem</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,6 +20,12 @@
       }
     }
   </script>
+
+  <!-- Firebase SDKs (v9 Compat Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  
   <style>
     .highlightable-content {
       -webkit-user-select: text;
@@ -31,62 +37,65 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500/30">
 
-  <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-2.5 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <a href="../index.html" class="flex items-center space-x-2 text-slate-300 hover:text-white transition">
-        <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-sm">KD</div>
+  <!-- TOP APP BAR -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-3 sm:px-4 py-2.5 flex items-center justify-between">
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <button id="btn-open-ecosystem-drawer" title="KetofolDoc Ecosystem Navigation" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700/80">
+        <i data-lucide="menu" class="w-4 h-4"></i>
+      </button>
+
+      <a href="../index.html" title="Back to Portal" class="flex items-center space-x-2 text-slate-300 hover:text-white transition">
+        <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs tracking-wider">KD</div>
       </a>
       
-      <!-- Exam Deck Selector Trigger -->
-      <button id="btn-open-deck-modal" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 transition">
-        <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400"></i>
-        <span id="active-deck-title" class="truncate max-w-[140px] sm:max-w-xs">Select Exam Recall</span>
-        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+      <button id="btn-open-deck-modal" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 transition max-w-[130px] sm:max-w-xs">
+        <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+        <span id="active-deck-title" class="truncate">Select Exam</span>
+        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
       </button>
     </div>
 
-    <!-- Quick Utilities -->
     <div class="flex items-center space-x-1.5">
-      <button id="btn-shuffle" title="Shuffle Questions" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
+      <button id="btn-shuffle" title="Shuffle Exam Questions" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
         <i data-lucide="shuffle" class="w-4 h-4"></i>
       </button>
-      <button id="btn-srs-mode" title="Toggle SRS Due Mode" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
+
+      <button id="btn-srs-mode" title="Toggle Due SRS Mode" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
         <i data-lucide="brain" class="w-4 h-4"></i>
       </button>
+
       <button id="btn-reset-deck" title="Reset Exam Progress" class="p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 transition border border-slate-700/60">
         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+      </button>
+
+      <button id="btn-auth-trigger" class="flex items-center space-x-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs transition">
+        <div id="auth-status-indicator" class="w-2 h-2 rounded-full bg-slate-500"></div>
+        <span id="auth-user-label" class="hidden sm:inline font-medium text-slate-300">Sign In</span>
       </button>
     </div>
   </header>
 
-  <!-- Progress Bar Strip -->
+  <!-- Progress Bar -->
   <div class="w-full bg-slate-900 h-1">
     <div id="progress-bar-fill" class="bg-cyan-500 h-1 transition-all duration-300" style="width: 0%;"></div>
   </div>
 
-  <!-- Main Viewport: Deep pb-72 padding ensures explanations and SRS controls clear the footer -->
+  <!-- MAIN QUESTION VIEWPORT -->
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-72">
     <div id="quiz-container" class="space-y-4">
-      
-      <!-- Meta Information -->
       <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-2">
         <span id="label-question-count">Question 0 of 0</span>
-        <span id="label-deck-category" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400">Recall Deck</span>
+        <span id="label-deck-category" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-medium">Recall Deck</span>
         <span id="label-accuracy">Accuracy: 0%</span>
       </div>
 
-      <!-- Question Stem (Annotatable) -->
       <div class="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-sm">
         <div id="q-stem" class="highlightable-content text-base sm:text-lg text-slate-100 font-medium leading-relaxed">
-          Loading exam recall...
+          Loading exam questions...
         </div>
       </div>
 
-      <!-- Options Container -->
-      <div id="options-container" class="space-y-2.5">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="options-container" class="space-y-2.5"></div>
 
       <!-- Reference & Rationale Box -->
       <div id="rationale-box" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
@@ -101,7 +110,7 @@
         <!-- SM-2 Rating Controls -->
         <div id="srs-rating-container" class="pt-4 border-t border-slate-800/80">
           <div class="text-[11px] font-semibold uppercase text-slate-400 mb-2.5 flex items-center justify-between">
-            <span>Rate Difficulty (SM-2 Interval)</span>
+            <span>Rate Recall Interval (SM-2)</span>
             <span id="srs-status-tag" class="text-slate-500 font-normal lowercase">Not rated yet</span>
           </div>
           <div class="grid grid-cols-4 gap-2">
@@ -124,17 +133,16 @@
           </div>
         </div>
       </div>
-
     </div>
   </main>
 
-  <!-- Floating Feedback Button: Elevated on mobile to clear bottom navigation -->
-  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-6 right-4 sm:right-6 z-40 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
+  <!-- FLOATING FEEDBACK (Elevated z-index and clearance on all viewports) -->
+  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-20 right-4 sm:right-6 z-50 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-cyan-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
-  <!-- Fixed Viewport Bottom Footer -->
+  <!-- FIXED FOOTER NAVIGATION -->
   <footer id="quiz-footer" class="fixed bottom-0 inset-x-0 z-50 bg-slate-950/98 backdrop-blur-md border-t border-slate-800/90 shadow-2xl pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] select-none">
     <div class="max-w-3xl mx-auto px-4">
       <div class="flex items-center justify-between space-x-3 mb-2">
@@ -157,9 +165,63 @@
     </div>
   </footer>
 
-  <!-- Deck Selection Modal (Tabbed by Category) -->
-  <div id="modal-deck" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl">
+  <!-- ECOSYSTEM DRAWER -->
+  <div id="drawer-ecosystem" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden modal-backdrop">
+    <div class="fixed inset-y-0 left-0 max-w-xs w-full bg-slate-900 border-r border-slate-800 flex flex-col p-5 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs">KD</div>
+          <div>
+            <h2 class="font-bold text-sm text-slate-100">KetofolDoc</h2>
+            <p class="text-[10px] text-slate-400">Anesthesia Ecosystem</p>
+          </div>
+        </div>
+        <button id="btn-close-ecosystem-drawer" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto py-4 space-y-2 no-scrollbar">
+        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-1">Ecosystem Platforms</div>
+        <a href="../index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="home" class="w-4 h-4 text-slate-400"></i>
+          <span>Home Portal</span>
+        </a>
+        <a href="../1000qs/index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="help-circle" class="w-4 h-4 text-emerald-400"></i>
+          <span>1000 Anesthesia Questions</span>
+        </a>
+        <a href="../saudi/index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+          <span>Saudi Board QB</span>
+        </a>
+        <a href="../comp/index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="book-open" class="w-4 h-4 text-purple-400"></i>
+          <span>Comprehensive Anesthesia</span>
+        </a>
+        <a href="../summaries/index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="file-text" class="w-4 h-4 text-rose-400"></i>
+          <span>Miller's Summaries</span>
+        </a>
+        <a href="./index.html" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-cyan-950/60 border border-cyan-500/40 text-cyan-300">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+            <span>Exam Recalls</span>
+          </div>
+          <span class="text-[9px] bg-cyan-900/80 text-cyan-300 px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
+        </a>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+        <span>KetofolDoc v2.5</span>
+        <span class="text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Online</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECK MODAL -->
+  <div id="modal-deck" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
       <div class="p-4 border-b border-slate-800 flex items-center justify-between">
         <h2 class="font-bold text-base text-slate-100 flex items-center space-x-2">
           <i data-lucide="folder-git-2" class="w-4 h-4 text-cyan-400"></i>
@@ -170,26 +232,67 @@
         </button>
       </div>
 
-      <!-- Categories Tabs -->
       <div class="flex border-b border-slate-800 px-4 pt-2 space-x-2 bg-slate-950/40">
         <button data-tab="part" class="tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition">Part Exams</button>
         <button data-tab="promotion" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Promotion</button>
         <button data-tab="central" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Central Region</button>
       </div>
 
-      <!-- Decks List -->
-      <div id="deck-list-container" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
-        <!-- Rendered dynamically -->
+      <div id="deck-list-container" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar"></div>
+    </div>
+  </div>
+
+  <!-- CLOUD AUTH MODAL -->
+  <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-slate-100 flex items-center space-x-2">
+          <i data-lucide="cloud" class="w-4 h-4 text-cyan-400"></i>
+          <span>Cloud Progress Sync</span>
+        </h3>
+        <button id="btn-close-auth-modal" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div id="auth-signed-in" class="hidden space-y-3">
+        <div class="flex items-center space-x-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+          <img id="auth-user-img" src="" class="w-10 h-10 rounded-full border border-cyan-500/40" />
+          <div class="overflow-hidden">
+            <div id="auth-user-name" class="font-bold text-xs text-slate-100 truncate"></div>
+            <div id="auth-user-email" class="text-[10px] text-slate-400 truncate"></div>
+          </div>
+        </div>
+        <div class="text-[11px] text-emerald-400 flex items-center space-x-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Synced across all your devices</span>
+        </div>
+        <button id="btn-logout" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-rose-300 transition">
+          Sign Out
+        </button>
+      </div>
+
+      <div id="auth-signed-out" class="space-y-3">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Sign in to preserve your answers and SM-2 schedules across mobile and desktop.
+        </p>
+        <button id="btn-google-login" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center space-x-2 shadow transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Deck Completed Modal -->
-  <div id="modal-completed" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+  <!-- COMPLETION MODAL -->
+  <div id="modal-completed" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl" onclick="event.stopPropagation()">
       <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl">🎉</div>
       <h3 class="text-lg font-bold text-slate-100">Exam Recall Completed!</h3>
-      <p class="text-xs text-slate-400 leading-relaxed">You have answered all questions in this recall deck. You can reset your progress to review from the beginning or switch to Spaced Repetition (SRS) mode.</p>
+      <p class="text-xs text-slate-400 leading-relaxed">You have reviewed all available items in this queue. You can reset to practice again or switch to Spaced Repetition (SRS) mode.</p>
       <div class="pt-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
         <button id="btn-modal-reset" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 border border-rose-900/40 transition">Reset Progress</button>
         <button id="btn-modal-review" class="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white transition">Review Deck</button>
@@ -197,35 +300,163 @@
     </div>
   </div>
 
-  <!-- Application Logic -->
+  <!-- APPLICATION LOGIC -->
   <script type="module">
     import { StudyHighlighter } from '../js/highlighter.js';
     import { RECALLS_CATALOG, getAllRecallDecks } from './manifest.js';
 
+    const DOM = {
+      activeDeckTitle: document.getElementById('active-deck-title'),
+      progressBar: document.getElementById('progress-bar-fill'),
+      btnShuffle: document.getElementById('btn-shuffle'),
+      btnSRSMode: document.getElementById('btn-srs-mode'),
+      btnResetDeck: document.getElementById('btn-reset-deck'),
+
+      labelQuestionCount: document.getElementById('label-question-count'),
+      labelDeckCategory: document.getElementById('label-deck-category'),
+      labelAccuracy: document.getElementById('label-accuracy'),
+
+      stem: document.getElementById('q-stem'),
+      optionsContainer: document.getElementById('options-container'),
+
+      rationaleBox: document.getElementById('rationale-box'),
+      rationaleCorrect: document.getElementById('rationale-correct'),
+      rationaleText: document.getElementById('rationale-text'),
+      rationaleImages: document.getElementById('rationale-images'),
+      srsStatusTag: document.getElementById('srs-status-tag'),
+      srsRatingBtns: document.querySelectorAll('.btn-srs'),
+
+      btnPrev: document.getElementById('btn-prev'),
+      btnReveal: document.getElementById('btn-reveal'),
+      btnNext: document.getElementById('btn-next'),
+      btnFeedback: document.getElementById('btn-feedback-trigger'),
+
+      drawerEcosystem: document.getElementById('drawer-ecosystem'),
+      btnOpenDrawer: document.getElementById('btn-open-ecosystem-drawer'),
+      btnCloseDrawer: document.getElementById('btn-close-ecosystem-drawer'),
+
+      modalDeck: document.getElementById('modal-deck'),
+      btnOpenDeckModal: document.getElementById('btn-open-deck-modal'),
+      btnCloseDeckModal: document.getElementById('btn-close-deck-modal'),
+      deckListContainer: document.getElementById('deck-list-container'),
+      tabBtns: document.querySelectorAll('.tab-btn'),
+
+      modalCompleted: document.getElementById('modal-completed'),
+      btnModalReset: document.getElementById('btn-modal-reset'),
+      btnModalReview: document.getElementById('btn-modal-review'),
+
+      modalAuth: document.getElementById('modal-auth'),
+      btnAuthTrigger: document.getElementById('btn-auth-trigger'),
+      btnCloseAuthModal: document.getElementById('btn-close-auth-modal'),
+      btnGoogleLogin: document.getElementById('btn-google-login'),
+      btnLogout: document.getElementById('btn-logout'),
+      authStatusDot: document.getElementById('auth-status-indicator'),
+      authUserLabel: document.getElementById('auth-user-label'),
+      authSignedInBox: document.getElementById('auth-signed-in'),
+      authSignedOutBox: document.getElementById('auth-signed-out'),
+      authUserName: document.getElementById('auth-user-name'),
+      authUserEmail: document.getElementById('auth-user-email'),
+      authUserImg: document.getElementById('auth-user-img')
+    };
+
+    // Firebase Initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
+      authDomain: "qb-sync-e6294.firebaseapp.com",
+      projectId: "qb-sync-e6294",
+      storageBucket: "qb-sync-e6294.firebasestorage.app",
+      messagingSenderId: "94979024020",
+      appId: "1:94979024020:web:687bd4c064b87ff1180081"
+    };
+
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+    let isCloudPulling = false; // Lock against race-condition overwrites
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      auth = firebase.auth();
+      db = firebase.firestore();
+    } catch (e) {
+      console.warn("Firebase initialized in offline mode:", e);
+    }
+
+    // App State
     const STORAGE_KEY = 'kd_recalls_state_v1';
     let state = loadLocalState();
     let currentDeck = null;
     let highlighter = null;
     let activeCategoryTab = 'part';
+    let srsSessionAnswers = {}; // Ephemeral answers for active SRS drill sessions
 
     function loadLocalState() {
+      const defaultState = {
+        activeDeckId: null,
+        userAnswers: {},
+        srsProgress: {},
+        sessionState: { isSRSMode: false, isShuffled: false, order: [], currentIndex: 0 }
+      };
       try {
         const d = localStorage.getItem(STORAGE_KEY);
-        return d ? JSON.parse(d) : {
-          activeDeckId: null,
-          userAnswers: {},
-          srsProgress: {},
-          sessionState: { isSRSMode: false, isShuffled: false, order: [], currentIndex: 0 }
-        };
+        return d ? { ...defaultState, ...JSON.parse(d) } : defaultState;
       } catch (e) {
-        return { activeDeckId: null, userAnswers: {}, srsProgress: {}, sessionState: { isSRSMode: false, isShuffled: false, order: [], currentIndex: 0 } };
+        return defaultState;
       }
     }
 
-    function saveState() {
+    function saveState(skipCloud = false) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!skipCloud && currentUser && db && !isCloudPulling) {
+        pushToCloud();
+      }
     }
 
+    let syncTimeout = null;
+    function pushToCloud() {
+      if (!currentUser || !db || isCloudPulling) return;
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(async () => {
+        try {
+          const docRef = db.collection('users').doc(currentUser.uid).collection('platforms').doc('recalls');
+          await docRef.set({
+            activeDeckId: state.activeDeckId,
+            userAnswers: state.userAnswers,
+            srsProgress: state.srsProgress,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          console.warn("Cloud sync write error:", err);
+        }
+      }, 1500);
+    }
+
+    async function pullFromCloud(user) {
+      if (!user || !db) return;
+      isCloudPulling = true;
+      try {
+        const docRef = db.collection('users').doc(user.uid).collection('platforms').doc('recalls');
+        const snap = await docRef.get();
+        if (snap.exists) {
+          const cloudData = snap.data();
+          state.userAnswers = { ...(cloudData.userAnswers || {}), ...state.userAnswers };
+          state.srsProgress = { ...(cloudData.srsProgress || {}), ...state.srsProgress };
+          if (cloudData.activeDeckId && !state.activeDeckId) {
+            state.activeDeckId = cloudData.activeDeckId;
+          }
+          saveState(true);
+          if (currentDeck) renderQuestion();
+        }
+      } catch (err) {
+        console.warn("Cloud pull error:", err);
+      } finally {
+        isCloudPulling = false;
+      }
+    }
+
+    // SRS SM-2 Engine
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -244,6 +475,7 @@
         interval = 1;
         easeFactor = Math.max(1.3, easeFactor - 0.2);
       } else if (rating === 'hard') {
+        repetitions += 1; // Repetitions must advance
         interval = Math.max(1, Math.round(interval * 1.2)) || 1;
         easeFactor = Math.max(1.3, easeFactor - 0.15);
       } else if (rating === 'good') {
@@ -262,9 +494,8 @@
       const MAX_INTERVAL = 90;
       if (interval > MAX_INTERVAL) interval = MAX_INTERVAL;
 
-      const nextDue = new Date();
-      nextDue.setDate(now.getDate() + interval);
-      nextDue.setHours(0, 0, 0, 0);
+      // Add full 24-hour day durations to prevent midnight rollover anomalies
+      const nextDue = new Date(now.getTime() + interval * 86400000);
 
       return {
         interval,
@@ -276,12 +507,12 @@
     }
 
     function getDueIndices(deck) {
-      const now = new Date().getTime();
+      const now = Date.now();
       const due = [];
       deck.questions.forEach((q, idx) => {
         const qId = `${deck.id}_${q.id}`;
         const srs = state.srsProgress[qId];
-        if (srs && srs.dueDate && new Date(srs.dueDate).getTime() <= now) {
+        if (srs?.dueDate && new Date(srs.dueDate).getTime() <= now) {
           due.push(idx);
         }
       });
@@ -289,61 +520,56 @@
     }
 
     function getUnansweredIndices(deck) {
-      const unanswered = [];
-      deck.questions.forEach((q, idx) => {
-        const qId = `${deck.id}_${q.id}`;
-        if (!state.userAnswers[qId]) unanswered.push(idx);
-      });
-      return unanswered;
+      return deck.questions
+        .map((q, idx) => idx)
+        .filter(idx => !state.userAnswers[`${deck.id}_${deck.questions[idx].id}`]);
     }
 
+    function checkAnswerMatch(a, b) {
+      if (!a || !b) return false;
+      return String(a).trim().toUpperCase() === String(b).trim().toUpperCase();
+    }
+
+    // Question Rendering
     function renderQuestion() {
-      if (!currentDeck || !currentDeck.questions.length) return;
+      if (!currentDeck || !currentDeck.questions?.length) return;
 
-      // Completion Guard: Prevents falling back to Question 1 when finished
-      if (!state.sessionState.order || state.sessionState.order.length === 0) {
-        document.getElementById('modal-completed').classList.remove('hidden');
+      const { order, currentIndex, isSRSMode } = state.sessionState;
+
+      if (!order || order.length === 0 || order[currentIndex] === undefined) {
+        DOM.modalCompleted.classList.remove('hidden');
         return;
       }
 
-      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
-      if (qIndex === undefined) {
-        document.getElementById('modal-completed').classList.remove('hidden');
-        return;
-      }
-
-      document.getElementById('modal-completed').classList.add('hidden');
+      DOM.modalCompleted.classList.add('hidden');
+      const qIndex = order[currentIndex];
       const q = currentDeck.questions[qIndex];
       const qId = `${currentDeck.id}_${q.id}`;
 
-      // Update highlighter context
-      highlighter.setContext(qId);
+      highlighter?.setContext(qId);
 
-      // Meta UI Updates
-      document.getElementById('label-question-count').textContent = `Question ${state.sessionState.currentIndex + 1} of ${state.sessionState.order.length}`;
-      document.getElementById('label-deck-category').textContent = currentDeck.groupTitle || 'Exam Recall';
+      DOM.labelQuestionCount.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+      DOM.labelDeckCategory.textContent = currentDeck.groupTitle || 'Exam Recall';
 
       const answeredInDeck = Object.keys(state.userAnswers).filter(k => k.startsWith(`${currentDeck.id}_`));
       const totalAnswered = answeredInDeck.length;
       const totalCorrect = answeredInDeck.filter(k => {
-        const qPart = currentDeck.questions.find(item => `${currentDeck.id}_${item.id}` === k);
-        return qPart && state.userAnswers[k] === qPart.correctAnswer;
+        const qItem = currentDeck.questions.find(item => `${currentDeck.id}_${item.id}` === k);
+        return qItem && checkAnswerMatch(state.userAnswers[k], qItem.correctAnswer);
       }).length;
 
       const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
-      document.getElementById('label-accuracy').textContent = `Accuracy: ${accuracy}%`;
+      DOM.labelAccuracy.textContent = `Accuracy: ${accuracy}%`;
 
       const progressPercent = Math.round((totalAnswered / currentDeck.questions.length) * 100);
-      document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+      DOM.progressBar.style.width = `${progressPercent}%`;
 
-      // Render Stem
-      const stemEl = document.getElementById('q-stem');
-      stemEl.innerHTML = highlighter.renderHighlights(q.stem, qId);
+      DOM.stem.innerHTML = highlighter ? highlighter.renderHighlights(q.stem, qId) : q.stem;
 
-      // Render Options
-      const optionsBox = document.getElementById('options-container');
-      optionsBox.innerHTML = '';
-      const selectedAnswer = state.userAnswers[qId];
+      DOM.optionsContainer.innerHTML = '';
+      
+      // Separate active SRS session answers from permanent history
+      const selectedAnswer = isSRSMode ? srsSessionAnswers[qId] : state.userAnswers[qId];
 
       Object.entries(q.options || {}).forEach(([optKey, optText]) => {
         const btn = document.createElement('button');
@@ -358,94 +584,97 @@
         text.textContent = optText;
 
         if (selectedAnswer) {
-          if (optKey === q.correctAnswer) {
+          if (checkAnswerMatch(optKey, q.correctAnswer)) {
             btn.className = 'w-full text-left p-3.5 rounded-xl border border-emerald-500/80 bg-emerald-950/30 flex items-start space-x-3 text-sm text-emerald-200';
             badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0';
-          } else if (optKey === selectedAnswer) {
+          } else if (checkAnswerMatch(optKey, selectedAnswer)) {
             btn.className = 'w-full text-left p-3.5 rounded-xl border border-rose-500/80 bg-rose-950/30 flex items-start space-x-3 text-sm text-rose-200';
             badge.className = 'w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0';
           }
         }
 
         btn.onclick = () => {
-          if (state.userAnswers[qId]) return;
-          state.userAnswers[qId] = optKey;
-          saveState();
+          if (isSRSMode) {
+            if (srsSessionAnswers[qId]) return;
+            srsSessionAnswers[qId] = optKey;
+          } else {
+            if (state.userAnswers[qId]) return;
+            state.userAnswers[qId] = optKey;
+            saveState();
+          }
           renderQuestion();
           revealRationale();
         };
 
         btn.appendChild(badge);
         btn.appendChild(text);
-        optionsBox.appendChild(btn);
+        DOM.optionsContainer.appendChild(btn);
       });
 
       if (selectedAnswer) {
         revealRationale();
       } else {
-        document.getElementById('rationale-box').classList.add('hidden');
+        DOM.rationaleBox.classList.add('hidden');
       }
 
-      // Sync SRS brain button active style
-      const srsBtn = document.getElementById('btn-srs-mode');
-      if (state.sessionState.isSRSMode) {
-        srsBtn.classList.add('bg-cyan-950/80', 'text-cyan-400', 'border-cyan-600');
-        srsBtn.classList.remove('bg-slate-800/60', 'text-slate-300', 'border-slate-700/60');
-      } else {
-        srsBtn.classList.remove('bg-cyan-950/80', 'text-cyan-400', 'border-cyan-600');
-        srsBtn.classList.add('bg-slate-800/60', 'text-slate-300', 'border-slate-700/60');
-      }
+      // Sync Navigation Button States
+      DOM.btnPrev.disabled = currentIndex === 0;
+      DOM.btnPrev.classList.toggle('opacity-40', currentIndex === 0);
+      DOM.btnNext.disabled = currentIndex >= order.length - 1;
+      DOM.btnNext.classList.toggle('opacity-40', currentIndex >= order.length - 1);
+
+      // Sync SRS Brain Button
+      DOM.btnSRSMode.classList.toggle('bg-cyan-950/80', isSRSMode);
+      DOM.btnSRSMode.classList.toggle('text-cyan-400', isSRSMode);
+      DOM.btnSRSMode.classList.toggle('border-cyan-600', isSRSMode);
 
       lucide.createIcons();
     }
 
     function revealRationale() {
-      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
-      if (qIndex === undefined) return;
+      const { order, currentIndex } = state.sessionState;
+      const qIndex = order[currentIndex];
+      if (qIndex === undefined || !currentDeck) return;
 
       const q = currentDeck.questions[qIndex];
       const qId = `${currentDeck.id}_${q.id}`;
 
-      const box = document.getElementById('rationale-box');
-      box.classList.remove('hidden');
+      DOM.rationaleBox.classList.remove('hidden');
+      DOM.rationaleCorrect.textContent = `Correct Answer: Option ${q.correctAnswer}`;
+      DOM.rationaleText.innerHTML = highlighter ? highlighter.renderHighlights(q.explanation || 'No rationale provided.', qId) : (q.explanation || 'No rationale provided.');
 
-      document.getElementById('rationale-correct').textContent = `Correct Answer: Option ${q.correctAnswer}`;
-      
-      const ratText = document.getElementById('rationale-text');
-      ratText.innerHTML = highlighter.renderHighlights(q.explanation || 'No detailed rationale provided for this recall item.', qId);
-
-      const imgContainer = document.getElementById('rationale-images');
-      imgContainer.innerHTML = '';
+      DOM.rationaleImages.innerHTML = '';
       if (Array.isArray(q.explanationImages)) {
         q.explanationImages.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
           img.className = 'rounded-xl border border-slate-800 max-h-80 mx-auto';
-          imgContainer.appendChild(img);
+          DOM.rationaleImages.appendChild(img);
         });
       }
 
       const srs = state.srsProgress[qId];
-      document.getElementById('srs-status-tag').textContent = srs ? `Next due in ${srs.interval} day(s)` : 'Not rated yet';
+      DOM.srsStatusTag.textContent = srs ? `Next due in ${srs.interval} day(s)` : 'Not rated yet';
     }
 
-    function loadDeck(deckId) {
+    function loadDeck(deckId, retainIndex = false) {
       const allDecks = getAllRecallDecks();
       const target = allDecks.find(d => d.id === deckId) || allDecks[0];
       if (!target) return;
 
       currentDeck = target;
       state.activeDeckId = target.id;
-      document.getElementById('active-deck-title').textContent = target.title;
+      DOM.activeDeckTitle.textContent = target.title;
 
-      const unanswered = getUnansweredIndices(target);
-      if (unanswered.length === 0 && !state.sessionState.isSRSMode) {
-        state.sessionState.order = [];
-        state.sessionState.currentIndex = 0;
-        document.getElementById('modal-completed').classList.remove('hidden');
-      } else {
-        state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unanswered) : unanswered;
-        state.sessionState.currentIndex = 0;
+      if (!retainIndex || !state.sessionState.order?.length) {
+        const unanswered = getUnansweredIndices(target);
+        if (unanswered.length === 0 && !state.sessionState.isSRSMode) {
+          state.sessionState.order = [];
+          state.sessionState.currentIndex = 0;
+        } else {
+          state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unanswered) : unanswered;
+          state.sessionState.currentIndex = 0;
+        }
       }
 
       saveState();
@@ -453,12 +682,11 @@
     }
 
     function renderDeckList(category = 'part') {
-      const container = document.getElementById('deck-list-container');
-      container.innerHTML = '';
+      DOM.deckListContainer.innerHTML = '';
 
       const group = RECALLS_CATALOG.find(g => g.categoryId === category);
-      if (!group || !group.decks.length) {
-        container.innerHTML = `<div class="text-xs text-slate-500 py-6 text-center">No exams found in this category.</div>`;
+      if (!group?.decks?.length) {
+        DOM.deckListContainer.innerHTML = `<div class="text-xs text-slate-500 py-6 text-center">No exams found in this category.</div>`;
         return;
       }
 
@@ -489,19 +717,19 @@
 
         card.onclick = () => {
           loadDeck(deck.id);
-          document.getElementById('modal-deck').classList.add('hidden');
+          DOM.modalDeck.classList.add('hidden');
         };
 
-        container.appendChild(card);
+        DOM.deckListContainer.appendChild(card);
       });
 
       lucide.createIcons();
     }
 
-    // Tab Listeners
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Navigation & Interaction Handlers
+    DOM.tabBtns.forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.tab-btn').forEach(b => {
+        DOM.tabBtns.forEach(b => {
           b.className = 'tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
         });
         btn.className = 'tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition';
@@ -510,28 +738,26 @@
       };
     });
 
-    // Navigation Controls
-    document.getElementById('btn-next').onclick = () => {
+    DOM.btnNext.onclick = () => {
       if (state.sessionState.currentIndex < state.sessionState.order.length - 1) {
         state.sessionState.currentIndex++;
+        saveState();
         renderQuestion();
       }
     };
 
-    document.getElementById('btn-prev').onclick = () => {
+    DOM.btnPrev.onclick = () => {
       if (state.sessionState.currentIndex > 0) {
         state.sessionState.currentIndex--;
+        saveState();
         renderQuestion();
       }
     };
 
-    document.getElementById('btn-reveal').onclick = () => {
-      revealRationale();
-    };
+    DOM.btnReveal.onclick = revealRationale;
 
-    // Shuffle Button: Shuffles active queue
-    document.getElementById('btn-shuffle').onclick = () => {
-      if (!currentDeck) return;
+    DOM.btnShuffle.onclick = () => {
+      if (!currentDeck || !state.sessionState.order?.length) return;
       state.sessionState.isShuffled = true;
       state.sessionState.order = shuffleArray(state.sessionState.order);
       state.sessionState.currentIndex = 0;
@@ -539,91 +765,154 @@
       renderQuestion();
     };
 
-    // SRS Auto-Shuffle Activation
-    document.getElementById('btn-srs-mode').onclick = () => {
+    DOM.btnSRSMode.onclick = () => {
       if (!currentDeck) return;
       state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
 
       if (state.sessionState.isSRSMode) {
         const dueIndices = getDueIndices(currentDeck);
         if (dueIndices.length === 0) {
-          alert('🎉 Excellent! No previously studied questions from this recall deck are due for review today.');
+          alert('No questions from this recall deck are due for review today.');
           state.sessionState.isSRSMode = false;
           state.sessionState.order = getUnansweredIndices(currentDeck);
-          state.sessionState.currentIndex = 0;
         } else {
-          // Automatic Fisher-Yates shuffle on SRS activation
+          srsSessionAnswers = {}; // Reset ephemeral answers for new session
           state.sessionState.order = shuffleArray(dueIndices);
-          state.sessionState.currentIndex = 0;
         }
       } else {
         state.sessionState.order = getUnansweredIndices(currentDeck);
-        state.sessionState.currentIndex = 0;
       }
 
+      state.sessionState.currentIndex = 0;
       saveState();
       renderQuestion();
     };
 
-    // SM-2 Rating Buttons
-    document.querySelectorAll('.btn-srs').forEach(btn => {
+    DOM.srsRatingBtns.forEach(btn => {
       btn.onclick = () => {
         const rating = btn.getAttribute('data-srs');
         const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+        if (qIndex === undefined || !currentDeck) return;
+
         const q = currentDeck.questions[qIndex];
         const qId = `${currentDeck.id}_${q.id}`;
 
         state.srsProgress[qId] = calculateNextSRS(state.srsProgress[qId], rating);
         saveState();
-        document.getElementById('srs-status-tag').textContent = `Scheduled: ${state.srsProgress[qId].interval} day(s)`;
+        DOM.srsStatusTag.textContent = `Scheduled: ${state.srsProgress[qId].interval} day(s)`;
       };
     });
 
-    // Reset Progress
     const triggerReset = () => {
       if (!currentDeck) return;
       currentDeck.questions.forEach(q => {
         delete state.userAnswers[`${currentDeck.id}_${q.id}`];
       });
+      state.sessionState.isSRSMode = false;
+      srsSessionAnswers = {};
       state.sessionState.order = currentDeck.questions.map((_, i) => i);
       state.sessionState.currentIndex = 0;
       saveState();
-      document.getElementById('modal-completed').classList.add('hidden');
+      DOM.modalCompleted.classList.add('hidden');
       renderQuestion();
     };
 
-    document.getElementById('btn-reset-deck').onclick = () => {
+    DOM.btnResetDeck.onclick = () => {
       if (!currentDeck) return;
       if (confirm(`Reset all recorded answers for ${currentDeck.title}?`)) {
         triggerReset();
       }
     };
 
-    document.getElementById('btn-modal-reset').onclick = triggerReset;
-    document.getElementById('btn-modal-review').onclick = () => {
-      document.getElementById('modal-completed').classList.add('hidden');
+    DOM.btnModalReset.onclick = triggerReset;
+
+    DOM.btnModalReview.onclick = () => {
+      DOM.modalCompleted.classList.add('hidden');
       state.sessionState.order = currentDeck.questions.map((_, i) => i);
       state.sessionState.currentIndex = 0;
+      saveState();
       renderQuestion();
     };
 
-    // Modal Triggers
-    document.getElementById('btn-open-deck-modal').onclick = () => {
+    // Modal & Drawer Toggles
+    DOM.btnOpenDeckModal.onclick = () => {
       renderDeckList(activeCategoryTab);
-      document.getElementById('modal-deck').classList.remove('hidden');
+      DOM.modalDeck.classList.remove('hidden');
     };
+    DOM.btnCloseDeckModal.onclick = () => DOM.modalDeck.classList.add('hidden');
 
-    document.getElementById('btn-close-deck-modal').onclick = () => {
-      document.getElementById('modal-deck').classList.add('hidden');
-    };
+    DOM.btnOpenDrawer.onclick = () => DOM.drawerEcosystem.classList.remove('hidden');
+    DOM.btnCloseDrawer.onclick = () => DOM.drawerEcosystem.classList.add('hidden');
 
-    // Feedback Trigger
-    document.getElementById('btn-feedback-trigger').onclick = () => {
+    DOM.btnFeedback.onclick = () => {
       const qIndex = state.sessionState.order[state.sessionState.currentIndex];
       const q = currentDeck ? currentDeck.questions[qIndex] : null;
       const subject = encodeURIComponent(`Feedback: Exam Recalls (${currentDeck ? currentDeck.title : ''} - Q${q ? q.id : ''})`);
       window.location.href = `mailto:support@ketofoldoc.com?subject=${subject}`;
     };
+
+    DOM.btnAuthTrigger.onclick = () => DOM.modalAuth.classList.remove('hidden');
+    DOM.btnCloseAuthModal.onclick = () => DOM.modalAuth.classList.add('hidden');
+
+    // Backdrop & Keyboard Dismissal
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', () => modal.classList.add('hidden'));
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        DOM.modalDeck.classList.add('hidden');
+        DOM.modalAuth.classList.add('hidden');
+        DOM.modalCompleted.classList.add('hidden');
+        DOM.drawerEcosystem.classList.add('hidden');
+      }
+    });
+
+    // Cloud Auth Handlers
+    if (DOM.btnGoogleLogin && auth) {
+      DOM.btnGoogleLogin.onclick = async () => {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await auth.signInWithPopup(provider);
+          DOM.modalAuth.classList.add('hidden');
+        } catch (e) {
+          alert('Sign in error: ' + e.message);
+        }
+      };
+    }
+
+    if (DOM.btnLogout && auth) {
+      DOM.btnLogout.onclick = async () => {
+        try {
+          await auth.signOut();
+          DOM.modalAuth.classList.add('hidden');
+        } catch (e) {
+          console.error("Sign out error:", e);
+        }
+      };
+    }
+
+    if (auth) {
+      auth.onAuthStateChanged(user => {
+        currentUser = user;
+        if (user) {
+          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          DOM.authUserLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+          DOM.authSignedInBox.classList.remove('hidden');
+          DOM.authSignedOutBox.classList.add('hidden');
+          DOM.authUserName.textContent = user.displayName || 'Learner';
+          DOM.authUserEmail.textContent = user.email || '';
+          DOM.authUserImg.src = user.photoURL || 'https://via.placeholder.com/40';
+          pullFromCloud(user);
+        } else {
+          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+          DOM.authUserLabel.textContent = 'Sign In';
+          DOM.authSignedInBox.classList.add('hidden');
+          DOM.authSignedOutBox.classList.remove('hidden');
+        }
+        lucide.createIcons();
+      });
+    }
 
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
@@ -634,7 +923,7 @@
 
       const allDecks = getAllRecallDecks();
       if (allDecks.length > 0) {
-        loadDeck(state.activeDeckId || allDecks[0].id);
+        loadDeck(state.activeDeckId || allDecks[0].id, true);
       }
 
       lucide.createIcons();
