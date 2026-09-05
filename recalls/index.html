@@ -427,9 +427,9 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
-    import { StudyHighlighter } from '/js/highlighter.js';
     import { RECALLS_CATALOG, getAllRecallDecks } from './manifest.js';
 
+    // 1. Cached DOM References
     const DOM = {
       viewEmpty: document.getElementById('view-empty'),
       viewQuiz: document.getElementById('view-quiz'),
@@ -498,6 +498,7 @@
       feedbackStatusMsg: document.getElementById('feedback-status-msg')
     };
 
+    // 2. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -517,19 +518,18 @@
       console.warn("Firebase Init:", e);
     }
 
-    // Storage Keys & Unified Architecture
+    // 3. Unified Nested Storage Schema
     const LOCAL_STORAGE_KEY = 'recalls_user_progress';
     const FIRESTORE_COLLECTION = 'users';
 
-    const allDecks = getAllRecallDecks();
+    const allDecks = getAllRecallDecks() || [];
     const DECKS = {};
     allDecks.forEach(d => { DECKS[d.id] = d; });
     const firstDeckId = allDecks[0]?.id || 'part_1_2023';
 
-    // State matching Saudi, 1000Qs, and Comp Architecture
     let state = {
       activeDeckId: firstDeckId,
-      userProgress: {}, // { [deckId]: { answers: {}, srs: {}, flags: [] } }
+      userProgress: {},
       sessionState: {
         currentIndex: 0,
         order: [],
@@ -539,7 +539,7 @@
       }
     };
 
-    let currentDeck = DECKS[firstDeckId] || allDecks[0];
+    let currentDeck = DECKS[firstDeckId] || allDecks[0] || null;
     let highlighter = null;
     let activeCategoryTab = 'part';
 
@@ -569,50 +569,6 @@
       });
 
       return normalized;
-    }
-
-    // Load Local Progress with Legacy Migration Fallback
-    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedProgress) {
-      try {
-        const parsed = JSON.parse(savedProgress);
-        state.userProgress = purgeGhostProgress(parsed.userProgress || parsed);
-        if (parsed.activeDeckId && DECKS[parsed.activeDeckId]) {
-          state.activeDeckId = parsed.activeDeckId;
-          currentDeck = DECKS[parsed.activeDeckId];
-        }
-      } catch (e) {}
-    } else {
-      // Automatic Legacy Migration from flat kd_recalls_state_v1
-      const legacyRaw = localStorage.getItem('kd_recalls_state_v1');
-      if (legacyRaw) {
-        try {
-          const legacy = JSON.parse(legacyRaw);
-          const migrated = {};
-
-          Object.entries(legacy.userAnswers || {}).forEach(([fullKey, ans]) => {
-            const parts = fullKey.split('_');
-            const qId = parts.pop();
-            const deckId = parts.join('_');
-            if (deckId && qId !== undefined) {
-              migrated[deckId] = migrated[deckId] || { answers: {}, srs: {}, flags: [] };
-              migrated[deckId].answers[qId] = ans;
-            }
-          });
-
-          Object.entries(legacy.srsProgress || {}).forEach(([fullKey, srs]) => {
-            const parts = fullKey.split('_');
-            const qId = parts.pop();
-            const deckId = parts.join('_');
-            if (deckId && qId !== undefined && migrated[deckId]) {
-              migrated[deckId].srs[qId] = srs;
-            }
-          });
-
-          state.userProgress = purgeGhostProgress(migrated);
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
-        } catch (e) {}
-      }
     }
 
     function compileCardStates() {
@@ -659,7 +615,7 @@
       return purgeGhostProgress(merged);
     }
 
-    // Cloud Sync: Directly to root document users/{uid}.recalls_progress
+    // 4. Cloud Persistence to Root Document
     let syncTimeout = null;
     function pushStateToCloud() {
       if (!db || !currentUser) return;
@@ -728,7 +684,7 @@
       }
     }
 
-    // Markdown & KaTeX Formatter
+    // 5. Text & Math Formatting
     function formatMarkdown(text) {
       if (!text) return '';
       let processed = String(text);
@@ -778,7 +734,7 @@
       return [];
     }
 
-    // SM-2 Engine
+    // 6. SM-2 Spaced Repetition Engine
     function calculateNextSRS(currentSRS, rating) {
       let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
       const now = new Date();
@@ -855,7 +811,7 @@
       return String(a).trim().toUpperCase() === String(b).trim().toUpperCase();
     }
 
-    // Main Renderer
+    // 7. Core Quiz UI Rendering Engine
     function render() {
       lucide.createIcons();
 
@@ -869,20 +825,33 @@
         return;
       }
 
+      // Initialize unanswered queue if empty and not in SRS mode
+      if (!state.sessionState.isSRSMode && (!state.sessionState.order || state.sessionState.order.length === 0)) {
+        const unans = getUnansweredIndices(currentDeck);
+        state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unans) : unans;
+      }
+
       const deckProgress = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
       const answersMap = deckProgress.answers || {};
       const totalAnswered = Object.keys(answersMap).length;
       const totalQuestions = currentDeck.questions.length;
       const isCompleted = totalAnswered >= totalQuestions && totalQuestions > 0;
+      const activeTotal = state.sessionState.order?.length || 0;
 
-      const { order, currentIndex, isSRSMode } = state.sessionState;
-
-      if ((!order || order.length === 0 || order[currentIndex] === undefined || isCompleted) && !isSRSMode) {
+      // Completion Guard
+      if ((activeTotal === 0 || isCompleted) && !state.sessionState.isSRSMode) {
         DOM.viewEmpty.classList.remove('hidden');
         DOM.viewQuiz.classList.add('hidden');
         DOM.quizFooter.classList.add('hidden');
-        DOM.emptyTitle.textContent = "Exam Recall Completed!";
-        DOM.emptyDesc.textContent = "You have answered every question in this recall paper. Click below to reset or choose another paper.";
+        if (isCompleted) {
+          DOM.emptyTitle.textContent = "Exam Recall Completed!";
+          DOM.emptyDesc.textContent = "You have answered every question in this recall paper. Click below to reset or choose another paper.";
+          DOM.btnResetCurrentDeck.classList.remove('hidden');
+        } else {
+          DOM.emptyTitle.textContent = "No Questions Available";
+          DOM.emptyDesc.textContent = "Select an exam from the menu to start practicing.";
+          DOM.btnResetCurrentDeck.classList.add('hidden');
+        }
         DOM.deckTitle.textContent = currentDeck.title;
         DOM.deckProgressText.textContent = `${totalQuestions} / ${totalQuestions} Completed`;
         DOM.progressBarFill.style.width = '100%';
@@ -893,7 +862,12 @@
       DOM.viewQuiz.classList.remove('hidden');
       DOM.quizFooter.classList.remove('hidden');
 
-      const qIndex = order[currentIndex] !== undefined ? order[currentIndex] : 0;
+      if (state.sessionState.currentIndex >= activeTotal) {
+        state.sessionState.currentIndex = Math.max(0, activeTotal - 1);
+      }
+
+      const qPointer = state.sessionState.currentIndex || 0;
+      const qIndex = state.sessionState.order[qPointer];
       const q = currentDeck.questions[qIndex] || currentDeck.questions[0];
       const namespacedContextId = `${currentDeck.id}_${qIndex}`;
 
@@ -924,19 +898,19 @@
         DOM.shuffleTag.classList.remove('hidden');
         DOM.srsTag.classList.add('hidden');
         DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
-        DOM.qNumberBadge.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+        DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
       } else if (state.sessionState.isSRSMode) {
         DOM.srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
         DOM.srsTag.classList.remove('hidden');
         DOM.shuffleTag.classList.add('hidden');
         DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
-        DOM.qNumberBadge.textContent = `SRS Due ${currentIndex + 1} of ${order.length}`;
+        DOM.qNumberBadge.textContent = `SRS Due ${qPointer + 1} of ${activeTotal}`;
       } else {
         DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
         DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
         DOM.shuffleTag.classList.add('hidden');
         DOM.srsTag.classList.add('hidden');
-        DOM.qNumberBadge.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+        DOM.qNumberBadge.textContent = `Question ${qPointer + 1} of ${activeTotal}`;
       }
 
       DOM.questionSourceBadge.textContent = currentDeck.groupTitle || 'Recall Exam';
@@ -955,14 +929,14 @@
         DOM.stemImgContainer.classList.add('hidden');
       }
 
-      // Bookmark / Flag state
+      // Bookmark Flag
       const isFlagged = (deckProgress.flags || []).includes(qIndex);
       DOM.flagBtn.className = isFlagged
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0'
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
       // Options
-      const selectedAnswer = isSRSMode 
+      const selectedAnswer = state.sessionState.isSRSMode 
         ? (state.sessionState.srsSessionAnswers?.[namespacedContextId]) 
         : answersMap[qIndex];
 
@@ -992,7 +966,7 @@
 
         btn.onclick = () => {
           state.userProgress[currentDeck.id] = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
-          if (isSRSMode) {
+          if (state.sessionState.isSRSMode) {
             state.sessionState.srsSessionAnswers = state.sessionState.srsSessionAnswers || {};
             if (state.sessionState.srsSessionAnswers[namespacedContextId]) return;
             state.sessionState.srsSessionAnswers[namespacedContextId] = letter;
@@ -1047,19 +1021,19 @@
       }
 
       // Prev / Next State
-      DOM.prevBtn.disabled = currentIndex <= 0;
-      DOM.prevBtn.classList.toggle('opacity-40', currentIndex <= 0);
-      DOM.prevBtn.classList.toggle('cursor-not-allowed', currentIndex <= 0);
+      DOM.prevBtn.disabled = qPointer <= 0;
+      DOM.prevBtn.classList.toggle('opacity-40', qPointer <= 0);
+      DOM.prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
 
-      const isLast = currentIndex >= order.length - 1;
+      const isLast = qPointer >= activeTotal - 1;
       DOM.nextBtn.innerHTML = isLast 
-        ? (isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
+        ? (state.sessionState.isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
         : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
 
       lucide.createIcons();
     }
 
-    // Deck Loader
+    // 8. Deck Switching & Navigation
     function loadDeck(deckId, retainIndex = false) {
       const target = DECKS[deckId] || allDecks[0];
       if (!target) return;
@@ -1079,13 +1053,11 @@
       }
 
       saveState();
-      render();
     }
 
-    // Category Tabs Render
     function renderDeckList(category = 'part') {
       DOM.deckListContainer.innerHTML = '';
-      const group = RECALLS_CATALOG.find(g => g.categoryId === category);
+      const group = (RECALLS_CATALOG || []).find(g => g.categoryId === category);
       if (!group?.decks?.length) {
         DOM.deckListContainer.innerHTML = `<div class="text-xs text-slate-500 py-6 text-center">No exams found in this category.</div>`;
         return;
@@ -1128,7 +1100,7 @@
       lucide.createIcons();
     }
 
-    // Full-Text Search Functionality (Ctrl + K)
+    // 9. Full-Text Search Functionality (Ctrl + K)
     function searchAllRecalls(query) {
       const clean = query.trim().toLowerCase();
       if (clean.length < 2) return [];
@@ -1223,7 +1195,6 @@
       });
     }
 
-    // Context Capture for In-App Feedback
     function captureCurrentContext() {
       const qIndex = state.sessionState.order[state.sessionState.currentIndex] || 0;
       const q = currentDeck?.questions[qIndex];
@@ -1242,7 +1213,7 @@
       };
     }
 
-    // Event Wiring
+    // 10. Interactive Event Wiring
     DOM.tabBtns.forEach(btn => {
       btn.onclick = () => {
         DOM.tabBtns.forEach(b => {
@@ -1328,7 +1299,6 @@
       saveState();
     };
 
-    // SM-2 Rating Controls
     document.querySelectorAll('.btn-srs').forEach(btn => {
       btn.onclick = () => {
         const rating = btn.getAttribute('data-srs');
@@ -1349,7 +1319,6 @@
       };
     });
 
-    // Reset Handlers
     const triggerReset = () => {
       if (!currentDeck) return;
       if (state.userProgress[currentDeck.id]) {
@@ -1367,7 +1336,6 @@
 
     DOM.btnResetCurrentDeck.onclick = triggerReset;
 
-    // Search Modal Handlers
     DOM.btnSearch.onclick = () => {
       DOM.modalSearch.classList.remove('hidden');
       DOM.searchInput.value = '';
@@ -1379,14 +1347,12 @@
     DOM.btnCloseSearch.onclick = () => DOM.modalSearch.classList.add('hidden');
     DOM.searchInput.addEventListener('input', debounce(e => renderSearchResults(e.target.value)));
 
-    // Menu / Decks Modal
     DOM.btnMenu.onclick = () => {
       renderDeckList(activeCategoryTab);
       DOM.modalDecks.classList.remove('hidden');
     };
     DOM.btnCloseDecks.onclick = () => DOM.modalDecks.classList.add('hidden');
 
-    // Feedback Modal Handlers (Web3Forms + Firestore Parity)
     DOM.btnFeedbackTrigger.onclick = () => {
       const ctx = captureCurrentContext();
       DOM.modalFeedback.classList.remove('hidden');
@@ -1466,7 +1432,6 @@
       }
     };
 
-    // Keyboard Shortcuts
     window.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -1491,7 +1456,6 @@
       }
     });
 
-    // Auth Modal Handlers
     DOM.btnAuthModal.onclick = () => DOM.modalAuth.classList.remove('hidden');
     DOM.btnCloseAuthModal.onclick = () => DOM.modalAuth.classList.add('hidden');
 
@@ -1534,26 +1498,56 @@
       });
     }
 
-    // Modal Backdrop Clicks
     document.querySelectorAll('.modal-backdrop').forEach(modal => {
       modal.addEventListener('click', e => {
         if (e.target === modal) modal.classList.add('hidden');
       });
     });
 
-    // App Initialization
-    window.addEventListener('DOMContentLoaded', () => {
-      highlighter = new StudyHighlighter({
-        storageKey: 'kd_recalls_highlights',
-        onChange: () => render()
-      });
+    // 11. Self-Executing Application Bootstrap (Immune to DOMContentLoaded Race Conditions)
+    async function initApp() {
+      // Safe highlighter initialization with resilient fallback
+      try {
+        const hlMod = await import('/js/highlighter.js').catch(() => import('./js/highlighter.js')).catch(() => null);
+        if (hlMod?.StudyHighlighter) {
+          highlighter = new hlMod.StudyHighlighter({
+            storageKey: 'kd_recalls_highlights',
+            onChange: () => render()
+          });
+        }
+      } catch (e) {
+        console.warn("Highlighter offline:", e);
+      }
 
-      if (allDecks.length > 0) {
-        loadDeck(state.activeDeckId || allDecks[0].id, true);
+      // Load active deck from storage or fallback
+      const savedRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let initialDeckId = allDecks[0]?.id || null;
+
+      if (savedRaw) {
+        try {
+          const parsed = JSON.parse(savedRaw);
+          state.userProgress = purgeGhostProgress(parsed.userProgress || parsed);
+          if (parsed.activeDeckId && DECKS[parsed.activeDeckId]) {
+            initialDeckId = parsed.activeDeckId;
+          }
+        } catch (e) {}
+      }
+
+      if (initialDeckId) {
+        loadDeck(initialDeckId, true);
+      } else {
+        render();
       }
 
       lucide.createIcons();
-    });
+    }
+
+    // Run immediately if DOM is already parsed; otherwise attach listener
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 </html>
