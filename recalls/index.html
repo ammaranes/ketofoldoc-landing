@@ -83,6 +83,10 @@
         <button id="btn-flag" class="p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Bookmark Question">
           <i data-lucide="bookmark" class="w-5 h-5"></i>
         </button>
+
+        <button id="btn-reset-deck" class="p-2 text-slate-400 hover:text-rose-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Reset Exam Progress">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
         
         <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
           <div id="auth-avatar" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
@@ -135,7 +139,9 @@
 
       <!-- Question Stem & Optional Stem Image -->
       <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
-        <div id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></div>
+        <div id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content">
+          Loading exam questions...
+        </div>
         <div id="stem-image-container" class="mt-4 hidden select-none">
           <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
         </div>
@@ -427,9 +433,7 @@
 
   <!-- ES6 Application Logic -->
   <script type="module">
-    import { RECALLS_CATALOG, getAllRecallDecks } from './manifest.js';
-
-    // 1. Cached DOM References
+    // 1. Cached DOM References (with both aliases for prev/next to eliminate undefined errors)
     const DOM = {
       viewEmpty: document.getElementById('view-empty'),
       viewQuiz: document.getElementById('view-quiz'),
@@ -440,6 +444,7 @@
       emptyTitle: document.getElementById('empty-title'),
       emptyDesc: document.getElementById('empty-desc'),
       btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
+      btnResetDeckHeader: document.getElementById('btn-reset-deck'),
       qNumberBadge: document.getElementById('question-number-badge'),
       questionSourceBadge: document.getElementById('question-source-badge'),
       scoreBadge: document.getElementById('score-badge'),
@@ -456,9 +461,14 @@
       expContent: document.getElementById('explanation-content'),
       expImgContainer: document.getElementById('explanation-images-container'),
       srsStatusTag: document.getElementById('srs-status-tag'),
+
+      // Aliases ensuring neither DOM.nextBtn nor DOM.btnNext is ever undefined
       prevBtn: document.getElementById('btn-prev'),
+      btnPrev: document.getElementById('btn-prev'),
       nextBtn: document.getElementById('btn-next'),
+      btnNext: document.getElementById('btn-next'),
       revealBtn: document.getElementById('btn-reveal'),
+      btnReveal: document.getElementById('btn-reveal'),
 
       btnMenu: document.getElementById('btn-menu'),
       modalDecks: document.getElementById('modal-decks'),
@@ -498,6 +508,9 @@
       feedbackStatusMsg: document.getElementById('feedback-status-msg')
     };
 
+    // Render icons right away so header and footer look crisp immediately
+    lucide.createIcons();
+
     // 2. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
@@ -518,17 +531,15 @@
       console.warn("Firebase Init:", e);
     }
 
-    // 3. Unified Nested Storage Schema
+    // 3. Application State & Storage
     const LOCAL_STORAGE_KEY = 'recalls_user_progress';
     const FIRESTORE_COLLECTION = 'users';
 
-    const allDecks = getAllRecallDecks() || [];
-    const DECKS = {};
-    allDecks.forEach(d => { DECKS[d.id] = d; });
-    const firstDeckId = allDecks[0]?.id || 'part_1_2023';
-
+    let allDecks = [];
+    let DECKS = {};
+    let RECALLS_CATALOG = [];
     let state = {
-      activeDeckId: firstDeckId,
+      activeDeckId: null,
       userProgress: {},
       sessionState: {
         currentIndex: 0,
@@ -539,7 +550,7 @@
       }
     };
 
-    let currentDeck = DECKS[firstDeckId] || allDecks[0] || null;
+    let currentDeck = null;
     let highlighter = null;
     let activeCategoryTab = 'part';
 
@@ -615,7 +626,7 @@
       return purgeGhostProgress(merged);
     }
 
-    // 4. Cloud Persistence to Root Document
+    // 4. Cloud Persistence
     let syncTimeout = null;
     function pushStateToCloud() {
       if (!db || !currentUser) return;
@@ -813,8 +824,6 @@
 
     // 7. Core Quiz UI Rendering Engine
     function render() {
-      lucide.createIcons();
-
       if (!currentDeck || !currentDeck.questions?.length) {
         DOM.viewEmpty.classList.remove('hidden');
         DOM.viewQuiz.classList.add('hidden');
@@ -822,10 +831,10 @@
         DOM.deckTitle.textContent = 'Exam Recalls';
         DOM.deckProgressText.textContent = '0 / 0 Completed';
         DOM.progressBarFill.style.width = '0%';
+        lucide.createIcons();
         return;
       }
 
-      // Initialize unanswered queue if empty and not in SRS mode
       if (!state.sessionState.isSRSMode && (!state.sessionState.order || state.sessionState.order.length === 0)) {
         const unans = getUnansweredIndices(currentDeck);
         state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unans) : unans;
@@ -838,7 +847,6 @@
       const isCompleted = totalAnswered >= totalQuestions && totalQuestions > 0;
       const activeTotal = state.sessionState.order?.length || 0;
 
-      // Completion Guard
       if ((activeTotal === 0 || isCompleted) && !state.sessionState.isSRSMode) {
         DOM.viewEmpty.classList.remove('hidden');
         DOM.viewQuiz.classList.add('hidden');
@@ -855,6 +863,7 @@
         DOM.deckTitle.textContent = currentDeck.title;
         DOM.deckProgressText.textContent = `${totalQuestions} / ${totalQuestions} Completed`;
         DOM.progressBarFill.style.width = '100%';
+        lucide.createIcons();
         return;
       }
 
@@ -873,7 +882,6 @@
 
       highlighter?.setContext(namespacedContextId);
 
-      // Header Labels
       DOM.deckTitle.textContent = currentDeck.title;
       const remainingCount = Math.max(0, totalQuestions - totalAnswered);
       DOM.deckProgressText.textContent = `${totalAnswered} / ${totalQuestions} Completed (${remainingCount} Left)`;
@@ -881,7 +889,6 @@
       const pct = (totalAnswered / totalQuestions) * 100;
       DOM.progressBarFill.style.width = `${pct}%`;
 
-      // Accuracy Badge
       let correctCount = 0;
       Object.entries(answersMap).forEach(([idxStr, ans]) => {
         const questionItem = currentDeck.questions[parseInt(idxStr, 10)];
@@ -892,7 +899,6 @@
       const acc = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 100;
       DOM.scoreBadge.textContent = `Accuracy: ${acc}%`;
 
-      // Mode Badge States
       if (state.sessionState.isShuffled) {
         DOM.shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
         DOM.shuffleTag.classList.remove('hidden');
@@ -915,7 +921,6 @@
 
       DOM.questionSourceBadge.textContent = currentDeck.groupTitle || 'Recall Exam';
 
-      // Stem & Image
       const rawStem = q.stem || q.question || '';
       DOM.qStem.innerHTML = highlighter ? highlighter.renderHighlights(rawStem, namespacedContextId) : rawStem;
 
@@ -929,13 +934,11 @@
         DOM.stemImgContainer.classList.add('hidden');
       }
 
-      // Bookmark Flag
       const isFlagged = (deckProgress.flags || []).includes(qIndex);
       DOM.flagBtn.className = isFlagged
         ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0'
         : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
 
-      // Options
       const selectedAnswer = state.sessionState.isSRSMode 
         ? (state.sessionState.srsSessionAnswers?.[namespacedContextId]) 
         : answersMap[qIndex];
@@ -980,7 +983,6 @@
         DOM.optionsContainer.appendChild(btn);
       });
 
-      // Explanation Box
       if (selectedAnswer) {
         DOM.expBox.classList.remove('hidden');
         const rawExp = formatMarkdown(q.explanation || 'No detailed rationale provided for this recall item.');
@@ -1020,7 +1022,6 @@
         DOM.expBox.classList.add('hidden');
       }
 
-      // Prev / Next State
       DOM.prevBtn.disabled = qPointer <= 0;
       DOM.prevBtn.classList.toggle('opacity-40', qPointer <= 0);
       DOM.prevBtn.classList.toggle('cursor-not-allowed', qPointer <= 0);
@@ -1033,7 +1034,7 @@
       lucide.createIcons();
     }
 
-    // 8. Deck Switching & Navigation
+    // 8. Deck Switching
     function loadDeck(deckId, retainIndex = false) {
       const target = DECKS[deckId] || allDecks[0];
       if (!target) return;
@@ -1100,7 +1101,7 @@
       lucide.createIcons();
     }
 
-    // 9. Full-Text Search Functionality (Ctrl + K)
+    // 9. Full-Text Search
     function searchAllRecalls(query) {
       const clean = query.trim().toLowerCase();
       if (clean.length < 2) return [];
@@ -1225,7 +1226,7 @@
       };
     });
 
-    DOM.btnNext.onclick = () => {
+    DOM.nextBtn.onclick = () => {
       if (state.sessionState.currentIndex < state.sessionState.order.length - 1) {
         state.sessionState.currentIndex++;
         saveState();
@@ -1335,6 +1336,14 @@
     };
 
     DOM.btnResetCurrentDeck.onclick = triggerReset;
+    if (DOM.btnResetDeckHeader) {
+      DOM.btnResetDeckHeader.onclick = () => {
+        if (!currentDeck) return;
+        if (confirm(`Reset all recorded progress for ${currentDeck.title}?`)) {
+          triggerReset();
+        }
+      };
+    }
 
     DOM.btnSearch.onclick = () => {
       DOM.modalSearch.classList.remove('hidden');
@@ -1504,11 +1513,39 @@
       });
     });
 
-    // 11. Self-Executing Application Bootstrap (Immune to DOMContentLoaded Race Conditions)
+    // 11. Resilient Application Bootstrap
     async function initApp() {
-      // Safe highlighter initialization with resilient fallback
+      // Diagnostic Guard: Dynamically load manifest to catch import/syntax errors gracefully
       try {
-        const hlMod = await import('/js/highlighter.js').catch(() => import('./js/highlighter.js')).catch(() => null);
+        const manifestModule = await import('./manifest.js');
+        RECALLS_CATALOG = manifestModule.RECALLS_CATALOG || [];
+        allDecks = typeof manifestModule.getAllRecallDecks === 'function' ? manifestModule.getAllRecallDecks() : [];
+        DECKS = {};
+        allDecks.forEach(d => { DECKS[d.id] = d; });
+      } catch (manifestError) {
+        console.error("Critical manifest load failure:", manifestError);
+        DOM.qStem.innerHTML = `
+          <div class="p-4 bg-rose-950/60 border border-rose-800/80 rounded-xl text-rose-200 text-sm space-y-2">
+            <div class="font-bold flex items-center space-x-2 text-rose-300">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span>Failed to load recall manifest or exam chunks</span>
+            </div>
+            <p class="text-xs text-rose-300/80">Check browser console (<kbd>F12</kbd> or <kbd>Option+Cmd+I</kbd>). A data file may have a syntax typo or a missing import.</p>
+            <div class="text-[11px] font-mono bg-black/40 p-2.5 rounded text-rose-400 overflow-x-auto">${manifestError.message}</div>
+          </div>
+        `;
+        DOM.deckTitle.textContent = "Data Load Error";
+        lucide.createIcons();
+        return;
+      }
+
+      // Safe highlighter initialization with relative and absolute fallbacks
+      try {
+        const hlMod = await import('../js/highlighter.js')
+          .catch(() => import('/js/highlighter.js'))
+          .catch(() => import('./js/highlighter.js'))
+          .catch(() => null);
+          
         if (hlMod?.StudyHighlighter) {
           highlighter = new hlMod.StudyHighlighter({
             storageKey: 'kd_recalls_highlights',
@@ -1542,7 +1579,6 @@
       lucide.createIcons();
     }
 
-    // Run immediately if DOM is already parsed; otherwise attach listener
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initApp);
     } else {
