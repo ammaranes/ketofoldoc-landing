@@ -1,568 +1,461 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="google-site-verification" content="L71BP_UGbg23lQZGPyrZpDiFDsw3YYz1DLyMtqruiWw" />
-  <title>KetofolDoc | Anesthesia Board Preparation & Analytics Hub</title>
-  
-  <!-- Favicon & Touch Icons -->
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>KetofolDoc | Precision Anesthesia Learning & Retention Hub</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490' }
+          }
+        }
+      }
+    }
+  </script>
 
-  <!-- Firebase SDKs (v9 Compat Mode - Aligned with Sub-Platforms) -->
+  <!-- Firebase SDKs (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <style>
-    body { -webkit-tap-highlight-color: transparent; }
-    .safe-top { padding-top: env(safe-area-inset-top); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    html { scroll-behavior: smooth; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500/30">
 
-  <!-- Top Navigation Bar -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top">
-    <div class="max-w-6xl mx-auto px-4 py-3 min-h-[3.75rem] flex items-center justify-between gap-3">
-      
-      <!-- Brand Logo & Title -->
-      <a href="/" class="flex items-center space-x-3 group">
-        <img src="/logo.svg" alt="KetofolDoc Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain group-hover:border-slate-500 transition" />
-        <div>
-          <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight block leading-tight group-hover:text-blue-400 transition">
-            KetofolDoc
-          </span>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block leading-tight">
-            Anesthesia Ecosystem
-          </span>
-        </div>
-      </a>
-
-      <!-- Right Header Actions -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
-        <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-          4 Platforms Live
+  <!-- TOP APP HEADER -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-2.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="flex items-center space-x-2.5 hover:opacity-90 transition">
+          <img 
+            id="brand-logo-img"
+            src="/logo.svg" 
+            alt="KetofolDoc Logo" 
+            class="w-8 h-8 rounded-lg border border-slate-700/80 object-contain"
+            onerror="this.classList.add('hidden'); document.getElementById('brand-logo-fallback').classList.remove('hidden');"
+          />
+          <div id="brand-logo-fallback" class="hidden w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs tracking-wider">
+            KD
+          </div>
+          <span class="font-bold text-base tracking-tight text-white">KetofolDoc</span>
+        </a>
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 uppercase tracking-wider">
+          Anesthesia Ecosystem
         </span>
-
-        <!-- Dynamic Auth Header Trigger -->
-        <button id="btn-auth-header" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500/60 rounded-xl text-xs font-semibold text-slate-200 flex items-center space-x-2 transition shadow-sm">
-          <svg id="google-icon-header" class="w-3.5 h-3.5" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span id="auth-label-header">Sign In</span>
-        </button>
       </div>
 
+      <!-- Auth Status Indicator -->
+      <button id="btn-auth-header" class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs font-semibold transition active:scale-95">
+        <div id="auth-status-indicator" class="w-2 h-2 rounded-full bg-slate-500"></div>
+        <span id="auth-header-label" class="text-slate-300">Sign In</span>
+      </button>
     </div>
   </header>
 
-  <!-- Main Content Canvas -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-16 space-y-10 sm:space-y-16">
-    
-    <!-- 1️⃣ HERO SECTION -->
-    <section class="text-center max-w-3xl mx-auto pt-2 sm:pt-6">
-      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold mb-4 shadow-inner">
-        <i data-lucide="compass" class="w-4 h-4 text-blue-400"></i>
-        <span>The Next-Generation Anesthesia Board Platform</span>
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-4 sm:py-6 space-y-6">
+
+    <!-- COMPACT HERO & ACTIVE CLOUD SYNC STRIP -->
+    <div class="text-center max-w-2xl mx-auto space-y-2 pt-1 sm:pt-2">
+      <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+        <span>Next-Gen Anesthesia Education Platform</span>
       </div>
-      <h1 class="text-3xl sm:text-5xl font-black text-slate-100 tracking-tight leading-tight sm:leading-tight mb-4">
-        Precision Anesthesia <br class="hidden sm:inline" />
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400">
-          Learning & Retention Hub
-        </span>
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight">
+        Precision Anesthesia <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Learning Hub</span>
       </h1>
-      <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto font-normal mb-8">
-        Designed to eliminate fragmented clinical revision by pairing comprehensive literature synthesis with automated spaced repetition and unified retention analytics.
+      <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+        Paired literature synthesis, verified question banks, and automated SM-2 spaced repetition for clinical mastery.
       </p>
-      
-      <!-- Quick Action Jump Buttons -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="#dashboard-section" class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-blue-600/20 active:scale-95">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 mr-2"></i> View Dashboard
-        </a>
-        <a href="#platforms-section" class="w-full sm:w-auto px-6 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-500 text-slate-200 font-semibold text-sm rounded-xl flex items-center justify-center transition active:scale-95">
-          <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Browse Platforms
-        </a>
-      </div>
-    </section>
 
-    <!-- 2️⃣ UNIFIED BOARD READINESS DASHBOARD -->
-    <section id="dashboard-section" class="scroll-mt-24 pt-2">
-      <!-- Signed-Out Prompt Banner -->
-      <div id="dashboard-logged-out" class="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-blue-950/40 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl backdrop-blur-sm">
-        <div class="flex items-center space-x-4 min-w-0">
-          <div class="w-12 h-12 rounded-2xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center shrink-0">
-            <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+      <!-- Active Cloud Sync Ribbon -->
+      <div class="pt-2">
+        <div class="inline-flex flex-wrap items-center justify-center gap-2 bg-slate-900/80 border border-slate-800/90 rounded-2xl px-3.5 py-2 max-w-lg mx-auto shadow-sm">
+          <div class="flex items-center space-x-2 text-[11px] text-slate-300 font-medium">
+            <i id="sync-icon-hero" data-lucide="cloud" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span id="sync-status-text">Cloud Sync: Sign in to sync across devices</span>
           </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-1">Sync Your Live Board Readiness Stats</h2>
-            <p class="text-sm text-slate-300 leading-relaxed max-w-xl font-normal">
-              Sign in with Google to aggregate Spaced Repetition (SM-2) retention, flashcard mastery, and chapter reading progress across all your devices.
-            </p>
-          </div>
-        </div>
-        <button id="btn-dashboard-signin" class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center space-x-3 transition shadow-lg shadow-blue-600/20 shrink-0">
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span>Sign In with Google</span>
-        </button>
-      </div>
-
-      <!-- Signed-In Live Dashboard Surface -->
-      <div id="dashboard-logged-in" class="hidden space-y-6">
-        <div class="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 border border-blue-800/60 px-2.5 py-1 rounded-lg">
-                Unified Ecosystem Analytics
-              </span>
-              <h2 id="dash-greeting" class="text-xl sm:text-2xl font-extrabold text-slate-100 mt-2">Welcome Back</h2>
-            </div>
-            <div class="flex items-center space-x-3 bg-slate-950/70 border border-slate-800 px-4 py-2 rounded-2xl self-start sm:self-auto">
-              <span class="text-xs font-semibold text-slate-400">Board Readiness Index:</span>
-              <span id="dash-readiness-percent" class="text-base font-black text-emerald-400">0%</span>
-            </div>
-          </div>
-
-          <!-- Readiness Progress Bar -->
-          <div class="w-full bg-slate-950 rounded-full h-3 p-0.5 border border-slate-800 mb-6">
-            <div id="dash-readiness-bar" class="bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 h-2 rounded-full w-0 transition-all duration-500"></div>
-          </div>
-
-          <!-- 4 Core Metric Tiles -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 mb-2">
-                <span class="text-[11px] font-semibold">Active Cards</span>
-                <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i>
-              </div>
-              <div>
-                <span id="stat-total-reviewed" class="text-xl sm:text-2xl font-black text-slate-100 block">0</span>
-                <span class="text-[10px] text-slate-500">Questions in SM-2 Queue</span>
-              </div>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 mb-2">
-                <span class="text-[11px] font-semibold">Mastered</span>
-                <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i>
-              </div>
-              <div>
-                <span id="stat-mastered-cards" class="text-xl sm:text-2xl font-black text-emerald-400 block">0</span>
-                <span class="text-[10px] text-slate-500">Interval ≥ 21 Days</span>
-              </div>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 mb-2">
-                <span class="text-[11px] font-semibold">Summaries</span>
-                <i data-lucide="book-marked" class="w-4 h-4 text-purple-400"></i>
-              </div>
-              <div>
-                <span id="stat-summaries-read" class="text-xl sm:text-2xl font-black text-purple-400 block">0</span>
-                <span class="text-[10px] text-slate-500">Chapters Completed</span>
-              </div>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between text-slate-400 mb-2">
-                <span class="text-[11px] font-semibold">Retention</span>
-                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
-              </div>
-              <div>
-                <span id="stat-retention-rate" class="text-xl sm:text-2xl font-black text-amber-400 block">0%</span>
-                <span class="text-[10px] text-slate-500">Average Memory Ease</span>
-              </div>
-            </div>
-          </div>
+          <button id="btn-quick-sync" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold transition flex items-center space-x-1 shadow-sm active:scale-95">
+            <span id="sync-btn-label">Sync Live</span>
+            <i id="sync-btn-icon" data-lucide="refresh-cw" class="w-3 h-3"></i>
+          </button>
         </div>
       </div>
-    </section>
-
-    <!-- 3️⃣ ACTIVE STUDY PLATFORMS (4-PLATFORM 2x2 GRID) -->
-    <section id="platforms-section" class="scroll-mt-24 space-y-6">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-        <div>
-          <h2 class="text-lg sm:text-xl font-bold text-slate-100 flex items-center">
-            <i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-blue-400"></i>
-            Active Study Platforms
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Select a specialized review platform to begin your study session</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        
-        <!-- Platform 1: Saudi Board QB -->
-        <a href="/saudi/" class="bg-slate-900/80 border border-slate-800 hover:border-blue-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-blue-950/40 cursor-pointer">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-blue-950/70 border border-blue-800/60 text-blue-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-                <i data-lucide="award" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 border border-blue-800/60 px-2.5 py-1 rounded-lg">
-                Saudi Board
-              </span>
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-blue-300 transition">
-              Saudi Board QB
-            </h3>
-            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
-              9 subspecialty question banks with verified textbook citations, custom composite practice, and SM-2 spaced repetition.
-            </p>
-
-            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-400 font-medium">Progress:</span>
-              <span id="card-stat-saudi" class="font-bold text-blue-300">-- Questions Active</span>
-            </div>
-          </div>
-
-          <div class="w-full py-3 bg-blue-600 group-hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-blue-600/20">
-            <span>Launch Question Bank</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-          </div>
-        </a>
-
-        <!-- Platform 2: 1000 Anesthesia Questions -->
-        <a href="/1000qs/" class="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-emerald-950/40 cursor-pointer">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-                <i data-lucide="book-open" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-lg">
-                1,002 Qs
-              </span>
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-emerald-300 transition">
-              1000 Questions
-            </h3>
-            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
-              21 chapter review modules with integrated clinical figures, explanations, and recall testing.
-            </p>
-
-            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-400 font-medium">Progress:</span>
-              <span id="card-stat-1000" class="font-bold text-emerald-300">-- Questions Active</span>
-            </div>
-          </div>
-
-          <div class="w-full py-3 bg-emerald-600 group-hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-emerald-600/20">
-            <span>Launch Practice</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-          </div>
-        </a>
-
-        <!-- Platform 3: Comprehensive Anesthesia QB (NEW) -->
-        <a href="/comp/" class="bg-slate-900/80 border border-slate-800 hover:border-cyan-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-cyan-950/40 cursor-pointer">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-cyan-950/70 border border-cyan-800/60 text-cyan-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-                <i data-lucide="stethoscope" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-2.5 py-1 rounded-lg">
-                1001 Qs
-              </span>
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-cyan-300 transition">
-              Comprehensive Anesthesia QB
-            </h3>
-            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
-              11 in-depth chapters covering anesthesia equipment, physical principles, pharmacology, and clinical subspecialties with diagrams.
-            </p>
-
-            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-400 font-medium">Progress:</span>
-              <span id="card-stat-comp" class="font-bold text-cyan-300">-- Questions Active</span>
-            </div>
-          </div>
-
-          <div class="w-full py-3 bg-cyan-600 group-hover:bg-cyan-500 active:bg-cyan-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-cyan-600/20">
-            <span>Launch Practice</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-          </div>
-        </a>
-
-        <!-- Platform 4: Textbook Chapter Summaries -->
-        <a href="/summaries/" class="bg-slate-900/80 border border-slate-800 hover:border-purple-500/60 transition duration-300 rounded-3xl p-6 sm:p-7 flex flex-col justify-between group hover:shadow-2xl hover:shadow-purple-950/40 cursor-pointer">
-          <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-purple-950/70 border border-purple-800/60 text-purple-400 flex items-center justify-center group-hover:scale-105 transition shadow-inner">
-                <i data-lucide="file-text" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 border border-purple-800/60 px-2.5 py-1 rounded-lg">
-                Summaries
-              </span>
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-100 mb-2 group-hover:text-purple-300 transition">
-              Chapter Summaries
-            </h3>
-            <p class="text-sm text-slate-300 leading-relaxed mb-6 font-normal">
-              High-yield Miller's Anesthesia textbook summaries and live synced recall questions.
-            </p>
-
-            <div class="pt-4 border-t border-slate-800/80 mb-6 flex items-center justify-between text-xs">
-              <span class="text-slate-400 font-medium">Progress:</span>
-              <span id="card-stat-summaries" class="font-bold text-purple-300">-- Chapters Read</span>
-            </div>
-          </div>
-
-          <div class="w-full py-3 bg-purple-600 group-hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center transition shadow-lg shadow-purple-600/20">
-            <span>Read Summaries</span>
-            <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1"></i>
-          </div>
-        </a>
-
-        <!-- Exam Recalls Platform Card -->
-<a href="recalls/index.html" class="group relative bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between shadow-lg hover:shadow-cyan-500/10">
-  <div class="space-y-3">
-    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
-      <i data-lucide="history" class="w-6 h-6"></i>
     </div>
-    <h3 class="text-lg font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">Exam Recalls</h3>
-    <p class="text-xs text-slate-400 leading-relaxed">
-      Review previous exam recalls from Saudi Board Part 1, Part 2 and annual Promotion exams.
-    </p>
-  </div>
-  <div class="pt-5 flex items-center justify-between text-xs font-semibold text-cyan-400">
-    <span>Launch Platform</span>
-    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-  </div>
-</a>
+
+    <!-- ACTIVE STUDY PLATFORMS -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+          <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-200">Active Study Platforms</h2>
+        </div>
+        <span class="text-[11px] text-slate-500">5 Integrated Modules</span>
+      </div>
+
+      <!-- 5-Card Responsive Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        
+        <!-- 1. Saudi Board QB (Blue) -->
+        <div class="bg-slate-900/70 border border-slate-800 hover:border-blue-500/40 rounded-2xl p-4 sm:p-4.5 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-blue-500/5 space-y-3.5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400">
+                <i data-lucide="award" class="w-4 h-4"></i>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 border border-blue-500/30 text-blue-400 uppercase tracking-wider">QUESTION BANK</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-100">Saudi Board QB</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">
+                Subspecialty question bank with verified textbook referencing, custom practice, and SM-2 spaced repetition.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Progress</span>
+                <span id="saudi-stat" class="text-blue-400">500+ Questions Active</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="saudi-progress-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+            <a href="/saudi/" class="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-98">
+              <span>Launch Question Bank</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. 1000 Questions (Emerald) -->
+        <div class="bg-slate-900/70 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-4 sm:p-4.5 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-emerald-500/5 space-y-3.5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 uppercase tracking-wider">1000 QS</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-100">1000 Questions</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">
+                50 chapter review modules with integrated clinical figures, explanations, and active recall testing.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Progress</span>
+                <span id="q1000-stat" class="text-emerald-400">1000 Questions Active</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="q1000-progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+            <a href="/1000qs/" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-98">
+              <span>Launch Practice</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. Comprehensive Anesthesia QB (Cyan) -->
+        <div class="bg-slate-900/70 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-4 sm:p-4.5 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-cyan-500/5 space-y-3.5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400">
+                <i data-lucide="stethoscope" class="w-4 h-4"></i>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 uppercase tracking-wider">TEST BANK</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-100">Comprehensive Anesthesia</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">
+                Interdisciplinary review covering airway management, hemodynamics, pharmacology, and subspecialties.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Progress</span>
+                <span id="comp-stat" class="text-cyan-400">450+ Questions Active</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="comp-progress-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+            <a href="/comp/" class="w-full py-2 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-98">
+              <span>Launch Practice</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. Chapter Summaries (Purple) -->
+        <div class="bg-slate-900/70 border border-slate-800 hover:border-purple-500/40 rounded-2xl p-4 sm:p-4.5 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-purple-500/5 space-y-3.5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 border border-purple-500/30 text-purple-400 uppercase tracking-wider">SUMMARIES</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-100">Chapter Summaries</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">
+                High-yield Miller's Anesthesia textbook chapter syntheses paired with integrated micro-testing questions.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Progress</span>
+                <span id="summaries-stat" class="text-purple-400">100+ Summaries Active</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="summaries-progress-bar" class="bg-purple-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+            <a href="/summaries/" class="w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-98">
+              <span>Read Summaries</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 5. Exam Recalls (Amber / Gold) -->
+        <div class="bg-slate-900/70 border border-slate-800 hover:border-amber-500/40 rounded-2xl p-4 sm:p-4.5 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-amber-500/5 space-y-3.5 md:col-span-2 lg:col-span-1">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400">
+                <i data-lucide="history" class="w-4 h-4"></i>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase tracking-wider">EXAM RECALLS</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-100">Exam Recalls</h3>
+              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-0.5">
+                Authentic previous recalls from Saudi Board Part 1, Part 2, Promotion exams, and Central Committee.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Progress</span>
+                <span id="recalls-stat" class="text-amber-400">800+ Recalls Active</span>
+              </div>
+              <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                <div id="recalls-progress-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+            <a href="/recalls/" class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-98">
+              <span>Launch Recalls</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
 
       </div>
     </section>
 
-    <!-- 4️⃣ WHY KETOFOLDOC PILLARS -->
-    <section class="pt-8 border-t border-slate-800/60">
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mb-3">Why KetofolDoc?</h2>
-        <p class="text-sm text-slate-400">The science behind our precision learning ecosystem.</p>
+    <!-- WHY KETOFOLDOC? -->
+    <section class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 sm:p-5 space-y-4">
+      <div class="text-center space-y-1">
+        <h3 class="font-bold text-sm sm:text-base text-slate-100">Why KetofolDoc?</h3>
+        <p class="text-xs text-slate-400">Engineered for long-term retention and focused clinical revision.</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition shadow-lg">
-          <div>
-            <div class="w-11 h-11 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center mb-4">
-              <i data-lucide="brain-circuit" class="w-5 h-5"></i>
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Spaced Repetition (SM-2 Engine)</h2>
-            <p class="text-sm text-slate-300 leading-relaxed font-normal">
-              Replaces passive reading with scheduled active recall. The algorithm calculates custom review intervals based on your response quality (Again, Hard, Good, Easy) to counter the clinical forgetting curve.
-            </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+          <div class="flex items-center space-x-2 text-cyan-400 font-bold">
+            <i data-lucide="brain" class="w-4 h-4"></i>
+            <span>SM-2 SRS Engine</span>
           </div>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/40 transition shadow-lg">
-          <div>
-            <div class="w-11 h-11 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center mb-4">
-              <i data-lucide="check-check" class="w-5 h-5"></i>
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Curated High-Yield Question Banks</h2>
-            <p class="text-sm text-slate-300 leading-relaxed font-normal">
-              Over 2,700+ verified questions covering the Saudi Anesthesia Board blueprint, featuring detailed explanations, hemodynamic figures, and verified references.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500/40 transition shadow-lg">
-          <div>
-            <div class="w-11 h-11 rounded-xl bg-purple-950/80 border border-purple-800/60 text-purple-400 flex items-center justify-center mb-4">
-              <i data-lucide="book-open-check" class="w-5 h-5"></i>
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Textbook Synthesis & Micro-Testing</h2>
-            <p class="text-sm text-slate-300 leading-relaxed font-normal">
-              Structured summaries of <em>Miller's Anesthesia</em> chapters paired with embedded recall questions that update your global flashcard queue in real-time as you read.
-            </p>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-amber-500/40 transition shadow-lg">
-          <div>
-            <div class="w-11 h-11 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center mb-4">
-              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-            </div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-2">Unified Board Readiness Index</h2>
-            <p class="text-sm text-slate-300 leading-relaxed font-normal">
-              An objective composite metric weighted across active question mastery (60%) and core literature completion (40%) to provide a transparent index of exam preparedness.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5️⃣ SYNERGY SECTION -->
-    <section class="pb-8">
-      <div class="bg-gradient-to-br from-slate-900 via-slate-900/95 to-purple-950/40 border border-purple-900/40 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-        <div class="absolute -right-16 -bottom-16 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="max-w-3xl mb-8">
-          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-800/60 text-purple-300 text-xs font-semibold mb-3">
-            <i data-lucide="link-2" class="w-3.5 h-3.5 text-purple-400"></i>
-            <span>Subject-Mapped Question Bank Synergy</span>
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight mb-3">
-            How Summaries Connect Directly to Practice Questions
-          </h2>
-          <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-            Reading comprehensive textbook material is only the first step. KetofolDoc bridges reading with retention through automated, subject-level topic mapping that links each summary chapter directly into our curated question banks.
+          <p class="text-slate-400 leading-relaxed text-[11px]">
+            Dynamic review intervals adjust to card difficulty, preventing memory decay.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500/40 transition shadow-md">
-            <div>
-              <div class="flex items-center space-x-3 mb-3">
-                <span class="w-7 h-7 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-xs font-bold text-purple-300">1</span>
-                <h3 class="text-base font-bold text-slate-100">Subspecialty Indexing</h3>
-              </div>
-              <p class="text-sm text-slate-300 leading-relaxed font-normal">
-                Relevant chapters of <em>Miller's Anesthesia</em> are indexed across core clinical domains—matching the blueprint of clinical board exams.
-              </p>
-            </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+          <div class="flex items-center space-x-2 text-emerald-400 font-bold">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Curated High-Yield</span>
           </div>
+          <p class="text-slate-400 leading-relaxed text-[11px]">
+            Over 2,200 verified questions matching the official Saudi Board syllabus.
+          </p>
+        </div>
 
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-emerald-500/40 transition shadow-md">
-            <div>
-              <div class="flex items-center space-x-3 mb-3">
-                <span class="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-xs font-bold text-emerald-300">2</span>
-                <h3 class="text-base font-bold text-slate-100">Immediate Micro-Testing</h3>
-              </div>
-              <p class="text-sm text-slate-300 leading-relaxed font-normal">
-                Upon completing any summary chapter, the engine dynamically generates targeted recall questions pulled directly from matching question bank modules[cite: 2].
-              </p>
-            </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+          <div class="flex items-center space-x-2 text-purple-400 font-bold">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+            <span>Textbook Synthesis</span>
           </div>
+          <p class="text-slate-400 leading-relaxed text-[11px]">
+            Direct chapter mappings connecting core textbook reading with instant testing.
+          </p>
+        </div>
 
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition shadow-md">
-            <div>
-              <div class="flex items-center space-x-3 mb-3">
-                <span class="w-7 h-7 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-xs font-bold text-blue-300">3</span>
-                <h3 class="text-base font-bold text-slate-100">Bidirectional SRS Sync</h3>
-              </div>
-              <p class="text-sm text-slate-300 leading-relaxed font-normal">
-                Every recall rating made inside a summary updates the question's mastery interval in your global queue and syncs across all devices in real time.
-              </p>
-            </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1.5">
+          <div class="flex items-center space-x-2 text-amber-400 font-bold">
+            <i data-lucide="history" class="w-4 h-4"></i>
+            <span>Authentic Recalls</span>
           </div>
+          <p class="text-slate-400 leading-relaxed text-[11px]">
+            Comprehensive archive of past resident recalls for Part, Promotion, and Central exams.
+          </p>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Floating Feedback Trigger Button -->
-  <button id="btn-feedback-trigger" class="fixed bottom-6 right-6 z-40 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full px-4 py-2.5 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95">
-    <i data-lucide="message-square-plus" class="w-4 h-4 text-blue-400"></i>
-    <span>Feedback</span>
-  </button>
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-4 px-4 text-center text-xs text-slate-500 space-y-2">
+    <div class="flex items-center justify-center space-x-4">
+      <a href="/privacy.html" class="hover:text-slate-400 transition">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html" class="hover:text-slate-400 transition">Terms of Service</a>
+      <span>•</span>
+      <a href="mailto:support@ketofoldoc.com" class="hover:text-slate-400 transition">Contact & Feedback</a>
+    </div>
+    <p>© 2026 KetofolDoc. Precision Anesthesia Learning. All rights reserved.</p>
+  </footer>
 
-  <!-- Global Context-Aware Feedback Modal -->
-  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden">
-      
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-blue-950/80 border border-blue-800/60 text-blue-400 flex items-center justify-center">
-            <i data-lucide="message-square" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-100">Feedback & Suggestions</h3>
-            <p class="text-[11px] text-slate-400">Help improve platform accuracy and feature development</p>
+  <!-- AUTH MODAL -->
+  <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-slate-100 flex items-center space-x-2">
+          <i data-lucide="cloud" class="w-4 h-4 text-cyan-400"></i>
+          <span>Account & Cloud Sync</span>
+        </h3>
+        <button id="btn-close-auth" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div id="auth-signed-in" class="hidden space-y-3">
+        <div class="flex items-center space-x-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+          <img 
+            id="auth-user-img" 
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%231e293b'/%3E%3C/svg%3E" 
+            class="w-10 h-10 rounded-full border border-cyan-500/40 object-cover" 
+            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%231e293b\'/%3E%3C/svg%3E';" 
+          />
+          <div class="overflow-hidden">
+            <div id="auth-user-name" class="font-bold text-xs text-slate-100 truncate"></div>
+            <div id="auth-user-email" class="text-[10px] text-slate-400 truncate"></div>
           </div>
         </div>
-        <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <p class="text-xs text-emerald-400 flex items-center space-x-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>All 5 platform schedules synced across your devices</span>
+        </p>
+        <button id="btn-logout" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-rose-300 transition">
+          Sign Out
         </button>
       </div>
 
-      <div class="overflow-y-auto py-4 space-y-4 flex-1">
-        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
-          <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
-            <span class="flex items-center">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-blue-400"></i> Location Context
-            </span>
-            <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Landing Portal</span>
-          </div>
-          <div id="feedback-context-summary" class="text-xs text-slate-300 leading-relaxed font-mono">
-            KetofolDoc Main Portal (Dashboard & Ecosystem Navigation)
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="General Suggestion" checked class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-              <span>Suggestion</span>
-            </label>
-            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-              <span>Bug Report</span>
-            </label>
-            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Dashboard / Sync Issue" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-              <span>Sync Question</span>
-            </label>
-            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Feature Request" class="text-blue-600 focus:ring-0 bg-slate-900 border-slate-700" />
-              <span>Feature Request</span>
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
-          <textarea id="feedback-comment" rows="4" placeholder="Share your suggestions, thoughts, or report an issue..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
-        </div>
-
-        <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
-      </div>
-
-      <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
-        <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
-          Cancel
-        </button>
-        <button id="btn-submit-feedback" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-blue-600/20">
-          <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          <span>Send Feedback</span>
+      <div id="auth-signed-out" class="space-y-3">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Sign in with Google to sync your study progress, bookmarks, and SM-2 schedules across mobile and desktop.
+        </p>
+        <button id="btn-google-login" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center space-x-2 shadow transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800/80 bg-slate-950/90 py-6 safe-bottom">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-      <p>© 2026 KetofolDoc. Precision anesthesia learning ecosystem for clinical board preparation.</p>
-      <div class="flex items-center space-x-4">
-        <a href="/privacy.html" class="hover:text-slate-300 transition">Privacy Policy</a>
-        <span>•</span>
-        <a href="/terms.html" class="hover:text-slate-300 transition">Terms of Service</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Firebase Auth & Real-Time Sync Engine -->
+  <!-- APPLICATION LOGIC -->
   <script>
+    // 1. Centralized Declarative Platforms Configuration
+    const PLATFORMS_CONFIG = [
+      {
+        id: 'saudi',
+        firestoreDocId: 'saudi',
+        storageKey: 'saudi_qb_state_v1',
+        total: 500,
+        progressBarId: 'saudi-progress-bar',
+        statLabelId: 'saudi-stat',
+        statUnit: 'Completed',
+        defaultStat: '500+ Questions Active',
+        countKey: 'userAnswers'
+      },
+      {
+        id: '1000qs',
+        firestoreDocId: '1000qs',
+        storageKey: 'qb_state_v1',
+        total: 1000,
+        progressBarId: 'q1000-progress-bar',
+        statLabelId: 'q1000-stat',
+        statUnit: 'Completed',
+        defaultStat: '1000 Questions Active',
+        countKey: 'userAnswers'
+      },
+      {
+        id: 'comp',
+        firestoreDocId: 'comp',
+        storageKey: 'comp_qb_state_v1',
+        total: 450,
+        progressBarId: 'comp-progress-bar',
+        statLabelId: 'comp-stat',
+        statUnit: 'Completed',
+        defaultStat: '450+ Questions Active',
+        countKey: 'userAnswers'
+      },
+      {
+        id: 'summaries',
+        firestoreDocId: 'summaries',
+        storageKey: 'summaries_state_v1',
+        total: 100,
+        progressBarId: 'summaries-progress-bar',
+        statLabelId: 'summaries-stat',
+        statUnit: 'Chapters Read',
+        defaultStat: '100+ Summaries Active',
+        countKey: 'readChapters'
+      },
+      {
+        id: 'recalls',
+        firestoreDocId: 'recalls',
+        storageKey: 'kd_recalls_state_v1',
+        total: 800,
+        progressBarId: 'recalls-progress-bar',
+        statLabelId: 'recalls-stat',
+        statUnit: 'Completed',
+        defaultStat: '800+ Recalls Active',
+        countKey: 'userAnswers'
+      }
+    ];
+
+    // 2. Firebase Initialization
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -572,277 +465,292 @@
       appId: "1:94979024020:web:687bd4c064b87ff1180081"
     };
 
-    let auth = null, db = null, currentUser = null, unsubDashboardSnapshot = null;
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+    let isSyncing = false;
 
     try {
-      firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
       auth = firebase.auth();
       db = firebase.firestore();
     } catch (e) {
-      console.warn("Firebase initialization warning:", e);
+      console.warn("Firebase running in local offline mode:", e);
     }
 
-    // Benchmark Totals: 450 (Saudi) + 1002 (1000 Qs) + 990 (Comp) = ~2,442
-    const BENCHMARK_QUESTIONS = 2719;
-    const BENCHMARK_SUMMARIES = 52;
-
-    const DOM = {
-      greeting: document.getElementById('dash-greeting'),
-      readinessPercent: document.getElementById('dash-readiness-percent'),
-      readinessBar: document.getElementById('dash-readiness-bar'),
-      statTotal: document.getElementById('stat-total-reviewed'),
-      statMastered: document.getElementById('stat-mastered-cards'),
-      statSummaries: document.getElementById('stat-summaries-read'),
-      statRetention: document.getElementById('stat-retention-rate'),
-      cardStatSaudi: document.getElementById('card-stat-saudi'),
-      cardStat1000: document.getElementById('card-stat-1000'),
-      cardStatComp: document.getElementById('card-stat-comp'),
-      cardStatSumm: document.getElementById('card-stat-summaries'),
-      authHeaderLabel: document.getElementById('auth-label-header'),
-      loggedOutView: document.getElementById('dashboard-logged-out'),
-      loggedInView: document.getElementById('dashboard-logged-in')
-    };
-
-    // Google Authentication Flow
-    async function handleGoogleAuth() {
-      if (!auth) return;
-      if (currentUser) {
-        if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
-          await auth.signOut();
-        }
-      } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        try { 
-          await auth.signInWithPopup(provider); 
-        } catch (err) { 
-          console.error("Google sign-in failed:", err); 
-        }
-      }
+    // 3. Merging Helpers
+    function mergeAnswers(cloudAnswers = {}, localAnswers = {}) {
+      return { ...(cloudAnswers || {}), ...(localAnswers || {}) };
     }
 
-    document.getElementById('btn-auth-header').onclick = handleGoogleAuth;
-    document.getElementById('btn-dashboard-signin').onclick = handleGoogleAuth;
+    function mergeChapters(cloudChapters, localChapters) {
+      const getArr = (v) => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v;
+        const vals = Object.values(v);
+        if (vals.every(x => typeof x === 'boolean')) return Object.keys(v);
+        return vals;
+      };
 
-    // Card State Extractor Supporting All Progress Formats
-    function extractCardList(source) {
-      if (!source || typeof source !== 'object') return [];
-      if (source.card_states && typeof source.card_states === 'object') {
-        return Object.values(source.card_states).filter(c => c && ((c.reps || c.repetitions || 0) > 0 || c.interval > 0));
+      if (Array.isArray(cloudChapters) || Array.isArray(localChapters)) {
+        return Array.from(new Set([...getArr(cloudChapters), ...getArr(localChapters)]));
       }
-      const prog = source.userProgress || source;
-      const extracted = [];
-      Object.entries(prog).forEach(([deckId, deck]) => {
-        if (deck && typeof deck === 'object') {
-          const answers = deck.answers || {};
-          const srs = deck.srs || {};
-          Object.entries(srs).forEach(([idxStr, srsItem]) => {
-            const reps = srsItem?.repetitions || srsItem?.reps || 0;
-            const wasAnswered = answers[idxStr] !== undefined;
-            if (srsItem && (reps > 0 || wasAnswered)) {
-              extracted.push({ reps: reps, interval: srsItem.interval || 0, easeFactor: srsItem.easeFactor || 2.5 });
-            }
-          });
+      return { ...(cloudChapters || {}), ...(localChapters || {}) };
+    }
+
+    // Timestamp-aware SRS merger: keeps the card review with the later lastReviewed date
+    function mergeSRSProgress(cloudSRS = {}, localSRS = {}) {
+      const merged = { ...(cloudSRS || {}) };
+      Object.entries(localSRS || {}).forEach(([qId, localCard]) => {
+        const cloudCard = merged[qId];
+        if (!cloudCard) {
+          merged[qId] = localCard;
+        } else {
+          const cTime = cloudCard.lastReviewed ? new Date(cloudCard.lastReviewed).getTime() : 0;
+          const lTime = localCard.lastReviewed ? new Date(localCard.lastReviewed).getTime() : 0;
+          if (lTime >= cTime) {
+            merged[qId] = localCard;
+          }
         }
       });
-      return extracted;
+      return merged;
     }
 
-    // Load Local Storage Data as Instant Cache Across All 4 Platforms
-    function getInstantLocalData() {
-      let saudiProg = null, thousandProg = null, compProg = null, summProg = null;
-      try { saudiProg = JSON.parse(localStorage.getItem('anesthesia_user_progress')) || JSON.parse(localStorage.getItem('saudi_board_progress')); } catch(e) {}
-      try { thousandProg = JSON.parse(localStorage.getItem('anes_1000q_progress')) || JSON.parse(localStorage.getItem('thousand_qs_progress')); } catch(e) {}
-      try { compProg = JSON.parse(localStorage.getItem('comp_qb_progress')) || JSON.parse(localStorage.getItem('hall_qb_progress')); } catch(e) {}
-      try { summProg = JSON.parse(localStorage.getItem('ketofoldoc_summaries_progress')); } catch(e) {}
+    // 4. Progress Loading Routine
+    function updatePlatformProgress() {
+      PLATFORMS_CONFIG.forEach(cfg => {
+        try {
+          const raw = localStorage.getItem(cfg.storageKey);
+          const data = raw ? JSON.parse(raw) : {};
+          const items = data[cfg.countKey] || (cfg.countKey === 'readChapters' ? [] : {});
+          
+          const count = Array.isArray(items) ? items.length : Object.keys(items).length;
+          const pct = Math.min(100, Math.round((count / cfg.total) * 100));
+          
+          const barEl = document.getElementById(cfg.progressBarId);
+          const statEl = document.getElementById(cfg.statLabelId);
+          
+          if (barEl) barEl.style.width = `${pct}%`;
+          if (statEl) statEl.textContent = count > 0 ? `${count} ${cfg.statUnit}` : cfg.defaultStat;
+        } catch (err) {
+          console.warn(`Error reading ${cfg.storageKey}:`, err);
+        }
+      });
+    }
 
-      return {
-        saudi_board_progress: { userProgress: saudiProg },
-        thousand_qs_progress: { userProgress: thousandProg },
-        comp_qb_progress: { userProgress: compProg },
-        summaries_progress: summProg
+    // 5. Intelligent Bi-Directional Cloud Synchronization
+    async function syncCloudProgress(user) {
+      if (!user || !db || isSyncing) return;
+      isSyncing = true;
+      
+      const btnSync = document.getElementById('btn-quick-sync');
+      const btnIcon = document.getElementById('sync-btn-icon');
+      const btnLabel = document.getElementById('sync-btn-label');
+      const syncText = document.getElementById('sync-status-text');
+
+      if (btnSync) {
+        btnSync.disabled = true;
+        btnSync.classList.add('opacity-75', 'pointer-events-none');
+      }
+      if (btnIcon) btnIcon.classList.add('animate-spin');
+      if (btnLabel) btnLabel.textContent = 'Syncing...';
+
+      try {
+        const platformsColRef = db.collection('users').doc(user.uid).collection('platforms');
+        const snap = await platformsColRef.get();
+        
+        const cloudDocsMap = {};
+        if (!snap.empty) {
+          snap.forEach(doc => {
+            cloudDocsMap[doc.id] = doc.data();
+          });
+        }
+
+        const batch = db.batch();
+        let changesToUpload = false;
+
+        PLATFORMS_CONFIG.forEach(cfg => {
+          const cloudData = cloudDocsMap[cfg.firestoreDocId] || {};
+          
+          let localData = {};
+          try {
+            const rawLocal = localStorage.getItem(cfg.storageKey);
+            if (rawLocal) localData = JSON.parse(rawLocal);
+          } catch (e) {
+            localData = {};
+          }
+
+          let mergedData = { ...cloudData, ...localData };
+          if (!mergedData.activeDeckId && cloudData.activeDeckId) {
+            mergedData.activeDeckId = cloudData.activeDeckId;
+          }
+          const cloudTime = cloudData.updatedAt?.toMillis 
+            ? cloudData.updatedAt.toMillis() 
+            : (cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0);
+          const localResetTime = localData.resetAt || 0;
+          const isLocalResetNewer = localResetTime > cloudTime;
+
+          let hasLocalDelta = false;
+
+          if (cfg.countKey === 'readChapters') {
+            if (isLocalResetNewer) {
+              mergedData.readChapters = localData.readChapters || (Array.isArray(cloudData.readChapters) ? [] : {});
+              hasLocalDelta = true;
+            } else {
+              const mergedReadChapters = mergeChapters(cloudData.readChapters, localData.readChapters);
+              mergedData.readChapters = mergedReadChapters;
+              hasLocalDelta = JSON.stringify(mergedReadChapters) !== JSON.stringify(cloudData.readChapters || (Array.isArray(mergedReadChapters) ? [] : {}));
+            }
+          } else {
+            let mergedUserAnswers;
+            if (isLocalResetNewer) {
+              mergedUserAnswers = localData.userAnswers || {};
+              hasLocalDelta = true;
+            } else {
+              mergedUserAnswers = mergeAnswers(cloudData.userAnswers, localData.userAnswers);
+            }
+
+            const mergedSRSProgress = mergeSRSProgress(cloudData.srsProgress, localData.srsProgress);
+            mergedData.userAnswers = mergedUserAnswers;
+            mergedData.srsProgress = mergedSRSProgress;
+
+            if (!hasLocalDelta) {
+              hasLocalDelta = 
+                JSON.stringify(mergedUserAnswers) !== JSON.stringify(cloudData.userAnswers || {}) ||
+                JSON.stringify(mergedSRSProgress) !== JSON.stringify(cloudData.srsProgress || {});
+            }
+          }
+          localStorage.setItem(cfg.storageKey, JSON.stringify(mergedData));
+          if (hasLocalDelta) {
+            const { resetAt, ...firestoreSafeData } = mergedData;
+            const docRef = platformsColRef.doc(cfg.firestoreDocId);
+            batch.set(docRef, {
+              ...firestoreSafeData,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            changesToUpload = true;
+          }
+        });
+        
+        if (changesToUpload) {
+          await batch.commit();
+        }
+
+        updatePlatformProgress();
+
+        if (btnLabel) btnLabel.textContent = 'Synced ✓';
+        if (syncText) syncText.textContent = `All platforms up to date`;
+        setTimeout(() => {
+          if (btnLabel) btnLabel.textContent = 'Sync Live';
+        }, 2000);
+
+      } catch (err) {
+        console.warn("Cloud sync error:", err);
+        if (btnLabel) btnLabel.textContent = 'Error';
+        setTimeout(() => {
+          if (btnLabel) btnLabel.textContent = 'Sync Live';
+        }, 3000);
+      } finally {
+        if (btnIcon) btnIcon.classList.remove('animate-spin');
+        if (btnSync) {
+          btnSync.disabled = false;
+          btnSync.classList.remove('opacity-75', 'pointer-events-none');
+        }
+        isSyncing = false;
+      }
+    }
+
+    // 6. Modal and Interaction Wiring
+    const modalAuth = document.getElementById('modal-auth');
+    const btnAuthHeader = document.getElementById('btn-auth-header');
+    const btnQuickSync = document.getElementById('btn-quick-sync');
+    const btnCloseAuth = document.getElementById('btn-close-auth');
+    const btnGoogle = document.getElementById('btn-google-login');
+    const btnLogout = document.getElementById('btn-logout');
+
+    const openAuth = () => modalAuth.classList.remove('hidden');
+    const closeAuth = () => modalAuth.classList.add('hidden');
+
+    btnAuthHeader.onclick = openAuth;
+    btnCloseAuth.onclick = closeAuth;
+    modalAuth.onclick = (e) => { if (e.target === modalAuth) closeAuth(); };
+
+    btnQuickSync.onclick = () => {
+      if (currentUser) {
+        syncCloudProgress(currentUser);
+      } else {
+        openAuth();
+      }
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAuth();
+    });
+
+    // 7. Authentication Handling
+    if (btnGoogle && auth) {
+      btnGoogle.onclick = async () => {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await auth.signInWithPopup(provider);
+          closeAuth();
+        } catch (e) {
+          alert("Sign in failed: " + e.message);
+        }
       };
     }
 
-    // Render Dashboard Analytics
-    function renderDashboard(userData) {
-      DOM.loggedOutView.classList.add('hidden');
-      DOM.loggedInView.classList.remove('hidden');
-
-      const name = currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Resident';
-      DOM.greeting.textContent = `Welcome Back, Dr. ${name}`;
-
-      const saudiCards = extractCardList(userData?.saudi_board_progress || (userData?.userProgress ? { userProgress: userData.userProgress } : null));
-      const thousandCards = extractCardList(userData?.thousand_qs_progress);
-      const compCards = extractCardList(userData?.comp_qb_progress || userData?.hall_qb_progress || userData?.comp_progress);
-      const readChapters = userData?.summaries_progress?.readChapters || {};
-
-      const allCards = [...saudiCards, ...thousandCards, ...compCards];
-      const totalReviewed = allCards.filter(c => (c.reps || 0) > 0 || (c.interval || 0) > 0).length;
-      const masteredCards = allCards.filter(c => (c.interval || 0) >= 21).length;
-      const summariesCount = Object.keys(readChapters).length;
-
-      let totalEase = 0, easeCount = 0;
-      allCards.forEach(c => {
-        if (c.easeFactor) { totalEase += c.easeFactor; easeCount++; }
-      });
-      
-      const avgEase = easeCount > 0 ? ((totalEase / easeCount) / 2.5) * 100 : 0;
-      let retentionPercent = 0;
-      if (totalReviewed > 0) {
-        retentionPercent = avgEase > 0 ? Math.min(100, Math.round(avgEase)) : 82;
-      }
-
-      const qScore = Math.min(1, totalReviewed / BENCHMARK_QUESTIONS) * 60;
-      const mScore = Math.min(1, summariesCount / BENCHMARK_SUMMARIES) * 40;
-      const overallReadiness = Math.min(100, Math.round(qScore + mScore));
-
-      DOM.readinessPercent.textContent = `${overallReadiness}%`;
-      DOM.readinessBar.style.width = `${overallReadiness}%`;
-      DOM.statTotal.textContent = totalReviewed.toLocaleString();
-      DOM.statMastered.textContent = masteredCards.toLocaleString();
-      DOM.statSummaries.textContent = summariesCount.toLocaleString();
-      DOM.statRetention.textContent = `${retentionPercent}%`;
-
-      DOM.cardStatSaudi.textContent = `${saudiCards.length} Active Cards`;
-      DOM.cardStat1000.textContent = `${thousandCards.length} Active Cards`;
-      DOM.cardStatComp.textContent = `${compCards.length} Active Cards`;
-      DOM.cardStatSumm.textContent = `${summariesCount} / ${BENCHMARK_SUMMARIES} Read`;
-    }
-
-    function renderLoggedOut() {
-      DOM.loggedOutView.classList.remove('hidden');
-      DOM.loggedInView.classList.add('hidden');
-      DOM.authHeaderLabel.textContent = 'Sign In';
-
-      DOM.cardStatSaudi.textContent = '-- Questions Active';
-      DOM.cardStat1000.textContent = '-- Questions Active';
-      DOM.cardStatComp.textContent = '-- Questions Active';
-      DOM.cardStatSumm.textContent = '-- Chapters Read';
-    }
-
-    // Unified Reactive Auth & Real-Time Sync Handler
-    function handleAuthState(user) {
-      currentUser = user;
-      
-      if (unsubDashboardSnapshot) {
-        unsubDashboardSnapshot();
-        unsubDashboardSnapshot = null;
-      }
-
-      if (user) {
-        DOM.authHeaderLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-        
-        // Instant Local Cache Hydration (Zero loading delay)
-        const localCache = getInstantLocalData();
-        renderDashboard(localCache);
-        
-        // Live Real-Time Firestore Sync
-        if (db) {
-          unsubDashboardSnapshot = db.collection('users').doc(user.uid).onSnapshot((snap) => {
-            if (snap.exists) {
-              renderDashboard(snap.data());
-            } else {
-              renderDashboard(localCache);
-            }
-          }, (err) => {
-            console.warn("Dashboard sync error:", err);
-            renderDashboard(localCache);
-          });
-        }
-      } else {
-        renderLoggedOut();
-      }
+    if (btnLogout && auth) {
+      btnLogout.onclick = () => auth.signOut();
     }
 
     if (auth) {
-      auth.onAuthStateChanged(handleAuthState);
+      auth.onAuthStateChanged(user => {
+        currentUser = user;
+        const indicator = document.getElementById('auth-status-indicator');
+        const label = document.getElementById('auth-header-label');
+        const syncText = document.getElementById('sync-status-text');
+        const signedInBox = document.getElementById('auth-signed-in');
+        const signedOutBox = document.getElementById('auth-signed-out');
+
+        if (user) {
+          indicator.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          label.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
+          syncText.textContent = `Signed in as ${user.displayName || 'Learner'}`;
+          signedInBox.classList.remove('hidden');
+          signedOutBox.classList.add('hidden');
+          document.getElementById('auth-user-name').textContent = user.displayName || 'Learner';
+          document.getElementById('auth-user-email').textContent = user.email || '';
+          if (user.photoURL) document.getElementById('auth-user-img').src = user.photoURL;
+          syncCloudProgress(user);
+        } else {
+          indicator.className = 'w-2 h-2 rounded-full bg-slate-500';
+          label.textContent = 'Sign In';
+          syncText.textContent = 'Cloud Sync: Sign in to sync across devices';
+          signedInBox.classList.add('hidden');
+          signedOutBox.classList.remove('hidden');
+        }
+        lucide.createIcons();
+      });
     }
 
-    window.addEventListener('pageshow', (event) => {
-      if (event.persisted && auth && auth.currentUser) {
-        handleAuthState(auth.currentUser);
-      }
+    // 8. Lifecycle Listeners (Initial Load, bfcache Back/Forward & Tab Visibility)
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePlatformProgress();
+      lucide.createIcons();
+    });
+
+    window.addEventListener('pageshow', () => {
+      updatePlatformProgress();
     });
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && auth && auth.currentUser) {
-        handleAuthState(auth.currentUser);
+      if (document.visibilityState === 'visible') {
+        updatePlatformProgress();
       }
     });
-
-    lucide.createIcons();
-
-    // Feedback Engine
-    const feedbackModal = document.getElementById('modal-feedback');
-    const feedbackComment = document.getElementById('feedback-comment');
-    const feedbackStatusMsg = document.getElementById('feedback-status-msg');
-
-    document.getElementById('btn-feedback-trigger').onclick = () => {
-      feedbackModal.classList.remove('hidden');
-      feedbackComment.value = '';
-      feedbackStatusMsg.classList.add('hidden');
-      lucide.createIcons();
-    };
-
-    document.getElementById('btn-close-feedback').onclick = () => feedbackModal.classList.add('hidden');
-    document.getElementById('btn-cancel-feedback').onclick = () => feedbackModal.classList.add('hidden');
-
-    document.getElementById('btn-submit-feedback').onclick = async () => {
-      const comment = feedbackComment.value.trim();
-      if (!comment) { alert("Please write your comment before submitting."); return; }
-
-      const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "General Suggestion";
-      const submitBtn = document.getElementById('btn-submit-feedback');
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-
-      const feedbackData = {
-        timestamp: new Date().toISOString(),
-        userId: currentUser?.uid || "anonymous",
-        userEmail: currentUser?.email || "anonymous",
-        userName: currentUser?.displayName || "Guest Doctor",
-        url: window.location.href,
-        category,
-        message: comment,
-        context: { pageType: "landing_portal", title: "KetofolDoc Home Portal" }
-      };
-
-      try {
-        const emailPromise = fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            access_key: "12303c13-8e61-47cc-937a-86364a6b38d6",
-            subject: `[KetofolDoc Landing] ${category}`,
-            from_name: "KetofolDoc Feedback Engine",
-            reply_to: currentUser?.email || "noreply@ketofoldoc.com",
-            "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
-            "Page URL": feedbackData.url,
-            "Category": category,
-            "Message": comment
-          })
-        });
-
-        const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
-        await Promise.all([emailPromise, firestorePromise]);
-
-        feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
-        feedbackStatusMsg.textContent = "✓ Thank you! Your feedback has been submitted.";
-        setTimeout(() => {
-          feedbackModal.classList.add('hidden');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
-          lucide.createIcons();
-        }, 1500);
-      } catch (err) {
-        console.error("Feedback submit error:", err);
-        feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
-        feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>Send Feedback</span>`;
-      }
-    };
   </script>
 </body>
 </html>
