@@ -8,12 +8,12 @@ export class StudyHighlighter {
     this.storageKey = options.storageKey || 'kd_highlights_data';
     this.onChange = options.onChange || (() => {});
     this.onSave = options.onSave || (() => {});
-    
+
     this.currentContext = null;
     this.currentRange = null;
     this.isInteractingWithToolbar = false;
     this.highlights = this.loadHighlights();
-    
+
     this.colors = [
       { name: 'emerald', bg: 'rgba(52, 211, 153, 0.35)', border: '#34d399', btnClass: 'bg-emerald-400' },
       { name: 'amber',   bg: 'rgba(251, 191, 36, 0.35)',  border: '#fbbf24', btnClass: 'bg-amber-400' },
@@ -30,7 +30,7 @@ export class StudyHighlighter {
       const stored = localStorage.getItem(this.storageKey);
       return stored ? JSON.parse(stored) : {};
     } catch (e) {
-      console.warn("Highlighter local storage load error:", e);
+      console.warn('Highlighter local storage load error:', e);
       return {};
     }
   }
@@ -40,19 +40,33 @@ export class StudyHighlighter {
       localStorage.setItem(this.storageKey, JSON.stringify(this.highlights));
       this.onSave(this.highlights);
     } catch (e) {
-      console.warn("Highlighter save error:", e);
+      console.warn('Highlighter save error:', e);
     }
   }
 
+  /**
+   * Updates the active context ID and cleans up floating toolbars & text selections.
+   * Centralizes teardown across all app platforms on deck/question changes.
+   */
   setContext(contextId) {
     this.currentContext = contextId ? String(contextId) : null;
-    this.hideToolbar();
+    this.hideToolbar(true);
+
+    try {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        sel.removeAllRanges();
+      }
+    } catch (e) {
+      // Ignore environments where getSelection is unavailable
+    }
   }
 
   initToolbar() {
-    if (document.getElementById('kd-highlighter-toolbar')) {
-      this.toolbar = document.getElementById('kd-highlighter-toolbar');
-      return;
+    // Replace any existing toolbar in the DOM to avoid orphaned listeners
+    const existing = document.getElementById('kd-highlighter-toolbar');
+    if (existing) {
+      existing.remove();
     }
 
     const toolbar = document.createElement('div');
@@ -88,7 +102,7 @@ export class StudyHighlighter {
     removeBtn.type = 'button';
     removeBtn.className = 'w-7 h-7 rounded-full bg-slate-800 border border-slate-600 text-rose-400 hover:text-rose-300 flex items-center justify-center active:scale-90 transition shrink-0';
     removeBtn.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-    
+
     removeBtn.addEventListener('pointerup', (e) => {
       e.preventDefault();
       this.removeHighlight();
@@ -112,20 +126,23 @@ export class StudyHighlighter {
         return;
       }
 
-      const anchorNode = sel.anchorNode;
-      const highlightContainer = anchorNode?.nodeType === 1 
-        ? anchorNode.closest('.highlightable-content') 
-        : anchorNode?.parentElement?.closest('.highlightable-content');
+      if (sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+
+      // Validate that the selection is anchored within .highlightable-content
+      let container = range.commonAncestorContainer;
+      if (container.nodeType !== 1) {
+        container = container.parentElement;
+      }
+      const highlightContainer = container?.closest('.highlightable-content');
 
       if (!highlightContainer) {
         this.hideToolbar();
         return;
       }
 
-      if (sel.rangeCount > 0) {
-        this.currentRange = sel.getRangeAt(0).cloneRange();
-        this.showToolbar();
-      }
+      this.currentRange = range.cloneRange();
+      this.showToolbar();
     };
 
     document.addEventListener('selectionchange', handleSelection);
@@ -159,7 +176,7 @@ export class StudyHighlighter {
       postRange.setStart(range.endContainer, range.endOffset);
       suffix = postRange.toString().slice(0, 30);
     } catch (e) {
-      console.warn("Could not calculate surrounding text context:", e);
+      console.warn('Could not calculate surrounding text context:', e);
     }
 
     return { exact, prefix, suffix };
@@ -171,30 +188,37 @@ export class StudyHighlighter {
     this.toolbar.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
   }
 
-  hideToolbar() {
-    if (!this.toolbar || this.isInteractingWithToolbar) return;
+  hideToolbar(force = false) {
+    if (!this.toolbar) return;
+    if (this.isInteractingWithToolbar && !force) return;
+
+    this.isInteractingWithToolbar = false;
     this.toolbar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
     this.toolbar.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
     this.currentRange = null;
   }
 
   finishInteraction() {
-    this.hideToolbar();
+    this.hideToolbar(true);
     setTimeout(() => {
       this.isInteractingWithToolbar = false;
-      const sel = window.getSelection();
-      if (sel) sel.removeAllRanges();
+      try {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          sel.removeAllRanges();
+        }
+      } catch (e) {}
     }, 150);
   }
 
   applyHighlight(colorName) {
     if (!this.currentContext) return;
-    
+
     const { exact, prefix, suffix } = this.getRangeContext(this.currentRange);
     if (!exact) return;
 
     this.highlights[this.currentContext] = this.highlights[this.currentContext] || [];
-    
+
     // Remove duplicate entry if identical context was already saved
     this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(
       h => !(h.text === exact && h.prefix === prefix && h.suffix === suffix)
@@ -223,12 +247,14 @@ export class StudyHighlighter {
     const cleanPost = suffix.trim();
 
     this.highlights[this.currentContext] = this.highlights[this.currentContext].filter(hl => {
-      const matchPre = cleanPre && hl.prefix && (hl.prefix.includes(cleanPre) || cleanPre.includes(hl.prefix));
-      const matchPost = cleanPost && hl.suffix && (hl.suffix.includes(cleanPost) || cleanPost.includes(hl.suffix));
-      const matchText = hl.text === exact;
+      const matchText = hl.text === exact || exact.includes(hl.text) || hl.text.includes(exact);
+      if (!matchText) return true;
 
-      if ((matchPre || matchPost) && matchText) return false;
-      if (!hl.prefix && !hl.suffix && matchText) return false;
+      const matchPre = !cleanPre || !hl.prefix || hl.prefix.includes(cleanPre) || cleanPre.includes(hl.prefix);
+      const matchPost = !cleanPost || !hl.suffix || hl.suffix.includes(cleanPost) || cleanPost.includes(hl.suffix);
+
+      // If text matches and surrounding context aligns, remove it
+      if (matchPre && matchPost) return false;
       return true;
     });
 
@@ -274,7 +300,7 @@ export class StudyHighlighter {
       if (prefixToken && suffixToken) {
         const fullRegex = new RegExp(`(${prefixToken}(?:\\s+|<[^>]+>)*)(${exactToken})((?:\\s+|<[^>]+>)*${suffixToken})`, 'i');
         if (fullRegex.test(rendered)) {
-          rendered = rendered.replace(fullRegex, `$1${markStart}$2${markEnd}$3`);
+          rendered = rendered.replace(fullRegex, (match, p1, p2, p3) => `${p1}${markStart}${p2}${markEnd}${p3}`);
           replaced = true;
         }
       }
@@ -283,7 +309,7 @@ export class StudyHighlighter {
       if (!replaced && prefixToken) {
         const preRegex = new RegExp(`(${prefixToken}(?:\\s+|<[^>]+>)*)(${exactToken})`, 'i');
         if (preRegex.test(rendered)) {
-          rendered = rendered.replace(preRegex, `$1${markStart}$2${markEnd}`);
+          rendered = rendered.replace(preRegex, (match, p1, p2) => `${p1}${markStart}${p2}${markEnd}`);
           replaced = true;
         }
       }
@@ -292,7 +318,7 @@ export class StudyHighlighter {
       if (!replaced && suffixToken) {
         const postRegex = new RegExp(`(${exactToken})((?:\\s+|<[^>]+>)*${suffixToken})`, 'i');
         if (postRegex.test(rendered)) {
-          rendered = rendered.replace(postRegex, `${markStart}$1${markEnd}$2`);
+          rendered = rendered.replace(postRegex, (match, p1, p2) => `${markStart}${p1}${markEnd}${p2}`);
           replaced = true;
         }
       }
@@ -301,7 +327,7 @@ export class StudyHighlighter {
       if (!replaced && !prefixToken && !suffixToken) {
         const fallbackRegex = new RegExp(`(?![^<]*>)(${exactToken})`, 'i');
         if (fallbackRegex.test(rendered)) {
-          rendered = rendered.replace(fallbackRegex, `${markStart}$1${markEnd}`);
+          rendered = rendered.replace(fallbackRegex, (match, p1) => `${markStart}${p1}${markEnd}`);
         }
       }
     });
