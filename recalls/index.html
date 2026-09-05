@@ -3,128 +3,178 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Exam Recalls | KetofolDoc Ecosystem</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Exam Recalls | KetofolDoc</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-
+  
   <!-- DOMPurify for HTML Sanitization -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
+  <!-- KaTeX Math Engine -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  
   <!-- Firebase SDKs (v9 Compat Mode) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  
+
   <style>
     body { -webkit-tap-highlight-color: transparent; }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .highlightable-content { -webkit-user-select: text; user-select: text; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500/30">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-600/40 selection:text-slate-100">
 
-  <!-- TOP APP BAR -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-3 sm:px-4 py-2.5 flex items-center justify-between select-none">
-    <div class="flex items-center space-x-2 sm:space-x-3">
-      <button id="btn-open-ecosystem-drawer" title="Ecosystem Navigation" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700/80">
-        <i data-lucide="menu" class="w-4 h-4"></i>
-      </button>
-
-      <a href="/" title="Back to Portal" class="flex items-center space-x-2 text-slate-300 hover:text-white transition">
-        <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs tracking-wider">KD</div>
-      </a>
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
+    <div class="max-w-4xl mx-auto px-4 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
       
-      <button id="btn-open-deck-modal" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 transition max-w-[130px] sm:max-w-xs">
-        <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
-        <span id="active-deck-title" class="truncate">Select Exam</span>
-        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
-      </button>
+      <!-- Left: Menu, Logo, Dual-Line Title -->
+      <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+        <button id="btn-menu" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0" title="Exams & Recalls">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+        </button>
+        
+        <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
+          <img src="/logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
+        </a>
+
+        <div class="min-w-0 flex-1 flex flex-col justify-center">
+          <a href="/" class="text-[10px] font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 truncate leading-tight transition">
+            Exam Recalls
+          </a>
+          <div class="flex items-center space-x-2 truncate">
+            <h1 id="deck-title" class="font-bold text-xs sm:text-sm text-slate-100 truncate leading-snug">
+              Loading Recalls...
+            </h1>
+            <span class="text-slate-600 text-xs">•</span>
+            <p id="deck-progress-text" class="text-[11px] font-medium text-emerald-400 truncate leading-snug">
+              0 / 0 Completed
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right: Action Controls -->
+      <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+        <button id="btn-shuffle" class="p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Toggle Random Order">
+          <i data-lucide="shuffle" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-srs-filter" class="p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0" title="SRS Due Review Mode">
+          <i data-lucide="brain" class="w-5 h-5"></i>
+        </button>
+        
+        <button id="btn-search" class="p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Search Recalls (Ctrl + K)">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+        
+        <button id="btn-flag" class="p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Bookmark Question">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
+        </button>
+        
+        <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
+          <div id="auth-avatar" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-500 -ml-1.5 -mt-3 hidden"></span>
+        </button>
+      </div>
+
     </div>
-
-    <!-- Quick Utilities -->
-    <div class="flex items-center space-x-1.5">
-      <button id="btn-shuffle" title="Shuffle Questions" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
-        <i data-lucide="shuffle" class="w-4 h-4"></i>
-      </button>
-
-      <button id="btn-srs-mode" title="Toggle Due SRS Mode" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
-        <i data-lucide="brain" class="w-4 h-4"></i>
-      </button>
-
-      <button id="btn-flag" title="Bookmark Question" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
-        <i data-lucide="bookmark" class="w-4 h-4"></i>
-      </button>
-
-      <button id="btn-reset-deck" title="Reset Exam Progress" class="p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 transition border border-slate-700/60">
-        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-      </button>
-
-      <button id="btn-auth-trigger" class="flex items-center space-x-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs transition">
-        <div id="auth-status-indicator" class="w-2 h-2 rounded-full bg-slate-500"></div>
-        <span id="auth-user-label" class="hidden sm:inline font-medium text-slate-300">Sign In</span>
-      </button>
+    
+    <!-- Linear Progress Bar -->
+    <div class="w-full bg-slate-800 h-1">
+      <div id="progress-bar-fill" class="bg-amber-500 h-1 w-0 transition-all duration-300"></div>
     </div>
   </header>
 
-  <!-- Progress Bar -->
-  <div class="w-full bg-slate-900 h-1">
-    <div id="progress-bar-fill" class="bg-cyan-500 h-1 transition-all duration-300" style="width: 0%;"></div>
-  </div>
-
-  <!-- MAIN QUESTION VIEWPORT -->
+  <!-- Main Content Viewport -->
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-72">
-    <div id="quiz-container" class="space-y-4">
-      <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-2 select-none">
-        <div class="flex items-center space-x-2">
-          <span id="label-question-count">Question 0 of 0</span>
-          <span id="label-deck-category" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-medium">Recall Deck</span>
+    
+    <!-- Empty & Completed State Screen -->
+    <div id="view-empty" class="hidden my-auto text-center py-12 px-4 select-none">
+      <div class="w-16 h-16 bg-emerald-950/80 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-800/60">
+        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+      </div>
+      <h2 id="empty-title" class="text-xl font-bold text-slate-100 mb-2">Exam Recall Completed!</h2>
+      <p id="empty-desc" class="text-sm text-slate-400 max-w-md mx-auto mb-6">You have answered all questions in this recall exam.</p>
+      <div class="flex items-center justify-center space-x-3">
+        <button id="btn-reset-current-deck" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-lg shadow-rose-600/20">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Reset & Practice Again</span>
+        </button>
+        <button onclick="document.getElementById('btn-menu').click()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
+          Choose Exams
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Question View -->
+    <div id="view-quiz" class="flex-1 flex flex-col">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2 select-none">
+        <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
+          <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
+          <span id="question-source-badge" class="px-2.5 py-1 bg-amber-950/80 border border-amber-700/60 text-amber-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0">Recall Exam</span>
+          <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">Shuffled</span>
+          <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-emerald-950/80 border border-emerald-700/50 text-emerald-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">SRS Due Mode</span>
         </div>
-        <span id="label-accuracy">Accuracy: 0%</span>
+        <span id="score-badge" class="text-slate-400 shrink-0">Accuracy: 100%</span>
       </div>
 
-      <div class="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div id="q-stem" class="highlightable-content text-base sm:text-lg text-slate-100 font-medium leading-relaxed">
-          Loading exam questions...
+      <!-- Question Stem & Optional Stem Image -->
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
+        <div id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></div>
+        <div id="stem-image-container" class="mt-4 hidden select-none">
+          <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
         </div>
       </div>
 
-      <div id="options-container" class="space-y-2.5 select-none"></div>
+      <!-- Options Container -->
+      <div id="options-container" class="space-y-3 mb-6 select-none"></div>
 
       <!-- Reference & Rationale Box -->
-      <div id="rationale-box" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
-        <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold tracking-wide uppercase select-none">
-          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-          <span>Reference & Rationale</span>
+      <div id="explanation-box" class="hidden bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300 scroll-mt-24">
+        <div class="flex items-center text-amber-400 font-bold mb-2 select-none">
+          <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
         </div>
-        <div id="rationale-correct" class="text-sm font-semibold text-emerald-300"></div>
-        <div id="rationale-text" class="highlightable-content text-sm sm:text-base text-slate-300 leading-relaxed"></div>
-        <div id="rationale-images" class="space-y-3 pt-2"></div>
+        
+        <div id="explanation-content" class="leading-relaxed space-y-2 highlightable-content"></div>
+        <div id="explanation-images-container" class="mt-4 space-y-3 hidden select-none"></div>
 
         <!-- SM-2 Rating Controls -->
-        <div id="srs-rating-container" class="pt-4 border-t border-slate-800/80 select-none">
-          <div class="text-[11px] font-semibold uppercase text-slate-400 mb-2.5 flex items-center justify-between">
-            <span>Rate Recall Interval (SM-2)</span>
-            <span id="srs-status-tag" class="text-slate-500 font-normal lowercase">Not rated yet</span>
+        <div class="mt-5 pt-4 border-t border-slate-800 select-none">
+          <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
+            <span>Rate Recall (Spaced Repetition):</span>
+            <span id="srs-status-tag" class="text-[10px] text-slate-500">Not rated yet</span>
           </div>
           <div class="grid grid-cols-4 gap-2">
-            <button data-srs="again" class="btn-srs py-2 px-1 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
-              <span class="font-bold">Again</span>
-              <span class="text-[10px] text-rose-400/80">1 Day</span>
+            <button type="button" data-srs="again" class="btn-srs py-2 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Again</span>
+              <span class="text-[9px] font-normal text-rose-400/80">1 Day</span>
             </button>
-            <button data-srs="hard" class="btn-srs py-2 px-1 rounded-xl bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/60 text-amber-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
-              <span class="font-bold">Hard</span>
-              <span class="text-[10px] text-amber-400/80">Slower</span>
+            <button type="button" data-srs="hard" class="btn-srs py-2 rounded-lg bg-amber-950/60 hover:bg-amber-900 border border-amber-800/60 text-amber-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Hard</span>
+              <span class="text-[9px] font-normal text-amber-400/80">Slower</span>
             </button>
-            <button data-srs="good" class="btn-srs py-2 px-1 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/60 text-sky-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
-              <span class="font-bold">Good</span>
-              <span class="text-[10px] text-sky-400/80">Standard</span>
+            <button type="button" data-srs="good" class="btn-srs py-2 rounded-lg bg-blue-950/60 hover:bg-blue-900 border border-blue-800/60 text-blue-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Good</span>
+              <span class="text-[9px] font-normal text-blue-400/80">Standard</span>
             </button>
-            <button data-srs="easy" class="btn-srs py-2 px-1 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
-              <span class="font-bold">Easy</span>
-              <span class="text-[10px] text-emerald-400/80">4-7 Days</span>
+            <button type="button" data-srs="easy" class="btn-srs py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
+              <span>Easy</span>
+              <span class="text-[9px] font-normal text-emerald-400/80">4-7 Days</span>
             </button>
           </div>
         </div>
@@ -132,13 +182,7 @@
     </div>
   </main>
 
-  <!-- FLOATING FEEDBACK TRIGGER -->
-  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-20 right-4 sm:right-6 z-40 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
-    <i data-lucide="message-square-plus" class="w-4 h-4 text-cyan-400"></i>
-    <span class="hidden sm:inline">Feedback</span>
-  </button>
-
-  <!-- FIXED FOOTER NAVIGATION -->
+  <!-- Navigation Footer -->
   <footer id="quiz-footer" class="fixed bottom-0 inset-x-0 z-50 bg-slate-950/98 backdrop-blur-md border-t border-slate-800/90 shadow-2xl pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] select-none">
     <div class="max-w-3xl mx-auto px-4">
       <div class="flex items-center justify-between space-x-3 mb-2">
@@ -148,7 +192,7 @@
         <button id="btn-reveal" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-xl font-semibold text-sm text-slate-200 transition">
           Reveal
         </button>
-        <button id="btn-next" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 rounded-xl font-semibold text-sm text-white flex items-center justify-center transition shadow-lg shadow-cyan-600/20">
+        <button id="btn-next" class="flex-1 py-3 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 rounded-xl font-semibold text-sm text-white flex items-center justify-center transition shadow-lg shadow-amber-600/20">
           Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
         </button>
       </div>
@@ -161,17 +205,166 @@
     </div>
   </footer>
 
-  <!-- CONTEXT-AWARE FEEDBACK MODAL (1000Qs Parity) -->
+  <!-- Full-Text Search Modal (Ctrl + K) -->
+  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
+        <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
+        <input 
+          type="search" 
+          id="search-input" 
+          name="recall-search-query"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Search exam recalls by keywords, topics, drugs..." 
+          class="w-full bg-transparent text-slate-100 placeholder-slate-500 text-base focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+        />
+        <button id="btn-close-search" class="p-1 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text">
+        <div class="text-xs text-slate-500 text-center py-8">
+          Type at least 2 characters to search across all recall exams...
+        </div>
+      </div>
+      
+      <div class="px-4 py-2 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+        <span id="search-count-badge">0 results found</span>
+        <span>Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">ESC</kbd> to close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam Decks Switcher & Platform Hub Modal -->
+  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-xl rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+      
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="compass" class="w-5 h-5 text-amber-400"></i>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm sm:text-base">Exam Recalls Archive</h3>
+            <p class="text-[11px] text-slate-400">Select recall papers or switch ecosystem platforms</p>
+          </div>
+        </div>
+        <button id="btn-close-decks" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto p-4 space-y-4 flex-1">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+            KetofolDoc Platforms
+          </span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="award" class="w-4 h-4 text-blue-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-blue-300 transition truncate w-full">Saudi Board QB</span>
+            </a>
+
+            <a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-emerald-300 transition truncate w-full">1000 Qs</span>
+            </a>
+
+            <a href="/comp/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-cyan-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="stethoscope" class="w-4 h-4 text-cyan-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-cyan-300 transition truncate w-full">Comprehensive</span>
+            </a>
+
+            <a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
+              <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
+              <span class="text-[10px] font-medium text-slate-200 group-hover:text-purple-300 transition truncate w-full">Summaries</span>
+            </a>
+          </div>
+
+          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-[11px] font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Return to KetofolDoc Home Portal</span>
+          </a>
+        </div>
+
+        <div class="border-t border-slate-800/80"></div>
+
+        <!-- Categories Tabs -->
+        <div class="flex border-b border-slate-800 space-x-2 bg-slate-950/40 p-1.5 rounded-xl">
+          <button data-tab="part" class="tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-amber-400 bg-slate-800 transition">Part Exams</button>
+          <button data-tab="promotion" class="tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition">Promotion</button>
+          <button data-tab="central" class="tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition">Central Region</button>
+        </div>
+
+        <!-- Decks List -->
+        <div id="deck-list-container" class="space-y-2 max-h-96 overflow-y-auto no-scrollbar"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Google Auth Modal -->
+  <div id="modal-auth" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 sm:p-8 shadow-2xl relative" onclick="event.stopPropagation()">
+      <button id="btn-close-auth-modal" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg active:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div id="auth-state-logged-out" class="flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-2xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center mx-auto mb-4 shadow-inner">
+          <i data-lucide="history" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-black text-slate-100 tracking-tight mb-1">Exam Recalls Sync</h3>
+        <p class="text-xs text-slate-400 mb-6 leading-relaxed">Sign in with Google to sync your answered exams, bookmarked items, and SM-2 schedules across devices.</p>
+
+        <div id="auth-error-box" class="hidden mb-4 p-3 bg-rose-950/50 border border-rose-800/60 rounded-xl text-xs text-rose-300 leading-relaxed w-full text-left"></div>
+
+        <button id="btn-google-login" class="w-full py-3.5 px-4 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-semibold text-xs sm:text-sm rounded-2xl flex items-center justify-center space-x-3 transition shadow-lg shadow-amber-600/20 active:scale-[0.99]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <div id="auth-state-logged-in" class="hidden flex flex-col items-center text-center">
+        <div id="user-display-avatar" class="w-14 h-14 rounded-full bg-amber-600/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-lg font-bold mb-3"></div>
+        <h4 id="user-display-name" class="font-bold text-slate-100 text-base">Doctor</h4>
+        <p id="user-display-email" class="text-xs text-slate-400 mb-5">doctor@example.com</p>
+        
+        <div class="w-full bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300 mb-5 flex items-center justify-center">
+          <i data-lucide="check" class="w-4 h-4 mr-1.5"></i> Live sync active across ecosystem
+        </div>
+
+        <button id="btn-logout" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold rounded-xl text-sm transition">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Feedback Button -->
+  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-6 right-4 sm:right-6 z-40 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
+    <i data-lucide="message-square-plus" class="w-4 h-4 text-amber-400"></i>
+    <span class="hidden sm:inline">Feedback</span>
+  </button>
+
+  <!-- Feedback Modal -->
   <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none modal-backdrop">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-800/60 text-cyan-400 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center">
             <i data-lucide="message-square" class="w-4 h-4"></i>
           </div>
           <div>
             <h3 class="text-base font-bold text-slate-100">Feedback & Corrections</h3>
-            <p class="text-[11px] text-slate-400">Review item accuracy and suggest improvements</p>
+            <p class="text-[11px] text-slate-400">Review item accuracy or report discrepancies</p>
           </div>
         </div>
         <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
@@ -183,7 +376,7 @@
         <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
             <span class="flex items-center">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i> Auto-Detected Context
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-amber-400"></i> Auto-Detected Context
             </span>
             <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Question Item</span>
           </div>
@@ -196,19 +389,19 @@
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
           <div class="grid grid-cols-2 gap-2">
             <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-amber-600 focus:ring-0 bg-slate-900 border-slate-700" />
               <span>Content Error / Typo</span>
             </label>
             <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-amber-600 focus:ring-0 bg-slate-900 border-slate-700" />
               <span>Answer / Rationale</span>
             </label>
             <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-amber-600 focus:ring-0 bg-slate-900 border-slate-700" />
               <span>Suggestion</span>
             </label>
             <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
-              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-amber-600 focus:ring-0 bg-slate-900 border-slate-700" />
               <span>Bug Report</span>
             </label>
           </div>
@@ -216,7 +409,7 @@
 
         <div>
           <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
-          <textarea id="feedback-comment" rows="4" placeholder="Describe the error, rationale nuance, or suggestion..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition resize-none"></textarea>
+          <textarea id="feedback-comment" rows="4" placeholder="Describe the error, recall discrepancy, or suggested change..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition resize-none"></textarea>
         </div>
 
         <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
@@ -224,7 +417,7 @@
 
       <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
         <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">Cancel</button>
-        <button id="btn-submit-feedback" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-cyan-600/20">
+        <button id="btn-submit-feedback" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-amber-600/20">
           <i data-lucide="send" class="w-3.5 h-3.5"></i>
           <span>Send Feedback</span>
         </button>
@@ -232,197 +425,70 @@
     </div>
   </div>
 
-  <!-- ECOSYSTEM DRAWER -->
-  <div id="drawer-ecosystem" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden modal-backdrop">
-    <div class="fixed inset-y-0 left-0 max-w-xs w-full bg-slate-900 border-r border-slate-800 flex flex-col p-5 shadow-2xl" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs">KD</div>
-          <div>
-            <h2 class="font-bold text-sm text-slate-100">KetofolDoc</h2>
-            <p class="text-[10px] text-slate-400">Anesthesia Ecosystem</p>
-          </div>
-        </div>
-        <button id="btn-close-ecosystem-drawer" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto py-4 space-y-2 no-scrollbar">
-        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-1">Ecosystem Platforms</div>
-        <a href="/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
-          <i data-lucide="home" class="w-4 h-4 text-slate-400"></i>
-          <span>Home Portal</span>
-        </a>
-        <a href="/1000qs/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
-          <i data-lucide="help-circle" class="w-4 h-4 text-emerald-400"></i>
-          <span>1000 Anesthesia Questions</span>
-        </a>
-        <a href="/saudi/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
-          <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
-          <span>Saudi Board QB</span>
-        </a>
-        <a href="/comp/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
-          <i data-lucide="book-open" class="w-4 h-4 text-purple-400"></i>
-          <span>Comprehensive Anesthesia</span>
-        </a>
-        <a href="/summaries/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
-          <i data-lucide="file-text" class="w-4 h-4 text-rose-400"></i>
-          <span>Miller's Summaries</span>
-        </a>
-        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-cyan-950/60 border border-cyan-500/40 text-cyan-300">
-          <div class="flex items-center space-x-3">
-            <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
-            <span>Exam Recalls</span>
-          </div>
-          <span class="text-[9px] bg-cyan-900/80 text-cyan-300 px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DECK MODAL -->
-  <div id="modal-deck" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-        <h2 class="font-bold text-base text-slate-100 flex items-center space-x-2">
-          <i data-lucide="folder-git-2" class="w-4 h-4 text-cyan-400"></i>
-          <span>Select Recall Exam</span>
-        </h2>
-        <button id="btn-close-deck-modal" class="p-1 text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="flex border-b border-slate-800 px-4 pt-2 space-x-2 bg-slate-950/40">
-        <button data-tab="part" class="tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition">Part Exams</button>
-        <button data-tab="promotion" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Promotion</button>
-        <button data-tab="central" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Central Region</button>
-      </div>
-
-      <div id="deck-list-container" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar"></div>
-    </div>
-  </div>
-
-  <!-- CLOUD AUTH MODAL -->
-  <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="font-bold text-sm text-slate-100 flex items-center space-x-2">
-          <i data-lucide="cloud" class="w-4 h-4 text-cyan-400"></i>
-          <span>Cloud Progress Sync</span>
-        </h3>
-        <button id="btn-close-auth-modal" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-
-      <div id="auth-signed-in" class="hidden space-y-3">
-        <div class="flex items-center space-x-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-          <img id="auth-user-img" src="" class="w-10 h-10 rounded-full border border-cyan-500/40 object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%231e293b\'/%3E%3C/svg%3E';" />
-          <div class="overflow-hidden">
-            <div id="auth-user-name" class="font-bold text-xs text-slate-100 truncate"></div>
-            <div id="auth-user-email" class="text-[10px] text-slate-400 truncate"></div>
-          </div>
-        </div>
-        <div class="text-[11px] text-emerald-400 flex items-center space-x-1.5">
-          <i data-lucide="check" class="w-3.5 h-3.5"></i>
-          <span>Synced across all your devices</span>
-        </div>
-        <button id="btn-logout" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-rose-300 transition">
-          Sign Out
-        </button>
-      </div>
-
-      <div id="auth-signed-out" class="space-y-3">
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Sign in with Google to sync your study progress, flags, and SM-2 schedules across devices.
-        </p>
-        <button id="btn-google-login" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center space-x-2 shadow transition active:scale-95">
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span>Continue with Google</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPLETION MODAL -->
-  <div id="modal-completed" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl" onclick="event.stopPropagation()">
-      <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl">🎉</div>
-      <h3 class="text-lg font-bold text-slate-100">Exam Recall Completed!</h3>
-      <p class="text-xs text-slate-400 leading-relaxed">You have reviewed all available items in this queue. You can reset to practice again or switch to Spaced Repetition (SRS) mode.</p>
-      <div class="pt-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-        <button id="btn-modal-reset" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 border border-rose-900/40 transition">Reset Progress</button>
-        <button id="btn-modal-review" class="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white transition">Review Deck</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- APPLICATION LOGIC -->
+  <!-- ES6 Application Logic -->
   <script type="module">
     import { StudyHighlighter } from '/js/highlighter.js';
     import { RECALLS_CATALOG, getAllRecallDecks } from './manifest.js';
 
     const DOM = {
-      activeDeckTitle: document.getElementById('active-deck-title'),
-      progressBar: document.getElementById('progress-bar-fill'),
-      btnShuffle: document.getElementById('btn-shuffle'),
-      btnSRSMode: document.getElementById('btn-srs-mode'),
-      btnFlag: document.getElementById('btn-flag'),
-      btnResetDeck: document.getElementById('btn-reset-deck'),
-
-      labelQuestionCount: document.getElementById('label-question-count'),
-      labelDeckCategory: document.getElementById('label-deck-category'),
-      labelAccuracy: document.getElementById('label-accuracy'),
-
-      stem: document.getElementById('q-stem'),
+      viewEmpty: document.getElementById('view-empty'),
+      viewQuiz: document.getElementById('view-quiz'),
+      quizFooter: document.getElementById('quiz-footer'),
+      deckTitle: document.getElementById('deck-title'),
+      deckProgressText: document.getElementById('deck-progress-text'),
+      progressBarFill: document.getElementById('progress-bar-fill'),
+      emptyTitle: document.getElementById('empty-title'),
+      emptyDesc: document.getElementById('empty-desc'),
+      btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
+      qNumberBadge: document.getElementById('question-number-badge'),
+      questionSourceBadge: document.getElementById('question-source-badge'),
+      scoreBadge: document.getElementById('score-badge'),
+      shuffleBtn: document.getElementById('btn-shuffle'),
+      shuffleTag: document.getElementById('shuffle-mode-tag'),
+      srsBtn: document.getElementById('btn-srs-filter'),
+      srsTag: document.getElementById('srs-mode-tag'),
+      flagBtn: document.getElementById('btn-flag'),
+      qStem: document.getElementById('question-stem'),
+      stemImgContainer: document.getElementById('stem-image-container'),
+      stemImg: document.getElementById('stem-image'),
       optionsContainer: document.getElementById('options-container'),
-
-      rationaleBox: document.getElementById('rationale-box'),
-      rationaleCorrect: document.getElementById('rationale-correct'),
-      rationaleText: document.getElementById('rationale-text'),
-      rationaleImages: document.getElementById('rationale-images'),
+      expBox: document.getElementById('explanation-box'),
+      expContent: document.getElementById('explanation-content'),
+      expImgContainer: document.getElementById('explanation-images-container'),
       srsStatusTag: document.getElementById('srs-status-tag'),
-      srsRatingBtns: document.querySelectorAll('.btn-srs'),
+      prevBtn: document.getElementById('btn-prev'),
+      nextBtn: document.getElementById('btn-next'),
+      revealBtn: document.getElementById('btn-reveal'),
 
-      btnPrev: document.getElementById('btn-prev'),
-      btnReveal: document.getElementById('btn-reveal'),
-      btnNext: document.getElementById('btn-next'),
-
-      drawerEcosystem: document.getElementById('drawer-ecosystem'),
-      btnOpenDrawer: document.getElementById('btn-open-ecosystem-drawer'),
-      btnCloseDrawer: document.getElementById('btn-close-ecosystem-drawer'),
-
-      modalDeck: document.getElementById('modal-deck'),
-      btnOpenDeckModal: document.getElementById('btn-open-deck-modal'),
-      btnCloseDeckModal: document.getElementById('btn-close-deck-modal'),
+      btnMenu: document.getElementById('btn-menu'),
+      modalDecks: document.getElementById('modal-decks'),
+      btnCloseDecks: document.getElementById('btn-close-decks'),
       deckListContainer: document.getElementById('deck-list-container'),
       tabBtns: document.querySelectorAll('.tab-btn'),
 
-      modalCompleted: document.getElementById('modal-completed'),
-      btnModalReset: document.getElementById('btn-modal-reset'),
-      btnModalReview: document.getElementById('btn-modal-review'),
+      btnSearch: document.getElementById('btn-search'),
+      modalSearch: document.getElementById('modal-search'),
+      searchInput: document.getElementById('search-input'),
+      searchResultsList: document.getElementById('search-results-list'),
+      searchCountBadge: document.getElementById('search-count-badge'),
+      btnCloseSearch: document.getElementById('btn-close-search'),
 
+      btnAuthModal: document.getElementById('btn-auth-modal'),
       modalAuth: document.getElementById('modal-auth'),
-      btnAuthTrigger: document.getElementById('btn-auth-trigger'),
       btnCloseAuthModal: document.getElementById('btn-close-auth-modal'),
       btnGoogleLogin: document.getElementById('btn-google-login'),
       btnLogout: document.getElementById('btn-logout'),
-      authStatusDot: document.getElementById('auth-status-indicator'),
-      authUserLabel: document.getElementById('auth-user-label'),
-      authSignedInBox: document.getElementById('auth-signed-in'),
-      authSignedOutBox: document.getElementById('auth-signed-out'),
-      authUserName: document.getElementById('auth-user-name'),
-      authUserEmail: document.getElementById('auth-user-email'),
-      authUserImg: document.getElementById('auth-user-img'),
+      authAvatar: document.getElementById('auth-avatar'),
+      syncDot: document.getElementById('sync-dot'),
+      authStateLoggedIn: document.getElementById('auth-state-logged-in'),
+      authStateLoggedOut: document.getElementById('auth-state-logged-out'),
+      userDisplayName: document.getElementById('user-display-name'),
+      userDisplayEmail: document.getElementById('user-display-email'),
+      userDisplayAvatar: document.getElementById('user-display-avatar'),
+      authErrorBox: document.getElementById('auth-error-box'),
 
-      // Feedback Elements
-      modalFeedback: document.getElementById('modal-feedback'),
       btnFeedbackTrigger: document.getElementById('btn-feedback-trigger'),
+      modalFeedback: document.getElementById('modal-feedback'),
       btnCloseFeedback: document.getElementById('btn-close-feedback'),
       btnCancelFeedback: document.getElementById('btn-cancel-feedback'),
       btnSubmitFeedback: document.getElementById('btn-submit-feedback'),
@@ -441,106 +507,266 @@
       appId: "1:94979024020:web:687bd4c064b87ff1180081"
     };
 
-    let auth = null, db = null, currentUser = null, isCloudPulling = false;
+    let auth = null, db = null, currentUser = null, syncUnsubscribe = null;
 
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
     } catch (e) {
-      console.warn("Firebase initialized in offline mode:", e);
+      console.warn("Firebase Init:", e);
     }
 
-    const STORAGE_KEY = 'kd_recalls_state_v1';
-    let state = loadLocalState();
-    let currentDeck = null;
+    // Storage Keys & Unified Architecture
+    const LOCAL_STORAGE_KEY = 'recalls_user_progress';
+    const FIRESTORE_COLLECTION = 'users';
+
+    const allDecks = getAllRecallDecks();
+    const DECKS = {};
+    allDecks.forEach(d => { DECKS[d.id] = d; });
+    const firstDeckId = allDecks[0]?.id || 'part_1_2023';
+
+    // State matching Saudi, 1000Qs, and Comp Architecture
+    let state = {
+      activeDeckId: firstDeckId,
+      userProgress: {}, // { [deckId]: { answers: {}, srs: {}, flags: [] } }
+      sessionState: {
+        currentIndex: 0,
+        order: [],
+        isShuffled: false,
+        isSRSMode: false,
+        srsSessionAnswers: {}
+      }
+    };
+
+    let currentDeck = DECKS[firstDeckId] || allDecks[0];
     let highlighter = null;
     let activeCategoryTab = 'part';
-    let srsSessionAnswers = {};
 
-    function loadLocalState() {
-      const defaultState = {
-        activeDeckId: null,
-        userAnswers: {},
-        srsProgress: {},
-        flags: [],
-        sessionState: { isSRSMode: false, isShuffled: false, order: [], currentIndex: 0 }
-      };
+    function purgeGhostProgress(prog) {
+      if (!prog || typeof prog !== 'object') return {};
+      const normalized = {};
+
+      Object.entries(prog).forEach(([deckId, deckProg]) => {
+        if (!deckProg || typeof deckProg !== 'object') return;
+        normalized[deckId] = normalized[deckId] || { answers: {}, flags: [], srs: {} };
+
+        const answers = deckProg.answers || {};
+        const srs = deckProg.srs || {};
+        const flags = Array.isArray(deckProg.flags) ? deckProg.flags : [];
+
+        Object.entries(answers).forEach(([idxStr, ans]) => {
+          if (ans !== undefined) normalized[deckId].answers[idxStr] = ans;
+        });
+
+        Object.entries(srs).forEach(([idxStr, srsObj]) => {
+          if (normalized[deckId].answers[idxStr] !== undefined && srsObj) {
+            normalized[deckId].srs[idxStr] = srsObj;
+          }
+        });
+
+        normalized[deckId].flags = Array.from(new Set([...normalized[deckId].flags, ...flags]));
+      });
+
+      return normalized;
+    }
+
+    // Load Local Progress with Legacy Migration Fallback
+    const savedProgress = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedProgress) {
       try {
-        const d = localStorage.getItem(STORAGE_KEY);
-        return d ? { ...defaultState, ...JSON.parse(d) } : defaultState;
-      } catch (e) {
-        return defaultState;
+        const parsed = JSON.parse(savedProgress);
+        state.userProgress = purgeGhostProgress(parsed.userProgress || parsed);
+        if (parsed.activeDeckId && DECKS[parsed.activeDeckId]) {
+          state.activeDeckId = parsed.activeDeckId;
+          currentDeck = DECKS[parsed.activeDeckId];
+        }
+      } catch (e) {}
+    } else {
+      // Automatic Legacy Migration from flat kd_recalls_state_v1
+      const legacyRaw = localStorage.getItem('kd_recalls_state_v1');
+      if (legacyRaw) {
+        try {
+          const legacy = JSON.parse(legacyRaw);
+          const migrated = {};
+
+          Object.entries(legacy.userAnswers || {}).forEach(([fullKey, ans]) => {
+            const parts = fullKey.split('_');
+            const qId = parts.pop();
+            const deckId = parts.join('_');
+            if (deckId && qId !== undefined) {
+              migrated[deckId] = migrated[deckId] || { answers: {}, srs: {}, flags: [] };
+              migrated[deckId].answers[qId] = ans;
+            }
+          });
+
+          Object.entries(legacy.srsProgress || {}).forEach(([fullKey, srs]) => {
+            const parts = fullKey.split('_');
+            const qId = parts.pop();
+            const deckId = parts.join('_');
+            if (deckId && qId !== undefined && migrated[deckId]) {
+              migrated[deckId].srs[qId] = srs;
+            }
+          });
+
+          state.userProgress = purgeGhostProgress(migrated);
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.userProgress));
+        } catch (e) {}
       }
     }
 
-    function saveState(skipCloud = false) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      if (!skipCloud && currentUser && db && !isCloudPulling) {
-        pushToCloud();
-      }
+    function compileCardStates() {
+      const cardStates = {};
+      Object.entries(state.userProgress || {}).forEach(([deckId, deckProg]) => {
+        if (!deckProg) return;
+        const srsMap = deckProg.srs || {};
+        const answers = deckProg.answers || {};
+
+        Object.entries(srsMap).forEach(([idxStr, srsObj]) => {
+          if (!srsObj || typeof srsObj !== 'object') return;
+          if (answers[idxStr] === undefined) return;
+
+          const namespacedId = `${deckId}_${idxStr}`;
+          cardStates[namespacedId] = {
+            reps: srsObj.repetitions || srsObj.reps || 0,
+            interval: srsObj.interval || 0,
+            easeFactor: srsObj.easeFactor || 2.5,
+            dueDate: typeof srsObj.dueDate === 'string' ? new Date(srsObj.dueDate).getTime() : (srsObj.dueDate || 0),
+            lastReviewed: typeof srsObj.lastReviewed === 'string' ? new Date(srsObj.lastReviewed).getTime() : (srsObj.lastReviewed || 0)
+          };
+        });
+      });
+      return cardStates;
     }
 
+    function mergeUserProgress(localProg, remoteProg) {
+      if (!remoteProg) return localProg || {};
+      const merged = { ...(localProg || {}) };
+
+      Object.entries(remoteProg).forEach(([deckId, remoteDeck]) => {
+        if (!remoteDeck) return;
+        if (!merged[deckId]) {
+          merged[deckId] = remoteDeck;
+        } else {
+          merged[deckId] = {
+            answers: { ...(merged[deckId].answers || {}), ...(remoteDeck.answers || {}) },
+            flags: Array.from(new Set([...(merged[deckId].flags || []), ...(remoteDeck.flags || [])])),
+            srs: { ...(merged[deckId].srs || {}), ...(remoteDeck.srs || {}) }
+          };
+        }
+      });
+
+      return purgeGhostProgress(merged);
+    }
+
+    // Cloud Sync: Directly to root document users/{uid}.recalls_progress
     let syncTimeout = null;
-    function pushToCloud() {
-      if (!currentUser || !db || isCloudPulling) return;
+    function pushStateToCloud() {
+      if (!db || !currentUser) return;
       clearTimeout(syncTimeout);
       syncTimeout = setTimeout(async () => {
         try {
-          const docRef = db.collection('users').doc(currentUser.uid).collection('platforms').doc('recalls');
-          await docRef.set({
-            activeDeckId: state.activeDeckId,
-            userAnswers: state.userAnswers,
-            srsProgress: state.srsProgress,
-            flags: state.flags || [],
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          state.userProgress = purgeGhostProgress(state.userProgress);
+          await db.collection(FIRESTORE_COLLECTION).doc(currentUser.uid).set({
+            recalls_progress: {
+              activeDeckId: state.activeDeckId,
+              userProgress: state.userProgress,
+              card_states: compileCardStates(),
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            recalls_highlights: highlighter?.highlights || {}
           }, { merge: true });
         } catch (err) {
           console.warn("Cloud sync write error:", err);
         }
-      }, 1500);
+      }, 1200);
     }
 
-    async function pullFromCloud(user) {
-      if (!user || !db) return;
-      isCloudPulling = true;
-      try {
-        const docRef = db.collection('users').doc(user.uid).collection('platforms').doc('recalls');
-        const snap = await docRef.get();
-        if (snap.exists) {
-          const cloudData = snap.data();
-          state.userAnswers = { ...(cloudData.userAnswers || {}), ...state.userAnswers };
-          state.srsProgress = { ...(cloudData.srsProgress || {}), ...state.srsProgress };
-          state.flags = Array.from(new Set([...(cloudData.flags || []), ...(state.flags || [])]));
-          if (cloudData.activeDeckId && !state.activeDeckId) {
-            state.activeDeckId = cloudData.activeDeckId;
+    function initUserCloudSync(userId) {
+      if (!db) return;
+      DOM.syncDot.classList.remove('hidden');
+      if (syncUnsubscribe) syncUnsubscribe();
+
+      const userDocRef = db.collection(FIRESTORE_COLLECTION).doc(userId);
+
+      syncUnsubscribe = userDocRef.onSnapshot(docSnap => {
+        if (docSnap.exists) {
+          const cloudData = docSnap.data();
+          const recallsData = cloudData.recalls_progress;
+          if (recallsData?.userProgress) {
+            state.userProgress = mergeUserProgress(state.userProgress, recallsData.userProgress);
+            if (recallsData.activeDeckId && DECKS[recallsData.activeDeckId]) {
+              state.activeDeckId = recallsData.activeDeckId;
+              currentDeck = DECKS[recallsData.activeDeckId];
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+              activeDeckId: state.activeDeckId,
+              userProgress: state.userProgress
+            }));
+            render();
           }
-          saveState(true);
-          if (currentDeck) renderQuestion();
+          if (cloudData.recalls_highlights && highlighter) {
+            highlighter.highlights = { ...highlighter.highlights, ...cloudData.recalls_highlights };
+            localStorage.setItem('kd_recalls_highlights', JSON.stringify(highlighter.highlights));
+            render();
+          }
+        } else {
+          pushStateToCloud();
         }
-      } catch (err) {
-        console.warn("Cloud pull error:", err);
-      } finally {
-        isCloudPulling = false;
+      });
+    }
+
+    function saveState(skipCloud = false) {
+      state.userProgress = purgeGhostProgress(state.userProgress);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+        activeDeckId: state.activeDeckId,
+        userProgress: state.userProgress
+      }));
+      render();
+      if (!skipCloud && currentUser && db) {
+        pushStateToCloud();
       }
     }
 
+    // Markdown & KaTeX Formatter
     function formatMarkdown(text) {
       if (!text) return '';
-      const rawHtml = String(text)
+      let processed = String(text);
+
+      if (window.katex) {
+        processed = processed.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+        processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
+          try { return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }); }
+          catch (e) { return math; }
+        });
+      }
+
+      const rawHtml = processed
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-100">$1</strong>')
         .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
         .replace(/\n/g, '<br/>');
+
       return window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
+    }
+
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
     }
 
     function getNormalizedOptions(q) {
       if (!q || !q.options) return [];
       if (Array.isArray(q.options)) {
         return q.options.map((opt, i) => {
-          const defaultKey = String.fromCharCode(65 + i);
-          if (typeof opt === 'string') return { key: defaultKey, text: opt };
-          return { key: opt.key || defaultKey, text: opt.text || String(opt) };
+          const defaultLetter = String.fromCharCode(65 + i);
+          if (typeof opt === 'string') return { key: defaultLetter, text: opt };
+          return { key: opt.key || defaultLetter, text: opt.text || String(opt) };
         });
       }
       if (typeof q.options === 'object') {
@@ -552,6 +778,7 @@
       return [];
     }
 
+    // SM-2 Engine
     function calculateNextSRS(currentSRS, rating) {
       let { interval = 0, repetitions = 0, easeFactor = 2.5 } = currentSRS || {};
       const now = new Date();
@@ -600,12 +827,15 @@
     }
 
     function getDueIndices(deck) {
+      if (!deck?.questions) return [];
       const now = Date.now();
       const due = [];
+      const srsMap = state.userProgress[deck.id]?.srs || {};
+      const answersMap = state.userProgress[deck.id]?.answers || {};
+
       deck.questions.forEach((q, idx) => {
-        const qId = `${deck.id}_${q.id}`;
-        const srs = state.srsProgress[qId];
-        if (srs?.dueDate && new Date(srs.dueDate).getTime() <= now) {
+        const srs = srsMap[idx];
+        if (answersMap[idx] !== undefined && srs?.dueDate && new Date(srs.dueDate).getTime() <= now) {
           due.push(idx);
         }
       });
@@ -613,9 +843,11 @@
     }
 
     function getUnansweredIndices(deck) {
+      if (!deck?.questions) return [];
+      const answersMap = state.userProgress[deck.id]?.answers || {};
       return deck.questions
-        .map((q, idx) => idx)
-        .filter(idx => !state.userAnswers[`${deck.id}_${deck.questions[idx].id}`]);
+        .map((_, idx) => idx)
+        .filter(idx => answersMap[idx] === undefined);
     }
 
     function checkAnswerMatch(a, b) {
@@ -623,151 +855,222 @@
       return String(a).trim().toUpperCase() === String(b).trim().toUpperCase();
     }
 
-    function renderQuestion() {
-      if (!currentDeck || !currentDeck.questions?.length) return;
+    // Main Renderer
+    function render() {
+      lucide.createIcons();
 
-      const { order, currentIndex, isSRSMode } = state.sessionState;
-
-      if (!order || order.length === 0 || order[currentIndex] === undefined) {
-        DOM.modalCompleted.classList.remove('hidden');
+      if (!currentDeck || !currentDeck.questions?.length) {
+        DOM.viewEmpty.classList.remove('hidden');
+        DOM.viewQuiz.classList.add('hidden');
+        DOM.quizFooter.classList.add('hidden');
+        DOM.deckTitle.textContent = 'Exam Recalls';
+        DOM.deckProgressText.textContent = '0 / 0 Completed';
+        DOM.progressBarFill.style.width = '0%';
         return;
       }
 
-      DOM.modalCompleted.classList.add('hidden');
-      const qIndex = order[currentIndex];
-      const q = currentDeck.questions[qIndex];
-      const qId = `${currentDeck.id}_${q.id}`;
+      const deckProgress = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
+      const answersMap = deckProgress.answers || {};
+      const totalAnswered = Object.keys(answersMap).length;
+      const totalQuestions = currentDeck.questions.length;
+      const isCompleted = totalAnswered >= totalQuestions && totalQuestions > 0;
 
-      highlighter?.setContext(qId);
+      const { order, currentIndex, isSRSMode } = state.sessionState;
 
-      DOM.labelQuestionCount.textContent = `Question ${currentIndex + 1} of ${order.length}`;
-      DOM.labelDeckCategory.textContent = currentDeck.groupTitle || 'Exam Recall';
+      if ((!order || order.length === 0 || order[currentIndex] === undefined || isCompleted) && !isSRSMode) {
+        DOM.viewEmpty.classList.remove('hidden');
+        DOM.viewQuiz.classList.add('hidden');
+        DOM.quizFooter.classList.add('hidden');
+        DOM.emptyTitle.textContent = "Exam Recall Completed!";
+        DOM.emptyDesc.textContent = "You have answered every question in this recall paper. Click below to reset or choose another paper.";
+        DOM.deckTitle.textContent = currentDeck.title;
+        DOM.deckProgressText.textContent = `${totalQuestions} / ${totalQuestions} Completed`;
+        DOM.progressBarFill.style.width = '100%';
+        return;
+      }
 
-      const answeredInDeck = Object.keys(state.userAnswers).filter(k => k.startsWith(`${currentDeck.id}_`));
-      const totalAnswered = answeredInDeck.length;
-      const totalCorrect = answeredInDeck.filter(k => {
-        const qItem = currentDeck.questions.find(item => `${currentDeck.id}_${item.id}` === k);
-        return qItem && checkAnswerMatch(state.userAnswers[k], qItem.correctAnswer);
-      }).length;
+      DOM.viewEmpty.classList.add('hidden');
+      DOM.viewQuiz.classList.remove('hidden');
+      DOM.quizFooter.classList.remove('hidden');
 
-      const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
-      DOM.labelAccuracy.textContent = `Accuracy: ${accuracy}%`;
+      const qIndex = order[currentIndex] !== undefined ? order[currentIndex] : 0;
+      const q = currentDeck.questions[qIndex] || currentDeck.questions[0];
+      const namespacedContextId = `${currentDeck.id}_${qIndex}`;
 
-      const progressPercent = Math.round((totalAnswered / currentDeck.questions.length) * 100);
-      DOM.progressBar.style.width = `${progressPercent}%`;
+      highlighter?.setContext(namespacedContextId);
 
-      DOM.stem.innerHTML = highlighter ? highlighter.renderHighlights(q.stem, qId) : q.stem;
+      // Header Labels
+      DOM.deckTitle.textContent = currentDeck.title;
+      const remainingCount = Math.max(0, totalQuestions - totalAnswered);
+      DOM.deckProgressText.textContent = `${totalAnswered} / ${totalQuestions} Completed (${remainingCount} Left)`;
+      
+      const pct = (totalAnswered / totalQuestions) * 100;
+      DOM.progressBarFill.style.width = `${pct}%`;
 
-      // Flag UI state
-      const isFlagged = (state.flags || []).includes(qId);
-      DOM.btnFlag.className = isFlagged
-        ? 'p-2 rounded-lg bg-amber-950/40 text-amber-400 border border-amber-800/60 transition'
-        : 'p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60';
+      // Accuracy Badge
+      let correctCount = 0;
+      Object.entries(answersMap).forEach(([idxStr, ans]) => {
+        const questionItem = currentDeck.questions[parseInt(idxStr, 10)];
+        if (questionItem && checkAnswerMatch(ans, questionItem.correctAnswer)) {
+          correctCount++;
+        }
+      });
+      const acc = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 100;
+      DOM.scoreBadge.textContent = `Accuracy: ${acc}%`;
 
-      // Options Rendering
+      // Mode Badge States
+      if (state.sessionState.isShuffled) {
+        DOM.shuffleBtn.className = 'p-2 text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.shuffleTag.classList.remove('hidden');
+        DOM.srsTag.classList.add('hidden');
+        DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.qNumberBadge.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+      } else if (state.sessionState.isSRSMode) {
+        DOM.srsBtn.className = 'p-2 text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.srsTag.classList.remove('hidden');
+        DOM.shuffleTag.classList.add('hidden');
+        DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.qNumberBadge.textContent = `SRS Due ${currentIndex + 1} of ${order.length}`;
+      } else {
+        DOM.shuffleBtn.className = 'p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.srsBtn.className = 'p-2 text-slate-400 hover:text-emerald-400 rounded-lg active:bg-slate-800 transition shrink-0';
+        DOM.shuffleTag.classList.add('hidden');
+        DOM.srsTag.classList.add('hidden');
+        DOM.qNumberBadge.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+      }
+
+      DOM.questionSourceBadge.textContent = currentDeck.groupTitle || 'Recall Exam';
+
+      // Stem & Image
+      const rawStem = q.stem || q.question || '';
+      DOM.qStem.innerHTML = highlighter ? highlighter.renderHighlights(rawStem, namespacedContextId) : rawStem;
+
+      const rawImg = q.image || q.figure || q.stemImage || q.img;
+      if (rawImg) {
+        let cleanPath = String(rawImg);
+        if (!cleanPath.startsWith('/') && !cleanPath.startsWith('http')) cleanPath = '/' + cleanPath;
+        DOM.stemImg.src = cleanPath;
+        DOM.stemImgContainer.classList.remove('hidden');
+      } else {
+        DOM.stemImgContainer.classList.add('hidden');
+      }
+
+      // Bookmark / Flag state
+      const isFlagged = (deckProgress.flags || []).includes(qIndex);
+      DOM.flagBtn.className = isFlagged
+        ? 'p-2 text-amber-400 bg-amber-950/40 border border-amber-800/50 rounded-lg active:bg-slate-800 transition shrink-0'
+        : 'p-2 text-slate-400 hover:text-amber-400 rounded-lg active:bg-slate-800 transition shrink-0';
+
+      // Options
+      const selectedAnswer = isSRSMode 
+        ? (state.sessionState.srsSessionAnswers?.[namespacedContextId]) 
+        : answersMap[qIndex];
+
       DOM.optionsContainer.innerHTML = '';
-      const selectedAnswer = isSRSMode ? srsSessionAnswers[qId] : state.userAnswers[qId];
       const optionsList = getNormalizedOptions(q);
 
-      optionsList.forEach(({ key: optKey, text: optText }) => {
+      optionsList.forEach(({ key: letter, text }) => {
         const btn = document.createElement('button');
-        btn.className = 'w-full text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-800/80 transition flex items-start space-x-3 text-sm';
-
-        const badge = document.createElement('span');
-        badge.className = 'w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-xs shrink-0 text-slate-300';
-        badge.textContent = optKey;
-
-        const text = document.createElement('div');
-        text.className = 'flex-1 text-slate-200 mt-0.5 leading-snug';
-        text.textContent = optText;
+        btn.className = `w-full text-left p-4 rounded-xl border font-medium text-sm transition flex items-start space-x-3.5 `;
 
         if (selectedAnswer) {
-          if (checkAnswerMatch(optKey, q.correctAnswer)) {
-            btn.className = 'w-full text-left p-3.5 rounded-xl border border-emerald-500/80 bg-emerald-950/30 flex items-start space-x-3 text-sm text-emerald-200';
-            badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0';
-          } else if (checkAnswerMatch(optKey, selectedAnswer)) {
-            btn.className = 'w-full text-left p-3.5 rounded-xl border border-rose-500/80 bg-rose-950/30 flex items-start space-x-3 text-sm text-rose-200';
-            badge.className = 'w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0';
+          if (checkAnswerMatch(letter, q.correctAnswer)) {
+            btn.className += 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200';
+          } else if (checkAnswerMatch(letter, selectedAnswer)) {
+            btn.className += 'bg-rose-950/40 border-rose-500/80 text-rose-200';
+          } else {
+            btn.className += 'bg-slate-900/50 border-slate-800/50 text-slate-500';
           }
+        } else {
+          btn.className += 'bg-slate-900 border-slate-800 hover:border-slate-700 active:bg-slate-800 text-slate-200';
         }
 
+        btn.innerHTML = `
+          <span class="font-bold px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 shrink-0">${letter}</span>
+          <span class="leading-relaxed">${text}</span>
+        `;
+
         btn.onclick = () => {
+          state.userProgress[currentDeck.id] = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
           if (isSRSMode) {
-            if (srsSessionAnswers[qId]) return;
-            srsSessionAnswers[qId] = optKey;
+            state.sessionState.srsSessionAnswers = state.sessionState.srsSessionAnswers || {};
+            if (state.sessionState.srsSessionAnswers[namespacedContextId]) return;
+            state.sessionState.srsSessionAnswers[namespacedContextId] = letter;
           } else {
-            if (state.userAnswers[qId]) return;
-            state.userAnswers[qId] = optKey;
-            saveState();
+            if (state.userProgress[currentDeck.id].answers[qIndex]) return;
+            state.userProgress[currentDeck.id].answers[qIndex] = letter;
           }
-          renderQuestion();
-          revealRationale();
+          saveState();
         };
 
-        btn.appendChild(badge);
-        btn.appendChild(text);
         DOM.optionsContainer.appendChild(btn);
       });
 
+      // Explanation Box
       if (selectedAnswer) {
-        revealRationale();
+        DOM.expBox.classList.remove('hidden');
+        const rawExp = formatMarkdown(q.explanation || 'No detailed rationale provided for this recall item.');
+        DOM.expContent.innerHTML = `
+          <div><b>Correct Answer:</b> Option ${q.correctAnswer}</div>
+          <div class="mt-1 text-slate-300">${highlighter ? highlighter.renderHighlights(rawExp, namespacedContextId) : rawExp}</div>
+        `;
+
+        const expImages = q.explanationImages || q.explanation_images || [];
+        if (Array.isArray(expImages) && expImages.length > 0) {
+          DOM.expImgContainer.innerHTML = '';
+          expImages.forEach(src => {
+            if (src) {
+              let cleanSrc = String(src);
+              if (!cleanSrc.startsWith('/') && !cleanSrc.startsWith('http')) cleanSrc = '/' + cleanSrc;
+              const img = document.createElement('img');
+              img.src = cleanSrc;
+              img.className = 'max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1';
+              DOM.expImgContainer.appendChild(img);
+            }
+          });
+          DOM.expImgContainer.classList.remove('hidden');
+        } else {
+          DOM.expImgContainer.classList.add('hidden');
+        }
+
+        const srs = (deckProgress.srs || {})[qIndex];
+        if (srs?.dueDate) {
+          const daysLeft = Math.ceil((new Date(srs.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+          DOM.srsStatusTag.textContent = daysLeft <= 0 ? 'Due for Review Today' : `Due in ${daysLeft}d (Interval: ${srs.interval}d)`;
+          DOM.srsStatusTag.className = daysLeft <= 0 ? 'text-[10px] text-amber-400 font-bold' : 'text-[10px] text-emerald-400 font-medium';
+        } else {
+          DOM.srsStatusTag.textContent = 'Not rated yet';
+          DOM.srsStatusTag.className = 'text-[10px] text-slate-500';
+        }
       } else {
-        DOM.rationaleBox.classList.add('hidden');
+        DOM.expBox.classList.add('hidden');
       }
 
-      DOM.btnPrev.disabled = currentIndex === 0;
-      DOM.btnPrev.classList.toggle('opacity-40', currentIndex === 0);
-      DOM.btnNext.disabled = currentIndex >= order.length - 1;
-      DOM.btnNext.classList.toggle('opacity-40', currentIndex >= order.length - 1);
+      // Prev / Next State
+      DOM.prevBtn.disabled = currentIndex <= 0;
+      DOM.prevBtn.classList.toggle('opacity-40', currentIndex <= 0);
+      DOM.prevBtn.classList.toggle('cursor-not-allowed', currentIndex <= 0);
 
-      DOM.btnSRSMode.classList.toggle('bg-cyan-950/80', isSRSMode);
-      DOM.btnSRSMode.classList.toggle('text-cyan-400', isSRSMode);
-      DOM.btnSRSMode.classList.toggle('border-cyan-600', isSRSMode);
+      const isLast = currentIndex >= order.length - 1;
+      DOM.nextBtn.innerHTML = isLast 
+        ? (isSRSMode ? `Finish SRS <i data-lucide="check" class="w-4 h-4 ml-1"></i>` : `Finish <i data-lucide="check" class="w-4 h-4 ml-1"></i>`)
+        : `Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>`;
 
       lucide.createIcons();
     }
 
-    function revealRationale() {
-      const { order, currentIndex } = state.sessionState;
-      const qIndex = order[currentIndex];
-      if (qIndex === undefined || !currentDeck) return;
-
-      const q = currentDeck.questions[qIndex];
-      const qId = `${currentDeck.id}_${q.id}`;
-
-      DOM.rationaleBox.classList.remove('hidden');
-      DOM.rationaleCorrect.textContent = `Correct Answer: Option ${q.correctAnswer}`;
-
-      const rawExp = formatMarkdown(q.explanation || 'No rationale provided.');
-      DOM.rationaleText.innerHTML = highlighter ? highlighter.renderHighlights(rawExp, qId) : rawExp;
-
-      DOM.rationaleImages.innerHTML = '';
-      if (Array.isArray(q.explanationImages)) {
-        q.explanationImages.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.className = 'rounded-xl border border-slate-800 max-h-80 mx-auto';
-          DOM.rationaleImages.appendChild(img);
-        });
-      }
-
-      const srs = state.srsProgress[qId];
-      DOM.srsStatusTag.textContent = srs ? `Next due in ${srs.interval} day(s)` : 'Not rated yet';
-    }
-
+    // Deck Loader
     function loadDeck(deckId, retainIndex = false) {
-      const allDecks = getAllRecallDecks();
-      const target = allDecks.find(d => d.id === deckId) || allDecks[0];
+      const target = DECKS[deckId] || allDecks[0];
       if (!target) return;
 
       currentDeck = target;
       state.activeDeckId = target.id;
-      DOM.activeDeckTitle.textContent = target.title;
 
       if (!retainIndex || !state.sessionState.order?.length) {
         const unanswered = getUnansweredIndices(target);
         if (unanswered.length === 0 && !state.sessionState.isSRSMode) {
-          state.sessionState.order = [];
+          state.sessionState.order = target.questions.map((_, i) => i);
           state.sessionState.currentIndex = 0;
         } else {
           state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unanswered) : unanswered;
@@ -776,12 +1079,12 @@
       }
 
       saveState();
-      renderQuestion();
+      render();
     }
 
+    // Category Tabs Render
     function renderDeckList(category = 'part') {
       DOM.deckListContainer.innerHTML = '';
-
       const group = RECALLS_CATALOG.find(g => g.categoryId === category);
       if (!group?.decks?.length) {
         DOM.deckListContainer.innerHTML = `<div class="text-xs text-slate-500 py-6 text-center">No exams found in this category.</div>`;
@@ -789,22 +1092,23 @@
       }
 
       group.decks.forEach(deck => {
-        const answeredCount = Object.keys(state.userAnswers).filter(k => k.startsWith(`${deck.id}_`)).length;
-        const isCompleted = answeredCount >= deck.questions.length && deck.questions.length > 0;
+        const deckProgress = state.userProgress[deck.id] || { answers: {} };
+        const answeredCount = Object.keys(deckProgress.answers || {}).length;
+        const isDone = answeredCount >= deck.questions.length && deck.questions.length > 0;
         const isSelected = currentDeck?.id === deck.id;
 
         const card = document.createElement('button');
-        card.className = `w-full text-left p-3 rounded-xl border transition flex items-center justify-between ${
+        card.className = `w-full text-left p-3.5 rounded-xl border transition flex items-center justify-between ${
           isSelected 
-            ? 'bg-cyan-950/40 border-cyan-500/60 text-cyan-200' 
-            : 'bg-slate-900/60 border-slate-800 hover:bg-slate-800/80 text-slate-200'
+            ? 'bg-amber-600/15 border-amber-500/60 text-amber-200' 
+            : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 text-slate-300'
         }`;
 
         card.innerHTML = `
-          <div class="space-y-0.5 pr-2">
-            <div class="font-semibold text-xs text-slate-100 flex items-center space-x-1.5">
-              <span>${deck.title}</span>
-              ${isCompleted ? '<span class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.2 rounded-full font-medium">Done</span>' : ''}
+          <div class="space-y-0.5 pr-2 min-w-0 flex-1">
+            <div class="font-bold text-xs sm:text-sm text-slate-100 flex items-center space-x-1.5 truncate">
+              <span class="truncate">${deck.title}</span>
+              ${isDone ? '<span class="text-[9px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.2 rounded-full font-bold uppercase">Done</span>' : ''}
             </div>
             <div class="text-[11px] text-slate-400">
               ${deck.questions.length} questions • ${answeredCount} answered
@@ -815,7 +1119,7 @@
 
         card.onclick = () => {
           loadDeck(deck.id);
-          DOM.modalDeck.classList.add('hidden');
+          DOM.modalDecks.classList.add('hidden');
         };
 
         DOM.deckListContainer.appendChild(card);
@@ -824,9 +1128,104 @@
       lucide.createIcons();
     }
 
-    // Context Capture for In-App Feedback (Parity with 1000Qs)
+    // Full-Text Search Functionality (Ctrl + K)
+    function searchAllRecalls(query) {
+      const clean = query.trim().toLowerCase();
+      if (clean.length < 2) return [];
+
+      const results = [];
+      allDecks.forEach(deck => {
+        (deck.questions || []).forEach((q, idx) => {
+          let score = 0;
+          let matchSnippet = '';
+          const stemText = q.stem || q.question || '';
+          const expText = q.explanation || '';
+          const optText = getNormalizedOptions(q).map(o => o.text).join(' ');
+
+          if (stemText.toLowerCase().includes(clean)) {
+            score += 10;
+            matchSnippet = stemText;
+          } else if (expText.toLowerCase().includes(clean)) {
+            score += 5;
+            matchSnippet = expText;
+          } else if (optText.toLowerCase().includes(clean)) {
+            score += 3;
+            matchSnippet = optText;
+          }
+
+          if (score > 0) {
+            results.push({
+              deckId: deck.id,
+              deckTitle: deck.title,
+              questionIndex: idx,
+              questionNumber: idx + 1,
+              stem: stemText,
+              snippet: matchSnippet,
+              score
+            });
+          }
+        });
+      });
+
+      return results.sort((a, b) => b.score - a.score);
+    }
+
+    function highlightKeyword(text, query) {
+      if (!text || !query) return text || '';
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      const sanitized = window.DOMPurify ? window.DOMPurify.sanitize(text) : text;
+      return String(sanitized).replace(regex, '<span class="bg-amber-500/30 text-amber-200 font-semibold px-0.5 rounded">$1</span>');
+    }
+
+    function renderSearchResults(query) {
+      const results = searchAllRecalls(query);
+      DOM.searchResultsList.innerHTML = '';
+
+      if (query.trim().length < 2) {
+        DOM.searchResultsList.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">Type at least 2 characters to search across all recall exams...</div>`;
+        DOM.searchCountBadge.textContent = '0 results found';
+        return;
+      }
+
+      if (results.length === 0) {
+        DOM.searchResultsList.innerHTML = `<div class="text-xs text-amber-400/80 text-center py-8">No matching recall questions found for "<b>${window.DOMPurify ? window.DOMPurify.sanitize(query) : query}</b>".</div>`;
+        DOM.searchCountBadge.textContent = '0 results found';
+        return;
+      }
+
+      DOM.searchCountBadge.textContent = `${results.length} result${results.length > 1 ? 's' : ''} found`;
+
+      results.forEach(res => {
+        const item = document.createElement('div');
+        item.className = 'pt-2.5 pb-2.5 px-3 rounded-xl hover:bg-slate-800/60 cursor-pointer transition flex flex-col space-y-1';
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-400 truncate">${res.deckTitle}</span>
+            <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/60 shrink-0">Q# ${res.questionNumber}</span>
+          </div>
+          <p class="text-xs text-slate-200 line-clamp-2 leading-relaxed">
+            ${highlightKeyword(res.stem, query)}
+          </p>
+        `;
+
+        item.onclick = () => {
+          loadDeck(res.deckId);
+          state.sessionState.currentIndex = res.questionIndex;
+          state.sessionState.order = currentDeck.questions.map((_, i) => i);
+          state.sessionState.isShuffled = false;
+          state.sessionState.isSRSMode = false;
+          saveState();
+          DOM.modalSearch.classList.add('hidden');
+        };
+
+        DOM.searchResultsList.appendChild(item);
+      });
+    }
+
+    // Context Capture for In-App Feedback
     function captureCurrentContext() {
-      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+      const qIndex = state.sessionState.order[state.sessionState.currentIndex] || 0;
       const q = currentDeck?.questions[qIndex];
       const optionsDict = {};
       getNormalizedOptions(q).forEach(o => { optionsDict[o.key] = o.text; });
@@ -834,8 +1233,8 @@
       return {
         pageType: "exam_recalls",
         deckTitle: currentDeck?.title || "Exam Recall",
-        questionNumber: state.sessionState.currentIndex + 1,
-        questionId: q ? `${currentDeck.id}_${q.id}` : null,
+        questionNumber: (state.sessionState.currentIndex || 0) + 1,
+        questionId: q ? `${currentDeck.id}_${qIndex}` : null,
         stem: q?.stem || "",
         options: optionsDict,
         correctAnswer: q?.correctAnswer || "A",
@@ -843,13 +1242,13 @@
       };
     }
 
-    // Interactive Listeners
+    // Event Wiring
     DOM.tabBtns.forEach(btn => {
       btn.onclick = () => {
         DOM.tabBtns.forEach(b => {
-          b.className = 'tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+          b.className = 'tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition';
         });
-        btn.className = 'tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition';
+        btn.className = 'tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-amber-400 bg-slate-800 transition';
         activeCategoryTab = btn.getAttribute('data-tab');
         renderDeckList(activeCategoryTab);
       };
@@ -859,44 +1258,54 @@
       if (state.sessionState.currentIndex < state.sessionState.order.length - 1) {
         state.sessionState.currentIndex++;
         saveState();
-        renderQuestion();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
-    DOM.btnPrev.onclick = () => {
+    DOM.prevBtn.onclick = () => {
       if (state.sessionState.currentIndex > 0) {
         state.sessionState.currentIndex--;
         saveState();
-        renderQuestion();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
-    DOM.btnReveal.onclick = revealRationale;
-
-    DOM.btnShuffle.onclick = () => {
-      if (!currentDeck || !state.sessionState.order?.length) return;
-      state.sessionState.isShuffled = true;
-      state.sessionState.order = shuffleArray(state.sessionState.order);
-      state.sessionState.currentIndex = 0;
-      saveState();
-      renderQuestion();
+    DOM.revealBtn.onclick = () => {
+      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+      const q = currentDeck?.questions[qIndex];
+      if (q) {
+        state.userProgress[currentDeck.id] = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
+        state.userProgress[currentDeck.id].answers[qIndex] = q.correctAnswer || 'A';
+        saveState();
+      }
     };
 
-    DOM.btnSRSMode.onclick = () => {
+    DOM.shuffleBtn.onclick = () => {
+      if (!currentDeck) return;
+      state.sessionState.isSRSMode = false;
+      state.sessionState.isShuffled = !state.sessionState.isShuffled;
+      state.sessionState.srsSessionAnswers = {};
+
+      const unans = getUnansweredIndices(currentDeck);
+      state.sessionState.order = state.sessionState.isShuffled ? shuffleArray(unans) : unans;
+      state.sessionState.currentIndex = 0;
+      saveState();
+    };
+
+    DOM.srsBtn.onclick = () => {
       if (!currentDeck) return;
       state.sessionState.isSRSMode = !state.sessionState.isSRSMode;
+      state.sessionState.isShuffled = false;
+      state.sessionState.srsSessionAnswers = {};
 
       if (state.sessionState.isSRSMode) {
-        const dueIndices = getDueIndices(currentDeck);
-        if (dueIndices.length === 0) {
-          alert('No questions from this recall deck are due for review today.');
+        const due = getDueIndices(currentDeck);
+        if (due.length === 0) {
+          alert('🎉 Excellent! No questions from this recall exam are due for review today.');
           state.sessionState.isSRSMode = false;
           state.sessionState.order = getUnansweredIndices(currentDeck);
         } else {
-          srsSessionAnswers = {};
-          state.sessionState.order = shuffleArray(dueIndices);
+          state.sessionState.order = shuffleArray(due);
         }
       } else {
         state.sessionState.order = getUnansweredIndices(currentDeck);
@@ -904,73 +1313,80 @@
 
       state.sessionState.currentIndex = 0;
       saveState();
-      renderQuestion();
     };
 
-    DOM.btnFlag.onclick = () => {
+    DOM.flagBtn.onclick = () => {
       const qIndex = state.sessionState.order[state.sessionState.currentIndex];
-      const q = currentDeck?.questions[qIndex];
-      if (!q) return;
+      if (qIndex === undefined || !currentDeck) return;
 
-      const qId = `${currentDeck.id}_${q.id}`;
-      state.flags = state.flags || [];
-      const pos = state.flags.indexOf(qId);
-      if (pos > -1) state.flags.splice(pos, 1);
-      else state.flags.push(qId);
+      state.userProgress[currentDeck.id] = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
+      state.userProgress[currentDeck.id].flags = state.userProgress[currentDeck.id].flags || [];
+      const pos = state.userProgress[currentDeck.id].flags.indexOf(qIndex);
+      if (pos > -1) state.userProgress[currentDeck.id].flags.splice(pos, 1);
+      else state.userProgress[currentDeck.id].flags.push(qIndex);
 
       saveState();
-      renderQuestion();
     };
 
-    DOM.srsRatingBtns.forEach(btn => {
+    // SM-2 Rating Controls
+    document.querySelectorAll('.btn-srs').forEach(btn => {
       btn.onclick = () => {
         const rating = btn.getAttribute('data-srs');
         const qIndex = state.sessionState.order[state.sessionState.currentIndex];
         if (qIndex === undefined || !currentDeck) return;
 
-        const q = currentDeck.questions[qIndex];
-        const qId = `${currentDeck.id}_${q.id}`;
-
-        state.srsProgress[qId] = calculateNextSRS(state.srsProgress[qId], rating);
+        state.userProgress[currentDeck.id] = state.userProgress[currentDeck.id] || { answers: {}, srs: {}, flags: [] };
+        state.userProgress[currentDeck.id].srs = state.userProgress[currentDeck.id].srs || {};
+        
+        const currentSRS = state.userProgress[currentDeck.id].srs[qIndex];
+        state.userProgress[currentDeck.id].srs[qIndex] = calculateNextSRS(currentSRS, rating);
+        
         saveState();
-        DOM.srsStatusTag.textContent = `Scheduled: ${state.srsProgress[qId].interval} day(s)`;
 
         if (state.sessionState.isSRSMode) {
-          DOM.btnNext.click();
+          DOM.nextBtn.click();
         }
       };
     });
 
+    // Reset Handlers
     const triggerReset = () => {
       if (!currentDeck) return;
-      currentDeck.questions.forEach(q => {
-        delete state.userAnswers[`${currentDeck.id}_${q.id}`];
-      });
+      if (state.userProgress[currentDeck.id]) {
+        state.userProgress[currentDeck.id].answers = {};
+        state.userProgress[currentDeck.id].srs = {};
+        state.userProgress[currentDeck.id].flags = [];
+      }
       state.sessionState.isSRSMode = false;
-      srsSessionAnswers = {};
-      state.sessionState.order = currentDeck.questions.map((_, i) => i);
-      state.sessionState.currentIndex = 0;
-      state.resetAt = Date.now();
-      saveState();
-      DOM.modalCompleted.classList.add('hidden');
-      renderQuestion();
-    };
-
-    DOM.btnResetDeck.onclick = () => {
-      if (!currentDeck) return;
-      if (confirm(`Reset all recorded answers for ${currentDeck.title}?`)) triggerReset();
-    };
-
-    DOM.btnModalReset.onclick = triggerReset;
-    DOM.btnModalReview.onclick = () => {
-      DOM.modalCompleted.classList.add('hidden');
+      state.sessionState.srsSessionAnswers = {};
       state.sessionState.order = currentDeck.questions.map((_, i) => i);
       state.sessionState.currentIndex = 0;
       saveState();
-      renderQuestion();
+      DOM.viewEmpty.classList.add('hidden');
     };
 
-    // Feedback Modal Handlers (Web3Forms + Firestore parity)
+    DOM.btnResetCurrentDeck.onclick = triggerReset;
+
+    // Search Modal Handlers
+    DOM.btnSearch.onclick = () => {
+      DOM.modalSearch.classList.remove('hidden');
+      DOM.searchInput.value = '';
+      DOM.searchInput.focus();
+      renderSearchResults('');
+      lucide.createIcons();
+    };
+
+    DOM.btnCloseSearch.onclick = () => DOM.modalSearch.classList.add('hidden');
+    DOM.searchInput.addEventListener('input', debounce(e => renderSearchResults(e.target.value)));
+
+    // Menu / Decks Modal
+    DOM.btnMenu.onclick = () => {
+      renderDeckList(activeCategoryTab);
+      DOM.modalDecks.classList.remove('hidden');
+    };
+    DOM.btnCloseDecks.onclick = () => DOM.modalDecks.classList.add('hidden');
+
+    // Feedback Modal Handlers (Web3Forms + Firestore Parity)
     DOM.btnFeedbackTrigger.onclick = () => {
       const ctx = captureCurrentContext();
       DOM.modalFeedback.classList.remove('hidden');
@@ -988,7 +1404,7 @@
     DOM.btnSubmitFeedback.onclick = async () => {
       const comment = DOM.feedbackComment.value.trim();
       if (!comment) {
-        alert("Please write your comment before submitting.");
+        alert("Please enter your comment before submitting.");
         return;
       }
 
@@ -1020,13 +1436,13 @@
             reply_to: currentUser?.email || "noreply@ketofoldoc.com",
             "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
             "Page URL": window.location.href,
-            "Deck": context.deckTitle,
+            "Exam Paper": context.deckTitle,
             "Question Number": context.questionNumber,
-            "Stem": context.stem,
+            "Question Stem": context.stem,
             "Correct Answer": `Option ${context.correctAnswer}`,
             "Options": JSON.stringify(context.options, null, 2),
             "Category": category,
-            "Comment": comment
+            "User Comment": comment
           })
         });
 
@@ -1052,13 +1468,12 @@
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        DOM.btnSearch.click();
+      }
       if (e.key === 'Escape') {
-        DOM.modalDeck.classList.add('hidden');
-        DOM.modalAuth.classList.add('hidden');
-        DOM.modalCompleted.classList.add('hidden');
-        DOM.modalFeedback.classList.add('hidden');
-        DOM.drawerEcosystem.classList.add('hidden');
-        return;
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
       }
 
       const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
@@ -1066,85 +1481,73 @@
 
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        DOM.btnNext.click();
+        DOM.nextBtn.click();
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        DOM.btnPrev.click();
+        DOM.prevBtn.click();
       } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
         e.preventDefault();
-        DOM.btnReveal.click();
+        DOM.revealBtn.click();
       }
     });
 
-    // Modal & Drawer Triggers
-    DOM.btnOpenDeckModal.onclick = () => {
-      renderDeckList(activeCategoryTab);
-      DOM.modalDeck.classList.remove('hidden');
-    };
-    DOM.btnCloseDeckModal.onclick = () => DOM.modalDeck.classList.add('hidden');
-    DOM.btnOpenDrawer.onclick = () => DOM.drawerEcosystem.classList.remove('hidden');
-    DOM.btnCloseDrawer.onclick = () => DOM.drawerEcosystem.classList.add('hidden');
-
-    DOM.btnAuthTrigger.onclick = () => DOM.modalAuth.classList.remove('hidden');
+    // Auth Modal Handlers
+    DOM.btnAuthModal.onclick = () => DOM.modalAuth.classList.remove('hidden');
     DOM.btnCloseAuthModal.onclick = () => DOM.modalAuth.classList.add('hidden');
 
-    document.querySelectorAll('.modal-backdrop').forEach(modal => {
-      modal.addEventListener('click', () => modal.classList.add('hidden'));
-    });
+    DOM.btnGoogleLogin.onclick = () => {
+      if (!auth) return;
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(() => {
+        DOM.modalAuth.classList.add('hidden');
+      }).catch(err => {
+        DOM.authErrorBox.textContent = err.message;
+        DOM.authErrorBox.classList.remove('hidden');
+      });
+    };
 
-    if (DOM.btnGoogleLogin && auth) {
-      DOM.btnGoogleLogin.onclick = async () => {
-        try {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          await auth.signInWithPopup(provider);
-          DOM.modalAuth.classList.add('hidden');
-        } catch (e) {
-          alert('Sign in error: ' + e.message);
-        }
-      };
-    }
-
-    if (DOM.btnLogout && auth) {
-      DOM.btnLogout.onclick = async () => {
-        try {
-          await auth.signOut();
-          DOM.modalAuth.classList.add('hidden');
-        } catch (e) {
-          console.error("Sign out error:", e);
-        }
-      };
-    }
+    DOM.btnLogout.onclick = () => {
+      if (!auth) return;
+      auth.signOut().then(() => DOM.modalAuth.classList.add('hidden'));
+    };
 
     if (auth) {
       auth.onAuthStateChanged(user => {
         currentUser = user;
         if (user) {
-          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-          DOM.authUserLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
-          DOM.authSignedInBox.classList.remove('hidden');
-          DOM.authSignedOutBox.classList.add('hidden');
-          DOM.authUserName.textContent = user.displayName || 'Learner';
-          DOM.authUserEmail.textContent = user.email || '';
-          if (user.photoURL) DOM.authUserImg.src = user.photoURL;
-          pullFromCloud(user);
+          DOM.authStateLoggedIn.classList.remove('hidden');
+          DOM.authStateLoggedOut.classList.add('hidden');
+          DOM.userDisplayName.textContent = user.displayName || 'Doctor';
+          DOM.userDisplayEmail.textContent = user.email;
+          const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+          DOM.userDisplayAvatar.textContent = initial;
+          DOM.authAvatar.innerHTML = `<span class="text-amber-400 font-bold">${initial}</span>`;
+          initUserCloudSync(user.uid);
         } else {
-          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
-          DOM.authUserLabel.textContent = 'Sign In';
-          DOM.authSignedInBox.classList.add('hidden');
-          DOM.authSignedOutBox.classList.remove('hidden');
+          DOM.authStateLoggedIn.classList.add('hidden');
+          DOM.authStateLoggedOut.classList.remove('hidden');
+          DOM.authAvatar.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i>`;
+          if (syncUnsubscribe) syncUnsubscribe();
+          DOM.syncDot.classList.add('hidden');
         }
         lucide.createIcons();
       });
     }
 
+    // Modal Backdrop Clicks
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    });
+
     // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       highlighter = new StudyHighlighter({
         storageKey: 'kd_recalls_highlights',
-        onChange: () => renderQuestion()
+        onChange: () => render()
       });
 
-      const allDecks = getAllRecallDecks();
       if (allDecks.length > 0) {
         loadDeck(state.activeDeckId || allDecks[0].id, true);
       }
