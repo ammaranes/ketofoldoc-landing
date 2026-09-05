@@ -2,24 +2,15 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Exam Recalls | KetofolDoc Ecosystem</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490' }
-          }
-        }
-      }
-    }
-  </script>
+
+  <!-- DOMPurify for HTML Sanitization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
   <!-- Firebase SDKs (v9 Compat Mode) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -27,160 +18,113 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   
   <style>
-    .highlightable-content {
-      -webkit-user-select: text;
-      user-select: text;
-    }
+    body { -webkit-tap-highlight-color: transparent; }
+    .highlightable-content { -webkit-user-select: text; user-select: text; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500/30">
 
-  <!-- ====================================================================== -->
-  <!-- TOP NAVIGATION BAR (KetofolDoc Ecosystem Header)                       -->
-  <!-- ====================================================================== -->
-  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 safe-top select-none">
-    <div class="max-w-4xl mx-auto px-4 py-2 min-h-[3.75rem] flex items-center justify-between gap-3">
+  <!-- TOP APP BAR -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-3 sm:px-4 py-2.5 flex items-center justify-between select-none">
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <button id="btn-open-ecosystem-drawer" title="Ecosystem Navigation" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700/80">
+        <i data-lucide="menu" class="w-4 h-4"></i>
+      </button>
+
+      <a href="/" title="Back to Portal" class="flex items-center space-x-2 text-slate-300 hover:text-white transition">
+        <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs tracking-wider">KD</div>
+      </a>
       
-      <!-- Left Section: Menu, Clickable Logo, and Dual-Line Title -->
-      <div class="flex items-center space-x-2.5 min-w-0 flex-1">
-        <button id="btn-menu" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0" title="Exams & Ecosystem Hub">
-          <i data-lucide="layers" class="w-5 h-5"></i>
-        </button>
-
-        <a href="/" title="Return to KetofolDoc Home" class="shrink-0 hover:opacity-80 transition">
-          <img src="/logo.svg" alt="App Logo" class="w-8 h-8 rounded-lg border border-slate-700/60 object-contain" />
-        </a>
-
-        <div class="min-w-0 flex-1 flex flex-col justify-center">
-          <a href="/" class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 hover:text-cyan-300 truncate leading-tight transition">
-            Exam Recalls
-          </a>
-          <div class="flex items-center space-x-2 truncate">
-            <h1 id="deck-title" class="font-bold text-xs sm:text-sm text-slate-100 truncate leading-snug">
-              Loading Exams...
-            </h1>
-            <span class="text-slate-600 text-xs">•</span>
-            <p id="deck-progress-text" class="text-[11px] font-medium text-cyan-400 truncate leading-snug">
-              0 / 0 Completed
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Right Section: Action Controls -->
-      <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
-        <button id="btn-shuffle" class="p-2 text-slate-400 hover:text-indigo-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Toggle Random Order">
-          <i data-lucide="shuffle" class="w-5 h-5"></i>
-        </button>
-
-        <button id="btn-srs-filter" class="p-2 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 transition shrink-0" title="SRS Due Review Mode">
-          <i data-lucide="brain" class="w-5 h-5"></i>
-        </button>
-
-        <!-- Global Search Trigger -->
-        <button id="btn-search" class="p-2 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Search Recalls (Ctrl + K)">
-          <i data-lucide="search" class="w-5 h-5"></i>
-        </button>
-
-        <button id="btn-reset-deck" class="p-2 text-slate-400 hover:text-rose-400 rounded-lg active:bg-slate-800 transition shrink-0" title="Reset Exam Progress">
-          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-        </button>
-        
-        <button id="btn-auth-modal" class="p-1.5 text-slate-400 hover:text-cyan-400 rounded-lg active:bg-slate-800 flex items-center transition shrink-0" title="Account & Sync">
-          <div id="auth-avatar" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
-            <i data-lucide="user" class="w-4 h-4"></i>
-          </div>
-          <span id="sync-dot" class="w-2 h-2 rounded-full bg-emerald-500 -ml-1.5 -mt-3 hidden"></span>
-        </button>
-      </div>
-
+      <button id="btn-open-deck-modal" class="flex items-center space-x-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-200 transition max-w-[130px] sm:max-w-xs">
+        <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+        <span id="active-deck-title" class="truncate">Select Exam</span>
+        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+      </button>
     </div>
-    
-    <!-- Linear Progress Bar -->
-    <div class="w-full bg-slate-800 h-1">
-      <div id="progress-bar-fill" class="bg-cyan-500 h-1 w-0 transition-all duration-300"></div>
+
+    <!-- Quick Utilities -->
+    <div class="flex items-center space-x-1.5">
+      <button id="btn-shuffle" title="Shuffle Questions" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
+        <i data-lucide="shuffle" class="w-4 h-4"></i>
+      </button>
+
+      <button id="btn-srs-mode" title="Toggle Due SRS Mode" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
+        <i data-lucide="brain" class="w-4 h-4"></i>
+      </button>
+
+      <button id="btn-flag" title="Bookmark Question" class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60">
+        <i data-lucide="bookmark" class="w-4 h-4"></i>
+      </button>
+
+      <button id="btn-reset-deck" title="Reset Exam Progress" class="p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 transition border border-slate-700/60">
+        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+      </button>
+
+      <button id="btn-auth-trigger" class="flex items-center space-x-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-xs transition">
+        <div id="auth-status-indicator" class="w-2 h-2 rounded-full bg-slate-500"></div>
+        <span id="auth-user-label" class="hidden sm:inline font-medium text-slate-300">Sign In</span>
+      </button>
     </div>
   </header>
 
-  <!-- ====================================================================== -->
-  <!-- MAIN CONTENT CONTAINER                                                 -->
-  <!-- ====================================================================== -->
+  <!-- Progress Bar -->
+  <div class="w-full bg-slate-900 h-1">
+    <div id="progress-bar-fill" class="bg-cyan-500 h-1 transition-all duration-300" style="width: 0%;"></div>
+  </div>
+
+  <!-- MAIN QUESTION VIEWPORT -->
   <main class="flex-1 max-w-3xl w-full mx-auto p-4 pb-72">
-    
-    <!-- Empty & Completed State Screen -->
-    <div id="view-empty" class="hidden my-auto text-center py-12 px-4 select-none">
-      <div class="w-16 h-16 bg-cyan-950/80 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-cyan-800/60">
-        <i data-lucide="check-circle-2" class="w-8 h-8"></i>
-      </div>
-      <h2 id="empty-title" class="text-xl font-bold text-slate-100 mb-2">Exam Recall Completed!</h2>
-      <p id="empty-desc" class="text-sm text-slate-400 max-w-md mx-auto mb-6">You have answered all available questions in this recall exam.</p>
-      <div class="flex items-center justify-center space-x-3">
-        <button id="btn-reset-current-deck" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-lg shadow-rose-600/20">
-          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-          <span>Reset & Practice Again</span>
-        </button>
-        <button id="btn-empty-choose-exam" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
-          Choose Exams
-        </button>
-      </div>
-    </div>
-
-    <!-- Active Question View -->
-    <div id="view-quiz" class="flex-1 flex flex-col">
-      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-3 gap-2 select-none">
-        <div class="flex items-center space-x-2 min-w-0 flex-1 overflow-x-auto">
-          <span id="question-number-badge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-slate-300 shrink-0">Question 1</span>
-          <span id="question-source-badge" class="px-2.5 py-1 bg-cyan-950/80 border border-cyan-700/60 text-cyan-300 rounded-md text-xs font-bold truncate max-w-[180px] sm:max-w-xs shrink-0">Recall Exam</span>
-          <span id="shuffle-mode-tag" class="hidden px-2 py-0.5 bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">Shuffled</span>
-          <span id="srs-mode-tag" class="hidden px-2 py-0.5 bg-cyan-950/80 border border-cyan-700/50 text-cyan-300 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">SRS Due Mode</span>
+    <div id="quiz-container" class="space-y-4">
+      <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-2 select-none">
+        <div class="flex items-center space-x-2">
+          <span id="label-question-count">Question 0 of 0</span>
+          <span id="label-deck-category" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-medium">Recall Deck</span>
         </div>
-        <span id="score-badge" class="text-slate-400 shrink-0">Accuracy: 100%</span>
+        <span id="label-accuracy">Accuracy: 0%</span>
       </div>
 
-      <!-- Question Stem & Image -->
-      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm mb-4">
-        <p id="question-stem" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed highlightable-content"></p>
-        <div id="stem-image-container" class="mt-4 hidden select-none">
-          <img id="stem-image" src="" alt="Question Diagram" class="max-h-72 w-auto mx-auto rounded-xl border border-slate-700 bg-white/5 p-1" />
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div id="q-stem" class="highlightable-content text-base sm:text-lg text-slate-100 font-medium leading-relaxed">
+          Loading exam questions...
         </div>
       </div>
 
-      <!-- Options Container -->
-      <div id="options-container" class="space-y-3 mb-6 select-none"></div>
+      <div id="options-container" class="space-y-2.5 select-none"></div>
 
-      <!-- Explanation & Rationale Box -->
-      <div id="explanation-box" class="hidden bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-5 mb-6 text-sm text-slate-300 scroll-mt-24">
-        <div class="flex items-center text-cyan-400 font-bold mb-2 select-none">
-          <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Reference & Rationale
+      <!-- Reference & Rationale Box -->
+      <div id="rationale-box" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold tracking-wide uppercase select-none">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          <span>Reference & Rationale</span>
         </div>
-        
-        <div id="explanation-content" class="leading-relaxed space-y-2 highlightable-content"></div>
-        <div id="explanation-images-container" class="mt-4 space-y-3 hidden select-none"></div>
+        <div id="rationale-correct" class="text-sm font-semibold text-emerald-300"></div>
+        <div id="rationale-text" class="highlightable-content text-sm sm:text-base text-slate-300 leading-relaxed"></div>
+        <div id="rationale-images" class="space-y-3 pt-2"></div>
 
-        <!-- Spaced Repetition Bar (SM-2) -->
-        <div class="mt-5 pt-4 border-t border-slate-800 select-none">
-          <div class="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
-            <span>Rate Recall (Spaced Repetition):</span>
-            <span id="srs-status-tag" class="text-[10px] text-slate-500">Not rated yet</span>
+        <!-- SM-2 Rating Controls -->
+        <div id="srs-rating-container" class="pt-4 border-t border-slate-800/80 select-none">
+          <div class="text-[11px] font-semibold uppercase text-slate-400 mb-2.5 flex items-center justify-between">
+            <span>Rate Recall Interval (SM-2)</span>
+            <span id="srs-status-tag" class="text-slate-500 font-normal lowercase">Not rated yet</span>
           </div>
           <div class="grid grid-cols-4 gap-2">
-            <button type="button" onclick="window.rateRecall('again')" class="py-2 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
-              <span>Again</span>
-              <span class="text-[9px] font-normal text-rose-400/80">1 Day</span>
+            <button data-srs="again" class="btn-srs py-2 px-1 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
+              <span class="font-bold">Again</span>
+              <span class="text-[10px] text-rose-400/80">1 Day</span>
             </button>
-            <button type="button" onclick="window.rateRecall('hard')" class="py-2 rounded-lg bg-amber-950/60 hover:bg-amber-900 border border-amber-800/60 text-amber-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
-              <span>Hard</span>
-              <span class="text-[9px] font-normal text-amber-400/80">Slower</span>
+            <button data-srs="hard" class="btn-srs py-2 px-1 rounded-xl bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/60 text-amber-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
+              <span class="font-bold">Hard</span>
+              <span class="text-[10px] text-amber-400/80">Slower</span>
             </button>
-            <button type="button" onclick="window.rateRecall('good')" class="py-2 rounded-lg bg-blue-950/60 hover:bg-blue-900 border border-blue-800/60 text-blue-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
-              <span>Good</span>
-              <span class="text-[9px] font-normal text-blue-400/80">Standard</span>
+            <button data-srs="good" class="btn-srs py-2 px-1 rounded-xl bg-sky-950/40 hover:bg-sky-900/60 border border-sky-800/60 text-sky-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
+              <span class="font-bold">Good</span>
+              <span class="text-[10px] text-sky-400/80">Standard</span>
             </button>
-            <button type="button" onclick="window.rateRecall('easy')" class="py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-300 font-bold text-xs flex flex-col items-center transition active:scale-95">
-              <span>Easy</span>
-              <span class="text-[9px] font-normal text-emerald-400/80">4-7 Days</span>
+            <button data-srs="easy" class="btn-srs py-2 px-1 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 text-xs flex flex-col items-center justify-center transition active:scale-95">
+              <span class="font-bold">Easy</span>
+              <span class="text-[10px] text-emerald-400/80">4-7 Days</span>
             </button>
           </div>
         </div>
@@ -188,17 +132,13 @@
     </div>
   </main>
 
-  <!-- ====================================================================== -->
-  <!-- FLOATING FEEDBACK                                                      -->
-  <!-- ====================================================================== -->
-  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-20 right-4 sm:right-6 z-50 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
+  <!-- FLOATING FEEDBACK TRIGGER -->
+  <button id="btn-feedback-trigger" class="fixed bottom-24 sm:bottom-20 right-4 sm:right-6 z-40 bg-slate-800/95 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-full p-2.5 sm:px-3.5 sm:py-2 text-xs font-semibold flex items-center space-x-2 shadow-2xl backdrop-blur transition active:scale-95 select-none">
     <i data-lucide="message-square-plus" class="w-4 h-4 text-cyan-400"></i>
     <span class="hidden sm:inline">Feedback</span>
   </button>
 
-  <!-- ====================================================================== -->
-  <!-- NAVIGATION FOOTER                                                      -->
-  <!-- ====================================================================== -->
+  <!-- FIXED FOOTER NAVIGATION -->
   <footer id="quiz-footer" class="fixed bottom-0 inset-x-0 z-50 bg-slate-950/98 backdrop-blur-md border-t border-slate-800/90 shadow-2xl pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] select-none">
     <div class="max-w-3xl mx-auto px-4">
       <div class="flex items-center justify-between space-x-3 mb-2">
@@ -221,123 +161,150 @@
     </div>
   </footer>
 
-  <!-- ====================================================================== -->
-  <!-- GLOBAL SEARCH MODAL                                                    -->
-  <!-- ====================================================================== -->
-  <div id="modal-search" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 select-none modal-backdrop">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden" onclick="event.stopPropagation()">
-      
-      <div class="p-4 border-b border-slate-800 flex items-center space-x-3 bg-slate-900/90">
-        <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
-        <input 
-          type="search" 
-          id="search-input" 
-          name="search-query"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          placeholder="Search recall questions, drugs, topics, keywords..." 
-          class="w-full bg-transparent text-slate-100 placeholder-slate-500 text-base focus:outline-none [&::-webkit-search-cancel-button]:hidden"
-        />
-        <button id="btn-close-search" class="p-1 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 shrink-0">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1 divide-y divide-slate-800/40 select-text no-scrollbar">
-        <div class="text-xs text-slate-500 text-center py-8">
-          Type at least 2 characters to search across all recall exams...
-        </div>
-      </div>
-      
-      <div class="px-4 py-2 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-        <span id="search-count-badge">0 results found</span>
-        <span>Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">ESC</kbd> to close</span>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ====================================================================== -->
-  <!-- MULTI-PLATFORM ECOSYSTEM HUB & EXAM SWITCHER MODAL                     -->
-  <!-- ====================================================================== -->
-  <div id="modal-decks" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none modal-backdrop">
-    <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
-      
-      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 shrink-0">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="compass" class="w-5 h-5 text-cyan-400"></i>
+  <!-- CONTEXT-AWARE FEEDBACK MODAL (1000Qs Parity) -->
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 select-none modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800/80">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-cyan-950/80 border border-cyan-800/60 text-cyan-400 flex items-center justify-center">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </div>
           <div>
-            <h3 class="font-bold text-slate-100 text-sm sm:text-base">Exam Recalls & Practice</h3>
-            <p class="text-[11px] text-slate-400">Select an exam recall deck or navigate platforms</p>
+            <h3 class="text-base font-bold text-slate-100">Feedback & Corrections</h3>
+            <p class="text-[11px] text-slate-400">Review item accuracy and suggest improvements</p>
           </div>
         </div>
-        <button id="btn-close-decks" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800">
+        <button id="btn-close-feedback" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="overflow-y-auto p-4 space-y-4 flex-1">
+      <div class="overflow-y-auto py-4 space-y-4 flex-1 select-text">
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
+            <span class="flex items-center">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i> Auto-Detected Context
+            </span>
+            <span id="feedback-context-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 border border-slate-700/60">Question Item</span>
+          </div>
+          <div id="feedback-context-summary" class="text-xs text-slate-200 line-clamp-2 leading-relaxed font-mono">
+            Loading context...
+          </div>
+        </div>
+
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
-            KetofolDoc Platforms
-          </span>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <a href="/saudi/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
-              <i data-lucide="award" class="w-4 h-4 text-blue-400"></i>
-              <span class="text-[10px] font-medium text-slate-200 group-hover:text-blue-300 transition truncate w-full">Saudi Board QB</span>
-            </a>
-
-            <a href="/1000qs/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-emerald-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
-              <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
-              <span class="text-[10px] font-medium text-slate-200 group-hover:text-emerald-300 transition truncate w-full">1000 Qs</span>
-            </a>
-
-            <a href="/comp/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-cyan-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
-              <i data-lucide="stethoscope" class="w-4 h-4 text-cyan-400"></i>
-              <span class="text-[10px] font-medium text-slate-200 group-hover:text-cyan-300 transition truncate w-full">Comprehensive</span>
-            </a>
-
-            <a href="/summaries/" class="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 flex flex-col items-center justify-center transition group text-center space-y-1">
-              <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
-              <span class="text-[10px] font-medium text-slate-200 group-hover:text-purple-300 transition truncate w-full">Summaries</span>
-            </a>
-
-            <div class="p-2.5 rounded-xl bg-cyan-600/15 border border-cyan-500/50 flex flex-col items-center justify-center text-center space-y-1 relative col-span-2 sm:col-span-1">
-              <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
-              <span class="text-[10px] font-bold text-cyan-200 truncate w-full">Exam Recalls</span>
-              <span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            </div>
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Category</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Content Error / Typo" checked class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Content Error / Typo</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Key / Explanation Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Answer / Rationale</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Feature Suggestion" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Suggestion</span>
+            </label>
+            <label class="flex items-center space-x-2 bg-slate-950/60 border border-slate-800 p-2 rounded-xl text-xs text-slate-300 cursor-pointer hover:border-slate-700">
+              <input type="radio" name="feedback-category" value="Bug / System Issue" class="text-cyan-600 focus:ring-0 bg-slate-900 border-slate-700" />
+              <span>Bug Report</span>
+            </label>
           </div>
-
-          <a href="/" class="mt-2 w-full p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 border border-slate-700/40 text-slate-300 hover:text-white text-[11px] font-medium flex items-center justify-center space-x-2 transition">
-            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400"></i>
-            <span>Return to KetofolDoc Home Portal</span>
-          </a>
         </div>
 
-        <div class="pt-2 border-t border-slate-800">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
-            Select Recall Exam Deck
-          </span>
-          
-          <div class="flex border-b border-slate-800 mb-3 space-x-2 bg-slate-950/40 px-2 pt-1 rounded-lg">
-            <button data-tab="part" class="tab-btn pb-2 px-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition">Part Exams</button>
-            <button data-tab="promotion" class="tab-btn pb-2 px-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Promotion</button>
-            <button data-tab="central" class="tab-btn pb-2 px-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Central Region</button>
-          </div>
-
-          <div id="deck-list-container" class="space-y-2 no-scrollbar max-h-60 overflow-y-auto"></div>
+        <div>
+          <label for="feedback-comment" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Your Message</label>
+          <textarea id="feedback-comment" rows="4" placeholder="Describe the error, rationale nuance, or suggestion..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition resize-none"></textarea>
         </div>
 
+        <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2 shrink-0">
+        <button id="btn-cancel-feedback" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">Cancel</button>
+        <button id="btn-submit-feedback" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition shadow-lg shadow-cyan-600/20">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Send Feedback</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ====================================================================== -->
-  <!-- CLOUD AUTH & SYNC MODAL                                                -->
-  <!-- ====================================================================== -->
+  <!-- ECOSYSTEM DRAWER -->
+  <div id="drawer-ecosystem" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden modal-backdrop">
+    <div class="fixed inset-y-0 left-0 max-w-xs w-full bg-slate-900 border-r border-slate-800 flex flex-col p-5 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400 text-xs">KD</div>
+          <div>
+            <h2 class="font-bold text-sm text-slate-100">KetofolDoc</h2>
+            <p class="text-[10px] text-slate-400">Anesthesia Ecosystem</p>
+          </div>
+        </div>
+        <button id="btn-close-ecosystem-drawer" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto py-4 space-y-2 no-scrollbar">
+        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-2 mb-1">Ecosystem Platforms</div>
+        <a href="/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="home" class="w-4 h-4 text-slate-400"></i>
+          <span>Home Portal</span>
+        </a>
+        <a href="/1000qs/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="help-circle" class="w-4 h-4 text-emerald-400"></i>
+          <span>1000 Anesthesia Questions</span>
+        </a>
+        <a href="/saudi/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+          <span>Saudi Board QB</span>
+        </a>
+        <a href="/comp/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="book-open" class="w-4 h-4 text-purple-400"></i>
+          <span>Comprehensive Anesthesia</span>
+        </a>
+        <a href="/summaries/" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition">
+          <i data-lucide="file-text" class="w-4 h-4 text-rose-400"></i>
+          <span>Miller's Summaries</span>
+        </a>
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-cyan-950/60 border border-cyan-500/40 text-cyan-300">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+            <span>Exam Recalls</span>
+          </div>
+          <span class="text-[9px] bg-cyan-900/80 text-cyan-300 px-1.5 py-0.5 rounded font-bold">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECK MODAL -->
+  <div id="modal-deck" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <h2 class="font-bold text-base text-slate-100 flex items-center space-x-2">
+          <i data-lucide="folder-git-2" class="w-4 h-4 text-cyan-400"></i>
+          <span>Select Recall Exam</span>
+        </h2>
+        <button id="btn-close-deck-modal" class="p-1 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex border-b border-slate-800 px-4 pt-2 space-x-2 bg-slate-950/40">
+        <button data-tab="part" class="tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition">Part Exams</button>
+        <button data-tab="promotion" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Promotion</button>
+        <button data-tab="central" class="tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Central Region</button>
+      </div>
+
+      <div id="deck-list-container" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar"></div>
+    </div>
+  </div>
+
+  <!-- CLOUD AUTH MODAL -->
   <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -350,7 +317,7 @@
 
       <div id="auth-signed-in" class="hidden space-y-3">
         <div class="flex items-center space-x-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-          <img id="auth-user-img" src="" class="w-10 h-10 rounded-full border border-cyan-500/40" />
+          <img id="auth-user-img" src="" class="w-10 h-10 rounded-full border border-cyan-500/40 object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%231e293b\'/%3E%3C/svg%3E';" />
           <div class="overflow-hidden">
             <div id="auth-user-name" class="font-bold text-xs text-slate-100 truncate"></div>
             <div id="auth-user-email" class="text-[10px] text-slate-400 truncate"></div>
@@ -367,7 +334,7 @@
 
       <div id="auth-signed-out" class="space-y-3">
         <p class="text-xs text-slate-300 leading-relaxed">
-          Sign in to preserve your answers and SM-2 schedules across mobile and desktop.
+          Sign in with Google to sync your study progress, flags, and SM-2 schedules across devices.
         </p>
         <button id="btn-google-login" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center space-x-2 shadow transition active:scale-95">
           <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -382,91 +349,89 @@
     </div>
   </div>
 
-  <!-- ====================================================================== -->
-  <!-- APPLICATION LOGIC                                                      -->
-  <!-- ====================================================================== -->
+  <!-- COMPLETION MODAL -->
+  <div id="modal-completed" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+      <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl">🎉</div>
+      <h3 class="text-lg font-bold text-slate-100">Exam Recall Completed!</h3>
+      <p class="text-xs text-slate-400 leading-relaxed">You have reviewed all available items in this queue. You can reset to practice again or switch to Spaced Repetition (SRS) mode.</p>
+      <div class="pt-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+        <button id="btn-modal-reset" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 border border-rose-900/40 transition">Reset Progress</button>
+        <button id="btn-modal-review" class="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white transition">Review Deck</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
   <script type="module">
-    import { StudyHighlighter } from '../js/highlighter.js';
+    import { StudyHighlighter } from '/js/highlighter.js';
     import { RECALLS_CATALOG, getAllRecallDecks } from './manifest.js';
 
-    // ------------------------------------------------------------------------
-    // 1. CENTRALIZED DOM REGISTRY
-    // ------------------------------------------------------------------------
     const DOM = {
-      // Header & Navigation
-      btnMenu: document.getElementById('btn-menu'),
-      deckTitle: document.getElementById('deck-title'),
-      deckProgressText: document.getElementById('deck-progress-text'),
+      activeDeckTitle: document.getElementById('active-deck-title'),
       progressBar: document.getElementById('progress-bar-fill'),
       btnShuffle: document.getElementById('btn-shuffle'),
-      btnSRSMode: document.getElementById('btn-srs-filter'),
+      btnSRSMode: document.getElementById('btn-srs-mode'),
+      btnFlag: document.getElementById('btn-flag'),
       btnResetDeck: document.getElementById('btn-reset-deck'),
 
-      // Global Search Elements
-      btnSearch: document.getElementById('btn-search'),
-      modalSearch: document.getElementById('modal-search'),
-      searchInput: document.getElementById('search-input'),
-      btnCloseSearch: document.getElementById('btn-close-search'),
-      searchResultsList: document.getElementById('search-results-list'),
-      searchCountBadge: document.getElementById('search-count-badge'),
+      labelQuestionCount: document.getElementById('label-question-count'),
+      labelDeckCategory: document.getElementById('label-deck-category'),
+      labelAccuracy: document.getElementById('label-accuracy'),
 
-      // Account & Auth Header
-      btnAuthModal: document.getElementById('btn-auth-modal'),
-      authAvatar: document.getElementById('auth-avatar'),
-      syncDot: document.getElementById('sync-dot'),
-
-      // Viewports
-      viewEmpty: document.getElementById('view-empty'),
-      viewQuiz: document.getElementById('view-quiz'),
-      btnResetCurrentDeck: document.getElementById('btn-reset-current-deck'),
-      btnEmptyChooseExam: document.getElementById('btn-empty-choose-exam'),
-
-      // Quiz Badges
-      badgeQuestionNumber: document.getElementById('question-number-badge'),
-      badgeQuestionSource: document.getElementById('question-source-badge'),
-      tagShuffleMode: document.getElementById('shuffle-mode-tag'),
-      tagSRSMode: document.getElementById('srs-mode-tag'),
-      badgeScore: document.getElementById('score-badge'),
-
-      // Question Content
-      qStem: document.getElementById('question-stem'),
-      stemImageContainer: document.getElementById('stem-image-container'),
-      stemImage: document.getElementById('stem-image'),
+      stem: document.getElementById('q-stem'),
       optionsContainer: document.getElementById('options-container'),
 
-      // Explanations
-      explanationBox: document.getElementById('explanation-box'),
-      explanationContent: document.getElementById('explanation-content'),
-      explanationImages: document.getElementById('explanation-images-container'),
+      rationaleBox: document.getElementById('rationale-box'),
+      rationaleCorrect: document.getElementById('rationale-correct'),
+      rationaleText: document.getElementById('rationale-text'),
+      rationaleImages: document.getElementById('rationale-images'),
       srsStatusTag: document.getElementById('srs-status-tag'),
+      srsRatingBtns: document.querySelectorAll('.btn-srs'),
 
-      // Footer Navigation
       btnPrev: document.getElementById('btn-prev'),
       btnReveal: document.getElementById('btn-reveal'),
       btnNext: document.getElementById('btn-next'),
-      btnFeedback: document.getElementById('btn-feedback-trigger'),
 
-      // Unified Hub / Decks Modal
-      modalDecks: document.getElementById('modal-decks'),
-      btnCloseDecks: document.getElementById('btn-close-decks'),
+      drawerEcosystem: document.getElementById('drawer-ecosystem'),
+      btnOpenDrawer: document.getElementById('btn-open-ecosystem-drawer'),
+      btnCloseDrawer: document.getElementById('btn-close-ecosystem-drawer'),
+
+      modalDeck: document.getElementById('modal-deck'),
+      btnOpenDeckModal: document.getElementById('btn-open-deck-modal'),
+      btnCloseDeckModal: document.getElementById('btn-close-deck-modal'),
       deckListContainer: document.getElementById('deck-list-container'),
       tabBtns: document.querySelectorAll('.tab-btn'),
 
-      // Auth Modal
+      modalCompleted: document.getElementById('modal-completed'),
+      btnModalReset: document.getElementById('btn-modal-reset'),
+      btnModalReview: document.getElementById('btn-modal-review'),
+
       modalAuth: document.getElementById('modal-auth'),
+      btnAuthTrigger: document.getElementById('btn-auth-trigger'),
       btnCloseAuthModal: document.getElementById('btn-close-auth-modal'),
       btnGoogleLogin: document.getElementById('btn-google-login'),
       btnLogout: document.getElementById('btn-logout'),
+      authStatusDot: document.getElementById('auth-status-indicator'),
+      authUserLabel: document.getElementById('auth-user-label'),
       authSignedInBox: document.getElementById('auth-signed-in'),
       authSignedOutBox: document.getElementById('auth-signed-out'),
       authUserName: document.getElementById('auth-user-name'),
       authUserEmail: document.getElementById('auth-user-email'),
-      authUserImg: document.getElementById('auth-user-img')
+      authUserImg: document.getElementById('auth-user-img'),
+
+      // Feedback Elements
+      modalFeedback: document.getElementById('modal-feedback'),
+      btnFeedbackTrigger: document.getElementById('btn-feedback-trigger'),
+      btnCloseFeedback: document.getElementById('btn-close-feedback'),
+      btnCancelFeedback: document.getElementById('btn-cancel-feedback'),
+      btnSubmitFeedback: document.getElementById('btn-submit-feedback'),
+      feedbackContextBadge: document.getElementById('feedback-context-badge'),
+      feedbackContextSummary: document.getElementById('feedback-context-summary'),
+      feedbackComment: document.getElementById('feedback-comment'),
+      feedbackStatusMsg: document.getElementById('feedback-status-msg')
     };
 
-    // ------------------------------------------------------------------------
-    // 2. FIREBASE INITIALIZATION
-    // ------------------------------------------------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyDTBiUKXcQ6i_0qdygn6sEUflFOlERzQOs",
       authDomain: "qb-sync-e6294.firebaseapp.com",
@@ -476,24 +441,16 @@
       appId: "1:94979024020:web:687bd4c064b87ff1180081"
     };
 
-    let auth = null;
-    let db = null;
-    let currentUser = null;
-    let isCloudPulling = false;
+    let auth = null, db = null, currentUser = null, isCloudPulling = false;
 
     try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
     } catch (e) {
-      console.warn("Firebase running in offline mode:", e);
+      console.warn("Firebase initialized in offline mode:", e);
     }
 
-    // ------------------------------------------------------------------------
-    // 3. APPLICATION STATE
-    // ------------------------------------------------------------------------
     const STORAGE_KEY = 'kd_recalls_state_v1';
     let state = loadLocalState();
     let currentDeck = null;
@@ -506,6 +463,7 @@
         activeDeckId: null,
         userAnswers: {},
         srsProgress: {},
+        flags: [],
         sessionState: { isSRSMode: false, isShuffled: false, order: [], currentIndex: 0 }
       };
       try {
@@ -534,10 +492,11 @@
             activeDeckId: state.activeDeckId,
             userAnswers: state.userAnswers,
             srsProgress: state.srsProgress,
+            flags: state.flags || [],
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
         } catch (err) {
-          console.warn("Cloud write error:", err);
+          console.warn("Cloud sync write error:", err);
         }
       }, 1500);
     }
@@ -552,6 +511,7 @@
           const cloudData = snap.data();
           state.userAnswers = { ...(cloudData.userAnswers || {}), ...state.userAnswers };
           state.srsProgress = { ...(cloudData.srsProgress || {}), ...state.srsProgress };
+          state.flags = Array.from(new Set([...(cloudData.flags || []), ...(state.flags || [])]));
           if (cloudData.activeDeckId && !state.activeDeckId) {
             state.activeDeckId = cloudData.activeDeckId;
           }
@@ -565,16 +525,31 @@
       }
     }
 
-    // ------------------------------------------------------------------------
-    // 4. SM-2 ENGINE & RECALL RATINGS
-    // ------------------------------------------------------------------------
-    function shuffleArray(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+    function formatMarkdown(text) {
+      if (!text) return '';
+      const rawHtml = String(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-100">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+        .replace(/\n/g, '<br/>');
+      return window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
+    }
+
+    function getNormalizedOptions(q) {
+      if (!q || !q.options) return [];
+      if (Array.isArray(q.options)) {
+        return q.options.map((opt, i) => {
+          const defaultKey = String.fromCharCode(65 + i);
+          if (typeof opt === 'string') return { key: defaultKey, text: opt };
+          return { key: opt.key || defaultKey, text: opt.text || String(opt) };
+        });
       }
-      return arr;
+      if (typeof q.options === 'object') {
+        return Object.entries(q.options).map(([key, val]) => ({
+          key,
+          text: typeof val === 'object' ? (val.text || JSON.stringify(val)) : String(val)
+        }));
+      }
+      return [];
     }
 
     function calculateNextSRS(currentSRS, rating) {
@@ -604,7 +579,6 @@
 
       const MAX_INTERVAL = 90;
       if (interval > MAX_INTERVAL) interval = MAX_INTERVAL;
-
       const nextDue = new Date(now.getTime() + interval * 86400000);
 
       return {
@@ -616,18 +590,14 @@
       };
     }
 
-    window.rateRecall = function(rating) {
-      const { order, currentIndex } = state.sessionState;
-      const qIndex = order[currentIndex];
-      if (qIndex === undefined || !currentDeck) return;
-
-      const q = currentDeck.questions[qIndex];
-      const qId = `${currentDeck.id}_${q.id}`;
-
-      state.srsProgress[qId] = calculateNextSRS(state.srsProgress[qId], rating);
-      saveState();
-      DOM.srsStatusTag.textContent = `Scheduled: ${state.srsProgress[qId].interval} day(s)`;
-    };
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
     function getDueIndices(deck) {
       const now = Date.now();
@@ -644,7 +614,7 @@
 
     function getUnansweredIndices(deck) {
       return deck.questions
-        .map((_, idx) => idx)
+        .map((q, idx) => idx)
         .filter(idx => !state.userAnswers[`${deck.id}_${deck.questions[idx].id}`]);
     }
 
@@ -653,143 +623,25 @@
       return String(a).trim().toUpperCase() === String(b).trim().toUpperCase();
     }
 
-    // ------------------------------------------------------------------------
-    // 5. GLOBAL SEARCH ENGINE IMPLEMENTATION
-    // ------------------------------------------------------------------------
-    function highlightSearchTerm(text, query) {
-      if (!text || !query) return text || '';
-      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(${escaped})`, 'gi');
-      return text.replace(regex, '<span class="bg-cyan-500/30 text-cyan-300 font-bold px-0.5 rounded">$1</span>');
-    }
-
-    function performGlobalSearch(rawQuery) {
-      const query = (rawQuery || '').trim().toLowerCase();
-      
-      if (query.length < 2) {
-        DOM.searchResultsList.innerHTML = `
-          <div class="text-xs text-slate-500 text-center py-8">
-            Type at least 2 characters to search across all recall exams...
-          </div>
-        `;
-        DOM.searchCountBadge.textContent = '0 results found';
-        return;
-      }
-
-      const allDecks = getAllRecallDecks();
-      const results = [];
-
-      allDecks.forEach(deck => {
-        deck.questions.forEach((q, idx) => {
-          const stemText = (q.stem || '').toLowerCase();
-          const explText = (q.explanation || '').toLowerCase();
-          const optionsText = Object.values(q.options || {}).join(' ').toLowerCase();
-
-          if (stemText.includes(query) || explText.includes(query) || optionsText.includes(query)) {
-            results.push({
-              deckId: deck.id,
-              deckTitle: deck.title,
-              categoryTitle: deck.groupTitle || 'Recall',
-              questionIndex: idx,
-              question: q
-            });
-          }
-        });
-      });
-
-      DOM.searchCountBadge.textContent = `${results.length} result${results.length === 1 ? '' : 's'} found`;
-
-      if (results.length === 0) {
-        DOM.searchResultsList.innerHTML = `
-          <div class="text-xs text-slate-500 text-center py-8">
-            No matching recall questions found for "<span class="text-slate-300 font-semibold">${rawQuery}</span>"
-          </div>
-        `;
-        return;
-      }
-
-      DOM.searchResultsList.innerHTML = '';
-
-      // Render top 75 results for high responsiveness
-      results.slice(0, 75).forEach(res => {
-        const item = document.createElement('button');
-        item.className = 'w-full text-left py-3 px-2 rounded-xl hover:bg-slate-800/60 transition group flex flex-col space-y-1';
-
-        const stemHighlighted = highlightSearchTerm(res.question.stem, rawQuery);
-
-        item.innerHTML = `
-          <div class="flex items-center space-x-2 text-[10px] font-semibold text-slate-400">
-            <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-cyan-400">${res.categoryTitle}</span>
-            <span class="truncate max-w-[200px] sm:max-w-xs text-slate-300">${res.deckTitle}</span>
-            <span>•</span>
-            <span class="text-slate-500">Q#${res.question.id || res.questionIndex + 1}</span>
-          </div>
-          <div class="text-xs sm:text-sm text-slate-200 leading-snug group-hover:text-white line-clamp-2">
-            ${stemHighlighted}
-          </div>
-        `;
-
-        item.onclick = () => {
-          jumpToQuestion(res.deckId, res.questionIndex);
-        };
-
-        DOM.searchResultsList.appendChild(item);
-      });
-    }
-
-    function jumpToQuestion(deckId, qIndexInDeck) {
-      const allDecks = getAllRecallDecks();
-      const targetDeck = allDecks.find(d => d.id === deckId);
-      if (!targetDeck) return;
-
-      currentDeck = targetDeck;
-      state.activeDeckId = targetDeck.id;
-      DOM.deckTitle.textContent = targetDeck.title;
-
-      // Ensure question is loaded in review mode
-      state.sessionState.isSRSMode = false;
-      state.sessionState.order = targetDeck.questions.map((_, i) => i);
-      state.sessionState.currentIndex = qIndexInDeck;
-
-      saveState();
-      renderQuestion();
-      closeSearch();
-    }
-
-    function openSearch() {
-      DOM.modalSearch.classList.remove('hidden');
-      DOM.searchInput.value = '';
-      performGlobalSearch('');
-      setTimeout(() => DOM.searchInput.focus(), 50);
-    }
-
-    function closeSearch() {
-      DOM.modalSearch.classList.add('hidden');
-      DOM.searchInput.blur();
-    }
-
-    // ------------------------------------------------------------------------
-    // 6. QUESTION RENDERING ENGINE
-    // ------------------------------------------------------------------------
     function renderQuestion() {
       if (!currentDeck || !currentDeck.questions?.length) return;
 
-      const { order, currentIndex, isSRSMode, isShuffled } = state.sessionState;
+      const { order, currentIndex, isSRSMode } = state.sessionState;
 
       if (!order || order.length === 0 || order[currentIndex] === undefined) {
-        DOM.viewQuiz.classList.add('hidden');
-        DOM.viewEmpty.classList.remove('hidden');
+        DOM.modalCompleted.classList.remove('hidden');
         return;
       }
 
-      DOM.viewEmpty.classList.add('hidden');
-      DOM.viewQuiz.classList.remove('hidden');
-
+      DOM.modalCompleted.classList.add('hidden');
       const qIndex = order[currentIndex];
       const q = currentDeck.questions[qIndex];
       const qId = `${currentDeck.id}_${q.id}`;
 
       highlighter?.setContext(qId);
+
+      DOM.labelQuestionCount.textContent = `Question ${currentIndex + 1} of ${order.length}`;
+      DOM.labelDeckCategory.textContent = currentDeck.groupTitle || 'Exam Recall';
 
       const answeredInDeck = Object.keys(state.userAnswers).filter(k => k.startsWith(`${currentDeck.id}_`));
       const totalAnswered = answeredInDeck.length;
@@ -798,32 +650,26 @@
         return qItem && checkAnswerMatch(state.userAnswers[k], qItem.correctAnswer);
       }).length;
 
-      DOM.deckTitle.textContent = currentDeck.title;
-      DOM.deckProgressText.textContent = `${totalAnswered} / ${currentDeck.questions.length} Completed`;
+      const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+      DOM.labelAccuracy.textContent = `Accuracy: ${accuracy}%`;
 
       const progressPercent = Math.round((totalAnswered / currentDeck.questions.length) * 100);
       DOM.progressBar.style.width = `${progressPercent}%`;
 
-      DOM.badgeQuestionNumber.textContent = `Question ${currentIndex + 1} of ${order.length}`;
-      DOM.badgeQuestionSource.textContent = currentDeck.groupTitle || 'Recall Exam';
-      DOM.tagShuffleMode.classList.toggle('hidden', !isShuffled);
-      DOM.tagSRSMode.classList.toggle('hidden', !isSRSMode);
+      DOM.stem.innerHTML = highlighter ? highlighter.renderHighlights(q.stem, qId) : q.stem;
 
-      const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 100;
-      DOM.badgeScore.textContent = `Accuracy: ${accuracy}%`;
+      // Flag UI state
+      const isFlagged = (state.flags || []).includes(qId);
+      DOM.btnFlag.className = isFlagged
+        ? 'p-2 rounded-lg bg-amber-950/40 text-amber-400 border border-amber-800/60 transition'
+        : 'p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-slate-300 transition border border-slate-700/60';
 
-      DOM.qStem.innerHTML = highlighter ? highlighter.renderHighlights(q.stem, qId) : q.stem;
-      if (q.image) {
-        DOM.stemImage.src = q.image;
-        DOM.stemImageContainer.classList.remove('hidden');
-      } else {
-        DOM.stemImageContainer.classList.add('hidden');
-      }
-
+      // Options Rendering
       DOM.optionsContainer.innerHTML = '';
       const selectedAnswer = isSRSMode ? srsSessionAnswers[qId] : state.userAnswers[qId];
+      const optionsList = getNormalizedOptions(q);
 
-      Object.entries(q.options || {}).forEach(([optKey, optText]) => {
+      optionsList.forEach(({ key: optKey, text: optText }) => {
         const btn = document.createElement('button');
         btn.className = 'w-full text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-800/80 transition flex items-start space-x-3 text-sm';
 
@@ -866,7 +712,7 @@
       if (selectedAnswer) {
         revealRationale();
       } else {
-        DOM.explanationBox.classList.add('hidden');
+        DOM.rationaleBox.classList.add('hidden');
       }
 
       DOM.btnPrev.disabled = currentIndex === 0;
@@ -889,20 +735,20 @@
       const q = currentDeck.questions[qIndex];
       const qId = `${currentDeck.id}_${q.id}`;
 
-      DOM.explanationBox.classList.remove('hidden');
-      DOM.explanationContent.innerHTML = highlighter ? highlighter.renderHighlights(q.explanation || 'No rationale provided.', qId) : (q.explanation || 'No rationale provided.');
+      DOM.rationaleBox.classList.remove('hidden');
+      DOM.rationaleCorrect.textContent = `Correct Answer: Option ${q.correctAnswer}`;
 
-      DOM.explanationImages.innerHTML = '';
-      if (Array.isArray(q.explanationImages) && q.explanationImages.length > 0) {
-        DOM.explanationImages.classList.remove('hidden');
+      const rawExp = formatMarkdown(q.explanation || 'No rationale provided.');
+      DOM.rationaleText.innerHTML = highlighter ? highlighter.renderHighlights(rawExp, qId) : rawExp;
+
+      DOM.rationaleImages.innerHTML = '';
+      if (Array.isArray(q.explanationImages)) {
         q.explanationImages.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
           img.className = 'rounded-xl border border-slate-800 max-h-80 mx-auto';
-          DOM.explanationImages.appendChild(img);
+          DOM.rationaleImages.appendChild(img);
         });
-      } else {
-        DOM.explanationImages.classList.add('hidden');
       }
 
       const srs = state.srsProgress[qId];
@@ -910,14 +756,13 @@
     }
 
     function loadDeck(deckId, retainIndex = false) {
-      highlighter?.hideToolbar?.();
       const allDecks = getAllRecallDecks();
       const target = allDecks.find(d => d.id === deckId) || allDecks[0];
       if (!target) return;
 
       currentDeck = target;
       state.activeDeckId = target.id;
-      DOM.deckTitle.textContent = target.title;
+      DOM.activeDeckTitle.textContent = target.title;
 
       if (!retainIndex || !state.sessionState.order?.length) {
         const unanswered = getUnansweredIndices(target);
@@ -946,7 +791,7 @@
       group.decks.forEach(deck => {
         const answeredCount = Object.keys(state.userAnswers).filter(k => k.startsWith(`${deck.id}_`)).length;
         const isCompleted = answeredCount >= deck.questions.length && deck.questions.length > 0;
-        const isSelected = currentDeck && currentDeck.id === deck.id;
+        const isSelected = currentDeck?.id === deck.id;
 
         const card = document.createElement('button');
         card.className = `w-full text-left p-3 rounded-xl border transition flex items-center justify-between ${
@@ -970,7 +815,7 @@
 
         card.onclick = () => {
           loadDeck(deck.id);
-          DOM.modalDecks.classList.add('hidden');
+          DOM.modalDeck.classList.add('hidden');
         };
 
         DOM.deckListContainer.appendChild(card);
@@ -979,30 +824,43 @@
       lucide.createIcons();
     }
 
-    // ------------------------------------------------------------------------
-    // 7. EVENT LISTENERS WIRING
-    // ------------------------------------------------------------------------
+    // Context Capture for In-App Feedback (Parity with 1000Qs)
+    function captureCurrentContext() {
+      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+      const q = currentDeck?.questions[qIndex];
+      const optionsDict = {};
+      getNormalizedOptions(q).forEach(o => { optionsDict[o.key] = o.text; });
+
+      return {
+        pageType: "exam_recalls",
+        deckTitle: currentDeck?.title || "Exam Recall",
+        questionNumber: state.sessionState.currentIndex + 1,
+        questionId: q ? `${currentDeck.id}_${q.id}` : null,
+        stem: q?.stem || "",
+        options: optionsDict,
+        correctAnswer: q?.correctAnswer || "A",
+        explanation: q?.explanation || ""
+      };
+    }
+
+    // Interactive Listeners
     DOM.tabBtns.forEach(btn => {
       btn.onclick = () => {
         DOM.tabBtns.forEach(b => {
-          b.className = 'tab-btn pb-2 px-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
+          b.className = 'tab-btn pb-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition';
         });
-        btn.className = 'tab-btn pb-2 px-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition';
+        btn.className = 'tab-btn pb-2 text-xs font-semibold text-cyan-400 border-b-2 border-cyan-400 transition';
         activeCategoryTab = btn.getAttribute('data-tab');
         renderDeckList(activeCategoryTab);
       };
     });
-
-    // Search Controls
-    DOM.btnSearch.onclick = openSearch;
-    DOM.btnCloseSearch.onclick = closeSearch;
-    DOM.searchInput.oninput = (e) => performGlobalSearch(e.target.value);
 
     DOM.btnNext.onclick = () => {
       if (state.sessionState.currentIndex < state.sessionState.order.length - 1) {
         state.sessionState.currentIndex++;
         saveState();
         renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
@@ -1011,6 +869,7 @@
         state.sessionState.currentIndex--;
         saveState();
         renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
@@ -1048,6 +907,40 @@
       renderQuestion();
     };
 
+    DOM.btnFlag.onclick = () => {
+      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+      const q = currentDeck?.questions[qIndex];
+      if (!q) return;
+
+      const qId = `${currentDeck.id}_${q.id}`;
+      state.flags = state.flags || [];
+      const pos = state.flags.indexOf(qId);
+      if (pos > -1) state.flags.splice(pos, 1);
+      else state.flags.push(qId);
+
+      saveState();
+      renderQuestion();
+    };
+
+    DOM.srsRatingBtns.forEach(btn => {
+      btn.onclick = () => {
+        const rating = btn.getAttribute('data-srs');
+        const qIndex = state.sessionState.order[state.sessionState.currentIndex];
+        if (qIndex === undefined || !currentDeck) return;
+
+        const q = currentDeck.questions[qIndex];
+        const qId = `${currentDeck.id}_${q.id}`;
+
+        state.srsProgress[qId] = calculateNextSRS(state.srsProgress[qId], rating);
+        saveState();
+        DOM.srsStatusTag.textContent = `Scheduled: ${state.srsProgress[qId].interval} day(s)`;
+
+        if (state.sessionState.isSRSMode) {
+          DOM.btnNext.click();
+        }
+      };
+    });
+
     const triggerReset = () => {
       if (!currentDeck) return;
       currentDeck.questions.forEach(q => {
@@ -1057,58 +950,148 @@
       srsSessionAnswers = {};
       state.sessionState.order = currentDeck.questions.map((_, i) => i);
       state.sessionState.currentIndex = 0;
+      state.resetAt = Date.now();
       saveState();
+      DOM.modalCompleted.classList.add('hidden');
       renderQuestion();
     };
 
     DOM.btnResetDeck.onclick = () => {
       if (!currentDeck) return;
-      if (confirm(`Reset all recorded answers for ${currentDeck.title}?`)) {
-        triggerReset();
+      if (confirm(`Reset all recorded answers for ${currentDeck.title}?`)) triggerReset();
+    };
+
+    DOM.btnModalReset.onclick = triggerReset;
+    DOM.btnModalReview.onclick = () => {
+      DOM.modalCompleted.classList.add('hidden');
+      state.sessionState.order = currentDeck.questions.map((_, i) => i);
+      state.sessionState.currentIndex = 0;
+      saveState();
+      renderQuestion();
+    };
+
+    // Feedback Modal Handlers (Web3Forms + Firestore parity)
+    DOM.btnFeedbackTrigger.onclick = () => {
+      const ctx = captureCurrentContext();
+      DOM.modalFeedback.classList.remove('hidden');
+      DOM.feedbackComment.value = '';
+      DOM.feedbackStatusMsg.classList.add('hidden');
+
+      DOM.feedbackContextBadge.textContent = `${ctx.deckTitle} • Q#${ctx.questionNumber}`;
+      DOM.feedbackContextSummary.textContent = `"${ctx.stem}" (Correct: Option ${ctx.correctAnswer})`;
+      lucide.createIcons();
+    };
+
+    DOM.btnCloseFeedback.onclick = () => DOM.modalFeedback.classList.add('hidden');
+    DOM.btnCancelFeedback.onclick = () => DOM.modalFeedback.classList.add('hidden');
+
+    DOM.btnSubmitFeedback.onclick = async () => {
+      const comment = DOM.feedbackComment.value.trim();
+      if (!comment) {
+        alert("Please write your comment before submitting.");
+        return;
+      }
+
+      const category = document.querySelector('input[name="feedback-category"]:checked')?.value || "Content Error / Typo";
+      const context = captureCurrentContext();
+
+      DOM.btnSubmitFeedback.disabled = true;
+      DOM.btnSubmitFeedback.textContent = "Submitting...";
+
+      const feedbackData = {
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: currentUser?.uid || "anonymous",
+        userEmail: currentUser?.email || "anonymous",
+        userName: currentUser?.displayName || "Resident Doctor",
+        url: window.location.href,
+        category,
+        message: comment,
+        context
+      };
+
+      try {
+        const emailPromise = fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "12303c13-8e61-47cc-937a-86364a6b38d6",
+            subject: `[KetofolDoc Recalls] ${category} - ${context.deckTitle} (Q# ${context.questionNumber})`,
+            from_name: "KetofolDoc Recalls Engine",
+            reply_to: currentUser?.email || "noreply@ketofoldoc.com",
+            "User": `${feedbackData.userName} (${feedbackData.userEmail})`,
+            "Page URL": window.location.href,
+            "Deck": context.deckTitle,
+            "Question Number": context.questionNumber,
+            "Stem": context.stem,
+            "Correct Answer": `Option ${context.correctAnswer}`,
+            "Options": JSON.stringify(context.options, null, 2),
+            "Category": category,
+            "Comment": comment
+          })
+        });
+
+        const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
+        await Promise.all([emailPromise, firestorePromise]);
+
+        DOM.feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-emerald-950/70 border border-emerald-500/60 text-emerald-300 block";
+        DOM.feedbackStatusMsg.textContent = "✓ Thank you! Your feedback has been recorded.";
+        setTimeout(() => {
+          DOM.modalFeedback.classList.add('hidden');
+          DOM.btnSubmitFeedback.disabled = false;
+          DOM.btnSubmitFeedback.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Feedback</span>`;
+          lucide.createIcons();
+        }, 1500);
+      } catch (err) {
+        console.error("Feedback error:", err);
+        DOM.feedbackStatusMsg.className = "p-3 rounded-xl text-xs leading-relaxed bg-rose-950/70 border border-rose-500/60 text-rose-300 block";
+        DOM.feedbackStatusMsg.textContent = "Error submitting feedback. Please try again.";
+        DOM.btnSubmitFeedback.disabled = false;
+        DOM.btnSubmitFeedback.innerHTML = `<span>Send Feedback</span>`;
       }
     };
 
-    DOM.btnResetCurrentDeck.onclick = triggerReset;
-    DOM.btnEmptyChooseExam.onclick = () => DOM.btnMenu.click();
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        DOM.modalDeck.classList.add('hidden');
+        DOM.modalAuth.classList.add('hidden');
+        DOM.modalCompleted.classList.add('hidden');
+        DOM.modalFeedback.classList.add('hidden');
+        DOM.drawerEcosystem.classList.add('hidden');
+        return;
+      }
 
-    DOM.btnMenu.onclick = () => {
+      const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+      if (isTyping) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        DOM.btnNext.click();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        DOM.btnPrev.click();
+      } else if (e.key === ' ' || e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        DOM.btnReveal.click();
+      }
+    });
+
+    // Modal & Drawer Triggers
+    DOM.btnOpenDeckModal.onclick = () => {
       renderDeckList(activeCategoryTab);
-      DOM.modalDecks.classList.remove('hidden');
+      DOM.modalDeck.classList.remove('hidden');
     };
-    DOM.btnCloseDecks.onclick = () => DOM.modalDecks.classList.add('hidden');
+    DOM.btnCloseDeckModal.onclick = () => DOM.modalDeck.classList.add('hidden');
+    DOM.btnOpenDrawer.onclick = () => DOM.drawerEcosystem.classList.remove('hidden');
+    DOM.btnCloseDrawer.onclick = () => DOM.drawerEcosystem.classList.add('hidden');
 
-    DOM.btnFeedback.onclick = () => {
-      const qIndex = state.sessionState.order[state.sessionState.currentIndex];
-      const q = currentDeck ? currentDeck.questions[qIndex] : null;
-      const subject = encodeURIComponent(`Feedback: Exam Recalls (${currentDeck ? currentDeck.title : ''} - Q${q ? q.id : ''})`);
-      window.location.href = `mailto:support@ketofoldoc.com?subject=${subject}`;
-    };
-
-    DOM.btnAuthModal.onclick = () => DOM.modalAuth.classList.remove('hidden');
+    DOM.btnAuthTrigger.onclick = () => DOM.modalAuth.classList.remove('hidden');
     DOM.btnCloseAuthModal.onclick = () => DOM.modalAuth.classList.add('hidden');
 
-    // Backdrop & Global Keyboard Shortcuts (ESC, Ctrl/Cmd + K)
     document.querySelectorAll('.modal-backdrop').forEach(modal => {
       modal.addEventListener('click', () => modal.classList.add('hidden'));
     });
 
-    window.addEventListener('keydown', e => {
-      // Shortcut: Open Global Search (Ctrl + K or Cmd + K)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        openSearch();
-        return;
-      }
-
-      // Shortcut: Close modals with Escape
-      if (e.key === 'Escape') {
-        DOM.modalDecks.classList.add('hidden');
-        DOM.modalAuth.classList.add('hidden');
-        DOM.modalSearch.classList.add('hidden');
-      }
-    });
-
-    // Cloud Auth Handlers
     if (DOM.btnGoogleLogin && auth) {
       DOM.btnGoogleLogin.onclick = async () => {
         try {
@@ -1136,17 +1119,17 @@
       auth.onAuthStateChanged(user => {
         currentUser = user;
         if (user) {
-          DOM.syncDot.classList.remove('hidden');
-          DOM.authAvatar.innerHTML = `<img src="${user.photoURL || ''}" class="w-full h-full rounded-full object-cover" />`;
+          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          DOM.authUserLabel.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Account';
           DOM.authSignedInBox.classList.remove('hidden');
           DOM.authSignedOutBox.classList.add('hidden');
           DOM.authUserName.textContent = user.displayName || 'Learner';
           DOM.authUserEmail.textContent = user.email || '';
-          DOM.authUserImg.src = user.photoURL || 'https://via.placeholder.com/40';
+          if (user.photoURL) DOM.authUserImg.src = user.photoURL;
           pullFromCloud(user);
         } else {
-          DOM.syncDot.classList.add('hidden');
-          DOM.authAvatar.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i>`;
+          DOM.authStatusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+          DOM.authUserLabel.textContent = 'Sign In';
           DOM.authSignedInBox.classList.add('hidden');
           DOM.authSignedOutBox.classList.remove('hidden');
         }
@@ -1154,9 +1137,7 @@
       });
     }
 
-    // ------------------------------------------------------------------------
-    // 8. INITIALIZATION
-    // ------------------------------------------------------------------------
+    // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       highlighter = new StudyHighlighter({
         storageKey: 'kd_recalls_highlights',
