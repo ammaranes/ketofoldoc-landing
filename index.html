@@ -396,62 +396,89 @@
 
   <!-- APPLICATION LOGIC -->
   <script>
-    // 1. Centralized Declarative Platforms Configuration
+    // 1. Centralized Declarative Platforms Configuration (Keys matching the ecosystem)
     const PLATFORMS_CONFIG = [
       {
         id: 'saudi',
-        firestoreDocId: 'saudi',
-        storageKey: 'saudi_qb_state_v1',
+        firestoreField: 'saudi_board_progress',
+        storageKey: 'anesthesia_user_progress',
         total: 500,
         progressBarId: 'saudi-progress-bar',
         statLabelId: 'saudi-stat',
         statUnit: 'Completed',
-        defaultStat: '500+ Questions Active',
-        countKey: 'userAnswers'
+        defaultStat: '700+ Questions Active',
+        countProgress: (data) => {
+          let count = 0;
+          Object.values(data || {}).forEach(deck => {
+            if (deck && deck.answers) count += Object.keys(deck.answers).length;
+          });
+          return count;
+        }
       },
       {
         id: '1000qs',
-        firestoreDocId: '1000qs',
-        storageKey: 'qb_state_v1',
+        firestoreField: 'thousand_qs_progress',
+        storageKey: 'anes_1000q_progress',
         total: 1000,
         progressBarId: 'q1000-progress-bar',
         statLabelId: 'q1000-stat',
         statUnit: 'Completed',
         defaultStat: '1000 Questions Active',
-        countKey: 'userAnswers'
+        countProgress: (data) => {
+          let count = 0;
+          Object.values(data || {}).forEach(deck => {
+            if (deck && deck.answers) count += Object.keys(deck.answers).length;
+          });
+          return count;
+        }
       },
       {
         id: 'comp',
-        firestoreDocId: 'comp',
-        storageKey: 'comp_qb_state_v1',
+        firestoreField: 'comp_qb_progress',
+        storageKey: 'comp_qb_progress',
         total: 450,
         progressBarId: 'comp-progress-bar',
         statLabelId: 'comp-stat',
         statUnit: 'Completed',
-        defaultStat: '450+ Questions Active',
-        countKey: 'userAnswers'
+        defaultStat: '1000 Questions Active',
+        countProgress: (data) => {
+          let count = 0;
+          Object.values(data || {}).forEach(deck => {
+            if (deck && deck.answers) count += Object.keys(deck.answers).length;
+          });
+          return count;
+        }
       },
       {
         id: 'summaries',
-        firestoreDocId: 'summaries',
-        storageKey: 'summaries_state_v1',
+        firestoreField: 'summaries_progress',
+        storageKey: 'ketofoldoc_summaries_progress',
         total: 100,
         progressBarId: 'summaries-progress-bar',
         statLabelId: 'summaries-stat',
         statUnit: 'Chapters Read',
-        defaultStat: '100+ Summaries Active',
-        countKey: 'readChapters'
+        defaultStat: '50+ Summaries Active',
+        countProgress: (data) => {
+          return data.readChapters ? Object.keys(data.readChapters).length : 0;
+        }
       },
       {
         id: 'recalls',
-        firestoreDocId: 'recalls',
-        storageKey: 'kd_recalls_state_v1',
+        firestoreField: 'recalls_progress',
+        storageKey: 'recalls_user_progress',
         total: 800,
         progressBarId: 'recalls-progress-bar',
         statLabelId: 'recalls-stat',
         statUnit: 'Completed',
-        defaultStat: '800+ Recalls Active',
-        countKey: 'userAnswers'
+        defaultStat: '860+ Recalls Active',
+        countProgress: (data) => {
+          let count = 0;
+          const progressObj = data.userProgress || data || {};
+          Object.values(progressObj).forEach(deck => {
+            if (deck && deck.answers) count += Object.keys(deck.answers).length;
+          });
+          return count;
+        }
       }
     ];
 
@@ -477,56 +504,17 @@
       auth = firebase.auth();
       db = firebase.firestore();
     } catch (e) {
-      console.warn("Firebase running in local offline mode:", e);
+      console.warn("Firebase Init Error:", e);
     }
 
-    // 3. Merging Helpers
-    function mergeAnswers(cloudAnswers = {}, localAnswers = {}) {
-      return { ...(cloudAnswers || {}), ...(localAnswers || {}) };
-    }
-
-    function mergeChapters(cloudChapters, localChapters) {
-      const getArr = (v) => {
-        if (!v) return [];
-        if (Array.isArray(v)) return v;
-        const vals = Object.values(v);
-        if (vals.every(x => typeof x === 'boolean')) return Object.keys(v);
-        return vals;
-      };
-
-      if (Array.isArray(cloudChapters) || Array.isArray(localChapters)) {
-        return Array.from(new Set([...getArr(cloudChapters), ...getArr(localChapters)]));
-      }
-      return { ...(cloudChapters || {}), ...(localChapters || {}) };
-    }
-
-    // Timestamp-aware SRS merger: keeps the card review with the later lastReviewed date
-    function mergeSRSProgress(cloudSRS = {}, localSRS = {}) {
-      const merged = { ...(cloudSRS || {}) };
-      Object.entries(localSRS || {}).forEach(([qId, localCard]) => {
-        const cloudCard = merged[qId];
-        if (!cloudCard) {
-          merged[qId] = localCard;
-        } else {
-          const cTime = cloudCard.lastReviewed ? new Date(cloudCard.lastReviewed).getTime() : 0;
-          const lTime = localCard.lastReviewed ? new Date(localCard.lastReviewed).getTime() : 0;
-          if (lTime >= cTime) {
-            merged[qId] = localCard;
-          }
-        }
-      });
-      return merged;
-    }
-
-    // 4. Progress Loading Routine
+    // 3. Progress Loading Routine (Reads LocalStorage and updates UI)
     function updatePlatformProgress() {
       PLATFORMS_CONFIG.forEach(cfg => {
         try {
           const raw = localStorage.getItem(cfg.storageKey);
           const data = raw ? JSON.parse(raw) : {};
-          const items = data[cfg.countKey] || (cfg.countKey === 'readChapters' ? [] : {});
           
-          const count = Array.isArray(items) ? items.length : Object.keys(items).length;
+          const count = cfg.countProgress(data);
           const pct = Math.min(100, Math.round((count / cfg.total) * 100));
           
           const barEl = document.getElementById(cfg.progressBarId);
@@ -535,12 +523,12 @@
           if (barEl) barEl.style.width = `${pct}%`;
           if (statEl) statEl.textContent = count > 0 ? `${count} ${cfg.statUnit}` : cfg.defaultStat;
         } catch (err) {
-          console.warn(`Error reading ${cfg.storageKey}:`, err);
+          console.warn(`Error updating progress for ${cfg.id}:`, err);
         }
       });
     }
 
-    // 5. Intelligent Bi-Directional Cloud Synchronization
+    // 4. Unified Ecosystem Cloud Synchronization
     async function syncCloudProgress(user) {
       if (!user || !db || isSyncing) return;
       isSyncing = true;
@@ -558,21 +546,18 @@
       if (btnLabel) btnLabel.textContent = 'Syncing...';
 
       try {
-        const platformsColRef = db.collection('users').doc(user.uid).collection('platforms');
-        const snap = await platformsColRef.get();
-        
-        const cloudDocsMap = {};
-        if (!snap.empty) {
-          snap.forEach(doc => {
-            cloudDocsMap[doc.id] = doc.data();
-          });
+        const userDocRef = db.collection('users').doc(user.uid);
+        const snap = await userDocRef.get();
+        let cloudData = {};
+        if (snap.exists) {
+          cloudData = snap.data();
         }
 
-        const batch = db.batch();
         let changesToUpload = false;
+        let finalUpdatePayload = {};
 
         PLATFORMS_CONFIG.forEach(cfg => {
-          const cloudData = cloudDocsMap[cfg.firestoreDocId] || {};
+          const cloudFieldData = cloudData[cfg.firestoreField] || {};
           
           let localData = {};
           try {
@@ -582,62 +567,62 @@
             localData = {};
           }
 
-          let mergedData = { ...cloudData, ...localData };
-          if (!mergedData.activeDeckId && cloudData.activeDeckId) {
-            mergedData.activeDeckId = cloudData.activeDeckId;
-          }
-          const cloudTime = cloudData.updatedAt?.toMillis 
-            ? cloudData.updatedAt.toMillis() 
-            : (cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0);
-          const localResetTime = localData.resetAt || 0;
-          const isLocalResetNewer = localResetTime > cloudTime;
-
-          let hasLocalDelta = false;
-
-          if (cfg.countKey === 'readChapters') {
-            if (isLocalResetNewer) {
-              mergedData.readChapters = localData.readChapters || (Array.isArray(cloudData.readChapters) ? [] : {});
-              hasLocalDelta = true;
-            } else {
-              const mergedReadChapters = mergeChapters(cloudData.readChapters, localData.readChapters);
-              mergedData.readChapters = mergedReadChapters;
-              hasLocalDelta = JSON.stringify(mergedReadChapters) !== JSON.stringify(cloudData.readChapters || (Array.isArray(mergedReadChapters) ? [] : {}));
-            }
+          if (cfg.id === 'summaries') {
+            const mergedRead = { ...(cloudFieldData.readChapters || {}), ...(localData.readChapters || {}) };
+            const mergedQuiz = { ...(cloudFieldData.quizAnswers || {}), ...(localData.quizAnswers || {}) };
+            
+            const newData = { readChapters: mergedRead, quizAnswers: mergedQuiz };
+            localStorage.setItem(cfg.storageKey, JSON.stringify(newData));
+            
+            finalUpdatePayload[cfg.firestoreField] = {
+              ...newData,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            changesToUpload = true;
+            
+          } else if (cfg.id === 'recalls') {
+            const mergedProgress = { ...(cloudFieldData.userProgress || {}), ...(localData.userProgress || localData || {}) };
+            const mergedCards = { ...(cloudFieldData.card_states || {}), ...(localData.card_states || {}) };
+            
+            const newData = { 
+              activeDeckId: localData.activeDeckId || cloudFieldData.activeDeckId || null,
+              userProgress: mergedProgress 
+            };
+            localStorage.setItem(cfg.storageKey, JSON.stringify(newData));
+            
+            finalUpdatePayload[cfg.firestoreField] = {
+              ...newData,
+              card_states: mergedCards,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            changesToUpload = true;
+            
           } else {
-            let mergedUserAnswers;
-            if (isLocalResetNewer) {
-              mergedUserAnswers = localData.userAnswers || {};
-              hasLocalDelta = true;
-            } else {
-              mergedUserAnswers = mergeAnswers(cloudData.userAnswers, localData.userAnswers);
-            }
+            // Saudi Board, 1000Qs, and Comprehensive QB
+            const mergedProgress = { ...(cloudFieldData.userProgress || {}), ...(localData || {}) };
+            
+            // Cleanup transient properties from local root if they exist
+            delete mergedProgress.card_states;
+            delete mergedProgress.lastUpdated;
 
-            const mergedSRSProgress = mergeSRSProgress(cloudData.srsProgress, localData.srsProgress);
-            mergedData.userAnswers = mergedUserAnswers;
-            mergedData.srsProgress = mergedSRSProgress;
+            const mergedCards = { ...(cloudFieldData.card_states || {}) }; 
 
-            if (!hasLocalDelta) {
-              hasLocalDelta = 
-                JSON.stringify(mergedUserAnswers) !== JSON.stringify(cloudData.userAnswers || {}) ||
-                JSON.stringify(mergedSRSProgress) !== JSON.stringify(cloudData.srsProgress || {});
-            }
-          }
-          localStorage.setItem(cfg.storageKey, JSON.stringify(mergedData));
-          if (hasLocalDelta) {
-            const { resetAt, ...firestoreSafeData } = mergedData;
-            const docRef = platformsColRef.doc(cfg.firestoreDocId);
-            batch.set(docRef, {
-              ...firestoreSafeData,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            localStorage.setItem(cfg.storageKey, JSON.stringify(mergedProgress));
+            
+            finalUpdatePayload[cfg.firestoreField] = {
+              userProgress: mergedProgress,
+              card_states: mergedCards,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };
             changesToUpload = true;
           }
         });
         
         if (changesToUpload) {
-          await batch.commit();
+          await userDocRef.set(finalUpdatePayload, { merge: true });
         }
 
+        // Refresh UI with the newly synchronized data
         updatePlatformProgress();
 
         if (btnLabel) btnLabel.textContent = 'Synced ✓';
@@ -662,7 +647,7 @@
       }
     }
 
-    // 6. Modal and Interaction Wiring
+    // 5. Modal and Interaction Wiring
     const modalAuth = document.getElementById('modal-auth');
     const btnAuthHeader = document.getElementById('btn-auth-header');
     const btnQuickSync = document.getElementById('btn-quick-sync');
@@ -689,7 +674,7 @@
       if (e.key === 'Escape') closeAuth();
     });
 
-    // 7. Authentication Handling
+    // 6. Authentication Handling
     if (btnGoogle && auth) {
       btnGoogle.onclick = async () => {
         try {
@@ -736,7 +721,7 @@
       });
     }
 
-    // 8. Lifecycle Listeners (Initial Load, bfcache Back/Forward & Tab Visibility)
+    // 7. Lifecycle Listeners
     window.addEventListener('DOMContentLoaded', () => {
       updatePlatformProgress();
       lucide.createIcons();
