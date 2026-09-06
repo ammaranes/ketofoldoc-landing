@@ -174,7 +174,7 @@ export const chapter16 = [
     "id": 13,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. The most appropriate first step in the management of this hemodynamic instability is",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. Midway through the surgery, when surgical traction in the operative field is applied, patient’s heart rate plummets from 110 bpm down to 55 bpm. The most appropriate first step in the management of this hemodynamic instability is",
     "options": {
       "A": "Epinephrine",
       "B": "Atropine",
@@ -188,7 +188,7 @@ export const chapter16 = [
     "id": 14,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. At the conclusion of the surgery, postoperative nausea and vomiting should be anticipated and can be minimized by all of the following, except",
+    "stem": "Questions 11 to 14 A 22-month-old 14.5-kg “preemie” is undergoing strabismus repair under general endotracheal anesthetic (GETA). Following an uneventful inhaled induction with sevoflurane, peripheral IV was obtained, and by oversight, patient was given 20 mg of succinylcholine prior to intubation. Masseter spasm was noted moments later. Midway through the surgery, when surgical traction in the operative field is applied, patient’s heart rate plummets from 110 bpm down to 55 bpm. At the conclusion of the surgery, postoperative nausea and vomiting should be anticipated and can be minimized by all of the following, except",
     "options": {
       "A": "Serotonin (5-HT3) antagonist",
       "B": "Propofol infusion",
@@ -482,7 +482,7 @@ export const chapter16 = [
     "id": 35,
     "chapter": 16,
     "chapterTitle": "Ophthalmic, Ear, Nose, and Throat Surgery",
-    "stem": "Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college. One hour later while recovering in the PACU, the patient is noted to have stridor and difficulty breathing. At this time, the most appropriate next step in his airway management includes",
+    "stem": "Questions 33 to 35 A 65-year-old male requires transoral laser microsurgery to address his laryngeal webs. His medical history reveals remote tobacco smoking and recreational drug use in college. There was an airway fire midway through the procedure. One hour later while recovering in the PACU, the patient is noted to have stridor and difficulty breathing. At this time, the most appropriate next step in his airway management includes",
     "options": {
       "A": "Administration of aerosolized epinephrine",
       "B": "Endotracheal intubation",
@@ -660,6 +660,6 @@ export const chapter16 = [
       "D": "Core temperature >42°C"
     },
     "correctAnswer": "A",
-    "explanation": "More than 30 different mutations are linked to malignant hyperthermia susceptibility. Genetic testing is available to establish a diagnosis, but the CHCT remains the criterion standard. Obstetric Anesthesia Thoha Pham"
+    "explanation": "More than 30 different mutations are linked to malignant hyperthermia susceptibility. Genetic testing is available to establish a diagnosis, but the CHCT remains the criterion standard."
   }
 ];
