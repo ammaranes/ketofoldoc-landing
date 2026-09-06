@@ -546,7 +546,7 @@ export const chapter08 = [
       "D": "Medial leg below the knee"
     },
     "correctAnswer": "B",
-    "explanation": "Sciatic nerve blockade provides sensory loss to the posterior thigh by blocking the posterior cutaneous nerve along with everything below the knee, except for the medical lower leg, which is innervated by the saphenous nerve."
+    "explanation": "Sciatic nerve blockade provides sensory loss to the posterior thigh by blocking the posterior cutaneous nerve along with everything below the knee, except for the medial lower leg, which is innervated by the saphenous nerve."
   },
   {
     "id": 40,
@@ -658,6 +658,6 @@ export const chapter08 = [
       "D": "Venous bleeding into the paravertebral space resulting in large volumes of local anesthetic absorption from the paravertebral blocks"
     },
     "correctAnswer": "C",
-    "explanation": "A potential advantage of paravertebral blockade compared to neuraxial blockade is a reduced incidence of creating an intense sympathectomy resulting in hemodynamic compromise. However, when bilateral paravertebral blocks are performed, the potential exists that epidural spread could be significant, resulting in an observation of a moderate BP decrease. Pain Management Thomas Halaszynski"
+    "explanation": "A potential advantage of paravertebral blockade compared to neuraxial blockade is a reduced incidence of creating an intense sympathectomy resulting in hemodynamic compromise. However, when bilateral paravertebral blocks are performed, the potential exists that epidural spread could be significant, resulting in an observation of a moderate BP decrease."
   }
 ];
