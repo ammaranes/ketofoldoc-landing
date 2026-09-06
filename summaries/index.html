@@ -21,6 +21,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
+  <!-- Firebase SDKs (v9 Compat Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     .safe-top { padding-top: env(safe-area-inset-top); }
@@ -546,10 +551,7 @@
 
   <!-- ES6 Application Logic + Namespaced Cross-Platform SM-2 Engine -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, addDoc, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
+    
     // Dynamic Module Fallback Loader
     async function loadModuleWithFallbacks(paths) {
       for (const p of paths) {
@@ -1167,14 +1169,12 @@
         appId: "1:94979024020:web:687bd4c064b87ff1180081"
       };
 
-      let auth = null;
-      let db = null;
-      let currentUser = null;
+      let auth = null, db = null, currentUser = null;
 
       try {
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
       } catch (e) {
         console.warn("Firebase Init:", e);
       }
@@ -1187,8 +1187,7 @@
         onSave: (allHighlights) => {
           if (currentUser && db) {
             try {
-              const userDocRef = doc(db, 'users', currentUser.uid);
-              setDoc(userDocRef, {
+              db.collection('users').doc(currentUser.uid).set({
                 summaries_highlights: allHighlights
               }, { merge: true });
             } catch (e) {
@@ -1235,8 +1234,7 @@
 
         if (currentUser && db) {
           try {
-            const userDocRef = doc(db, 'users', currentUser.uid);
-            await setDoc(userDocRef, {
+            await db.collection('users').doc(currentUser.uid).set({
               [targetFirestoreField]: { card_states: targetStates, lastUpdated: new Date().toISOString() },
               summaries_progress: summariesState
             }, { merge: true });
@@ -1248,7 +1246,7 @@
 
       // Auth Observer
       if (auth) {
-        onAuthStateChanged(auth, async (user) => {
+        auth.onAuthStateChanged(async (user) => {
           currentUser = user;
           const authBtnLabel = document.getElementById('auth-label');
           
@@ -1257,8 +1255,8 @@
             
             if (db) {
               try {
-                const snap = await getDoc(doc(db, 'users', user.uid));
-                if (snap.exists()) {
+                const snap = await db.collection('users').doc(user.uid).get();
+                if (snap.exists) {
                   const data = snap.data();
                   if (data.summaries_progress) {
                     summariesState.readChapters = { ...summariesState.readChapters, ...(data.summaries_progress.readChapters || {}) };
@@ -1300,12 +1298,12 @@
         if (!auth) return;
         if (currentUser) {
           if (confirm(`Signed in as ${currentUser.email || currentUser.displayName}.\nDo you want to sign out?`)) {
-            await signOut(auth);
+            await auth.signOut();
           }
         } else {
-          const provider = new GoogleAuthProvider();
+          const provider = new firebase.auth.GoogleAuthProvider();
           try {
-            await signInWithPopup(auth, provider);
+            await auth.signInWithPopup(provider);
           } catch (err) {
             console.error("Google sign-in error:", err);
           }
@@ -1371,7 +1369,7 @@
 
         if (currentUser && db) {
           try {
-            await setDoc(doc(db, 'users', currentUser.uid), {
+            await db.collection('users').doc(currentUser.uid).set({
               summaries_progress: {
                 ...summariesState,
                 lastUpdated: new Date().toISOString()
@@ -2194,7 +2192,7 @@
             })
           });
 
-          const firestorePromise = db ? addDoc(collection(db, 'feedback'), feedbackData) : Promise.resolve();
+          const firestorePromise = db ? db.collection('feedback').add(feedbackData) : Promise.resolve();
 
           await Promise.all([emailPromise, firestorePromise]);
 
