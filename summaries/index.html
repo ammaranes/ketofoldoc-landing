@@ -751,39 +751,6 @@
       return [];
     }
 
-    // Spaced Repetition (SM-2) Engine
-    function calculateSM2(cardState, quality) {
-      let { reps = 0, interval = 1, easeFactor = 2.5 } = cardState || {};
-      
-      if (quality < 3) {
-        reps = 0;
-        interval = 1;
-      } else {
-        if (reps === 0) {
-          interval = 1;
-        } else if (reps === 1) {
-          interval = 6;
-        } else {
-          interval = Math.round(interval * easeFactor);
-        }
-        reps += 1;
-      }
-
-      easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
-      
-      const now = Date.now();
-      const dueDate = now + (interval * 86400000);
-
-      return {
-        reps,
-        interval,
-        easeFactor: Number(easeFactor.toFixed(2)),
-        dueDate,
-        lastReviewed: now,
-        lastQuality: quality
-      };
-    }
-
     // Topic & Keyword Mapping Table for Miller Chapters
     const CHAPTER_TOPIC_MAP = {
       10: { topic: "neuro", keywords: ["cerebral", "cbf", "icp", "brain", "autoregulation", "cpp", "jugular", "isoflurane", "burst suppression"] },
@@ -843,28 +810,12 @@
 
     // Storage Management
     const LOCAL_SUMMARIES_KEY = 'ketofoldoc_summaries_progress';
-    const LOCAL_SAUDI_KEY = 'saudi_board_progress';
-    const LOCAL_1000_KEY = 'thousand_qs_progress';
-    const LOCAL_COMP_KEY = 'comp_qb_progress';
-
     let summariesState = { readChapters: {}, quizAnswers: {} };
-    let saudiBoardCardStates = {};
-    let thousandQsCardStates = {};
-    let compCardStates = {};
 
     function loadLocalProgress() {
       try {
         const sumSaved = localStorage.getItem(LOCAL_SUMMARIES_KEY);
         if (sumSaved) summariesState = JSON.parse(sumSaved);
-
-        const saudiSaved = localStorage.getItem(LOCAL_SAUDI_KEY);
-        if (saudiSaved) saudiBoardCardStates = JSON.parse(saudiSaved).card_states || {};
-
-        const thSaved = localStorage.getItem(LOCAL_1000_KEY);
-        if (thSaved) thousandQsCardStates = JSON.parse(thSaved).card_states || {};
-
-        const compSaved = localStorage.getItem(LOCAL_COMP_KEY) || localStorage.getItem('hall_qb_progress');
-        if (compSaved) compCardStates = JSON.parse(compSaved).card_states || {};
       } catch (e) {}
     }
 
@@ -1198,52 +1149,6 @@
       });
       window.highlighterInstance = highlighter;
 
-      // Spaced Repetition Syncer
-      async function syncCardSRS(question, quality) {
-        const qId = question._namespacedId;
-        if (!qId) return;
-
-        const isSaudi = question._sourceName === 'Saudi Board QB';
-        const isComp = question._sourceName === 'Comprehensive QB';
-
-        let targetStates, targetStorageKey, targetFirestoreField;
-        
-        if (isSaudi) {
-          targetStates = saudiBoardCardStates;
-          targetStorageKey = LOCAL_SAUDI_KEY;
-          targetFirestoreField = 'saudi_board_progress';
-        } else if (isComp) {
-          targetStates = compCardStates;
-          targetStorageKey = LOCAL_COMP_KEY;
-          targetFirestoreField = 'comp_qb_progress';
-        } else {
-          targetStates = thousandQsCardStates;
-          targetStorageKey = LOCAL_1000_KEY;
-          targetFirestoreField = 'thousand_qs_progress';
-        }
-
-        const existingState = targetStates[qId] || {};
-        const newCardState = calculateSM2(existingState, quality);
-
-        targetStates[qId] = newCardState;
-
-        try {
-          localStorage.setItem(targetStorageKey, JSON.stringify({ card_states: targetStates }));
-          localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
-        } catch (e) {}
-
-        if (currentUser && db) {
-          try {
-            await db.collection('users').doc(currentUser.uid).set({
-              [targetFirestoreField]: { card_states: targetStates, lastUpdated: new Date().toISOString() },
-              summaries_progress: summariesState
-            }, { merge: true });
-          } catch (e) {
-            console.error("Firestore SRS sync error:", e);
-          }
-        }
-      }
-
       // Auth Observer
       if (auth) {
         auth.onAuthStateChanged(async (user) => {
@@ -1263,19 +1168,6 @@
                     summariesState.quizAnswers = { ...summariesState.quizAnswers, ...(data.summaries_progress.quizAnswers || {}) };
                     localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
                   }
-                  if (data.saudi_board_progress?.card_states) {
-                    saudiBoardCardStates = { ...saudiBoardCardStates, ...data.saudi_board_progress.card_states };
-                    localStorage.setItem(LOCAL_SAUDI_KEY, JSON.stringify({ card_states: saudiBoardCardStates }));
-                  }
-                  if (data.thousand_qs_progress?.card_states) {
-                    thousandQsCardStates = { ...thousandQsCardStates, ...data.thousand_qs_progress.card_states };
-                    localStorage.setItem(LOCAL_1000_KEY, JSON.stringify({ card_states: thousandQsCardStates }));
-                  }
-                  if (data.comp_qb_progress?.card_states || data.hall_qb_progress?.card_states) {
-                    const cloudStates = data.comp_qb_progress?.card_states || data.hall_qb_progress?.card_states;
-                    compCardStates = { ...compCardStates, ...cloudStates };
-                    localStorage.setItem(LOCAL_COMP_KEY, JSON.stringify({ card_states: compCardStates }));
-                  }
                   if (data.summaries_highlights && highlighter.highlights) {
                     highlighter.highlights = { ...highlighter.highlights, ...data.summaries_highlights };
                     localStorage.setItem('kd_summaries_highlights', JSON.stringify(highlighter.highlights));
@@ -1293,7 +1185,7 @@
           else renderDirectory();
         });
       }
-
+      
       document.getElementById('btn-auth').onclick = async () => {
         if (!auth) return;
         if (currentUser) {
@@ -1710,20 +1602,8 @@
                            : isComp ? 'bg-cyan-950/80 text-cyan-300 border-cyan-800/60' 
                            : 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60';
 
-          const cardStates = isSaudi ? saudiBoardCardStates : (isComp ? compCardStates : thousandQsCardStates);
-          const existingSRS = cardStates[qId];
-
           const card = document.createElement('div');
           card.className = 'bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-lg';
-
-          let srsBadgeHtml = '';
-          if (existingSRS && existingSRS.interval) {
-            srsBadgeHtml = `
-              <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-semibold text-slate-400 border border-slate-700/60 flex items-center">
-                <i data-lucide="repeat" class="w-3 h-3 mr-1 text-purple-400"></i> ${existingSRS.interval}d interval
-              </span>
-            `;
-          }
 
           const rawStem = q.stem || q.question || '';
           const highlightedStem = highlighter.renderHighlights(rawStem, qId);
@@ -1733,7 +1613,6 @@
               <div class="flex items-center space-x-2">
                 <span class="px-2.5 py-0.5 rounded bg-slate-800 text-purple-300 border border-slate-700/60 font-bold">Question ${qIndex + 1}</span>
                 <span class="px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${badgeStyle}">${q._sourceName}</span>
-                ${srsBadgeHtml}
               </div>
               <span class="text-[11px] text-slate-400 truncate max-w-[200px]">${q._deckTitle}</span>
             </div>
@@ -1781,53 +1660,36 @@
                   <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Correct Answer: Option ${q.correctAnswer || 'A'}
                 </div>
                 <div class="text-slate-300 prose-reading mb-5 highlightable-content" data-highlight-context="${qId}">${highlightedExp}</div>
-                
-                <div class="pt-4 border-t border-slate-800/80 select-none">
-                  <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-                    Update Spaced Repetition Memory State
-                  </span>
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button type="button" data-quality="1" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-rose-950/50 border border-slate-800 hover:border-rose-500/60 rounded-xl text-xs font-semibold text-rose-300 transition flex flex-col items-center">
-                      <span>Again</span>
-                      <span class="text-[10px] text-slate-500">1 day</span>
-                    </button>
-                    <button type="button" data-quality="2" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-amber-950/50 border border-slate-800 hover:border-amber-500/60 rounded-xl text-xs font-semibold text-amber-300 transition flex flex-col items-center">
-                      <span>Hard</span>
-                      <span class="text-[10px] text-slate-500">3 days</span>
-                    </button>
-                    <button type="button" data-quality="3" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-blue-950/50 border border-slate-800 hover:border-blue-500/60 rounded-xl text-xs font-semibold text-blue-300 transition flex flex-col items-center">
-                      <span>Good</span>
-                      <span class="text-[10px] text-slate-500">6 days</span>
-                    </button>
-                    <button type="button" data-quality="4" class="srs-btn py-2 px-3 bg-slate-900 hover:bg-emerald-950/50 border border-slate-800 hover:border-emerald-500/60 rounded-xl text-xs font-semibold text-emerald-300 transition flex flex-col items-center">
-                      <span>Easy</span>
-                      <span class="text-[10px] text-slate-500">12 days</span>
-                    </button>
-                  </div>
-                </div>
-
               </div>
             `;
           }
 
           card.innerHTML = cardHtml;
 
+          // Simple Click Handler (Saves answer locally/cloud, but no SRS math)
           card.querySelectorAll('.options-wrapper button').forEach(btn => {
             btn.onclick = async () => {
+              if (isRevealed) return; // Prevent changing answer after reveal
+              
               const letter = btn.getAttribute('data-letter');
               summariesState.quizAnswers[qId] = letter;
 
-              const initialQuality = (letter === q.correctAnswer) ? 3 : 1;
-              await syncCardSRS(q, initialQuality);
+              // Save state instantly
+              try {
+                localStorage.setItem(LOCAL_SUMMARIES_KEY, JSON.stringify(summariesState));
+              } catch (e) {}
 
-              renderInteractiveQuestions(chapterNumber);
-            };
-          });
+              if (currentUser && db) {
+                try {
+                  await db.collection('users').doc(currentUser.uid).set({
+                    summaries_progress: {
+                      ...summariesState,
+                      lastUpdated: new Date().toISOString()
+                    }
+                  }, { merge: true });
+                } catch (e) {}
+              }
 
-          card.querySelectorAll('.srs-btn').forEach(srsBtn => {
-            srsBtn.onclick = async () => {
-              const quality = parseInt(srsBtn.getAttribute('data-quality'), 10);
-              await syncCardSRS(q, quality);
               renderInteractiveQuestions(chapterNumber);
             };
           });
