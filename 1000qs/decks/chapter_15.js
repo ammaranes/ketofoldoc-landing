@@ -70,7 +70,10 @@ export const chapter15 = [
       "D": "Elevated TSH, low T3, low T4"
     },
     "correctAnswer": "D",
-    "explanation": "Table 15-1"
+    "explanation": "Table 15-1",
+    "explanationImages": [
+      "/1000qs/images/ch15/fig_15_e5.png"
+    ]
   },
   {
     "id": 6,
