@@ -90,7 +90,7 @@ export const chapter17 = [
     "id": 7,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "In the above patient, labor is nonprogressive with signs of fetal distress on heart rate monitoring. Spinal anesthesia with 2-chloroprocaine 3% (2 mL) is provided for emergent cesarean section. On postpartum day 2, she complains of leg numbness, which quickly progressed to flaccid paralysis. On examination, inability to move her lower extremities with complete loss of pain and temperature sensation below T4 with normal sensation to light touch was noted. The most likely cause of this complication is",
+    "stem": "A 20-year-old G1P0 female at 42+5 weeks of gestation presents to labor and delivery floor with rupture of membranes and onset of early labor. Labor is nonprogressive with signs of fetal distress on heart rate monitoring. Spinal anesthesia with 2-chloroprocaine 3% (2 mL) is provided for emergent cesarean section. On postpartum day 2, she complains of leg numbness, which quickly progressed to flaccid paralysis. On examination, inability to move her lower extremities with complete loss of pain and temperature sensation below T4 with normal sensation to light touch was noted. The most likely cause of this complication is",
     "options": {
       "A": "2-Chloroprocaine neurotoxicity",
       "B": "Inadvertent subdural injection",
@@ -258,7 +258,7 @@ export const chapter17 = [
     "id": 19,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "A 27-year-old G2P1 at 392 weeks’ gestation is electing to have spinal anesthesia for a repeat cesarean section. Five minutes after bupivacaine spinal injection, the patient becomes hypotensive and is complaining of tingling in her fingers with subjective difficulty breathing. Her oxygen saturation remains 100% and blood pressure is 95/55. The most likely etiology is",
+    "stem": "A 27-year-old G2P1 at 39+2 weeks’ gestation is electing to have spinal anesthesia for a repeat cesarean section. Five minutes after bupivacaine spinal injection, the patient becomes hypotensive and is complaining of tingling in her fingers with subjective difficulty breathing. Her oxygen saturation remains 100% and blood pressure is 95/55. The most likely etiology is",
     "options": {
       "A": "Engorgement of epidural veins contributed to inadvertent intravascular injection of the local anesthetics",
       "B": "Decrease in volume of CSF in the subarachnoid space facilitated higher spread of local anesthetics",
@@ -776,7 +776,7 @@ export const chapter17 = [
     "id": 56,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The fetus is quickly delivered (skin-to-skin time of 18 minutes). However, 10 minutes after delivery, her uterus is noted to be boggy and bleeding persists. The appropriate treatment option is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 34+1 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. The fetus is quickly delivered (skin-to-skin time of 18 minutes). However, 10 minutes after delivery, her uterus is noted to be boggy and bleeding persists. The appropriate treatment option is",
     "options": {
       "A": "Bolus oxytocin (Pitocin) 20 U intravenously",
       "B": "Bolus methylergonovine (Methergine) 0.2 mg intravenously",
@@ -790,7 +790,7 @@ export const chapter17 = [
     "id": 57,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. Two hours later, the patient remains apneic and intubated in the intensive care unit. She is sedated and mechanically ventilated (TV = 450, RR = 12, FIO2 = 0.4) with the arterial blood gas revealing a pH of 7.45, PaO2 of 100 mm Hg, and PaCO2 of 37 mm Hg with a base excess of zero. Her examination reveals absent deep-tendon reflexes throughout. ECG reveals intermittent ventricular bigeminy. This situation could be explained by",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 34+1 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. Two hours later, the patient remains apneic and intubated in the intensive care unit. She is sedated and mechanically ventilated (TV = 450, RR = 12, FIO2 = 0.4) with the arterial blood gas revealing a pH of 7.45, PaO2 of 100 mm Hg, and PaCO2 of 37 mm Hg with a base excess of zero. Her examination reveals absent deep-tendon reflexes throughout. ECG reveals intermittent ventricular bigeminy. This situation could be explained by",
     "options": {
       "A": "Hypermagnesemia",
       "B": "Severe hypovolemic shock",
@@ -804,7 +804,7 @@ export const chapter17 = [
     "id": 58,
     "chapter": 17,
     "chapterTitle": "Obstetric Anesthesia",
-    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 341 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. At 3 weeks’ postpartum, the patient has absence of lactation and denies return of her menstrual cycle. Review of systems is positive for intolerance to cold, constipation, hair loss, and 2-pound weight gain. The best explanation for this constellation of symptoms is",
+    "stem": "Questions 55 to 58 A 30-year-old otherwise-healthy G2P0 (167 cm, 68 kg) presents at 34+1 weeks’ gestation with the rupture of membranes, single footling in breech presentation with fetal bradycardia. The decision for emergent cesarean delivery under general anesthesia is made, and the patient is quickly prepared for a rapid sequence induction. However, patient’s larynx is noted to be very anterior, and is unable to be intubated after multiple direct laryngoscopy attempts. At 3 weeks’ postpartum, the patient has absence of lactation and denies return of her menstrual cycle. Review of systems is positive for intolerance to cold, constipation, hair loss, and 2-pound weight gain. The best explanation for this constellation of symptoms is",
     "options": {
       "A": "Amenorrhea–galactorrhea syndrome",
       "B": "Sheehan syndrome",
